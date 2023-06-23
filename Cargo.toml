@@ -1,0 +1,2 @@
+[workspace]
+members = [ "nabla_frontend" ]
