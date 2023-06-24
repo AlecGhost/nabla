@@ -15,7 +15,7 @@ pub const LET: &str = "let";
 pub const TRUE: &str = "true";
 pub const FALSE: &str = "false";
 
-type TextRange = std::ops::Range<usize>;
+pub type TextRange = std::ops::Range<usize>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TokenType {
@@ -47,6 +47,7 @@ pub enum TokenType {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorMessage {
     MissingClosingSingleQuote,
+    MissingDecimals,
     Unknown,
 }
 
