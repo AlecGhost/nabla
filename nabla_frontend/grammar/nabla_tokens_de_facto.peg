@@ -1,0 +1,51 @@
+# Nabla Token Grammar (de facto)
+
+Tokens <- Token* Eof
+
+Token <-
+    Symbol
+    / Keyword
+    / Bool
+    / String
+    / Char
+    / Number
+    / Identifier
+    / Whitespace
+    / Comment
+    / Unkown
+
+Symbol <-
+    "{"
+    / "}"
+    / "["
+    / "]"
+    / "::"
+    / "*"
+    / "|"
+    / "="
+    / ":"
+
+Keyword <-
+    "use"
+    / "def"
+    / "let"
+
+Bool <-
+    "true"
+    / "false"
+
+String <- '"' (!'"' .)* '"'
+
+Char <- "'" ("\" . / &"'" / .) "'"?
+
+Number <- [0-9]+ ("." [0-9]*)?
+
+Identifier <- [A-Za-z0-9_]+
+
+Whitespace <- [\s\t\r\n]+
+
+Comment <- "//" (!"\n" .)* "\n"
+
+Unkown <- .
+
+Eof <- !.
