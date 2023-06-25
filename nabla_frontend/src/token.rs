@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 pub const LBRACKET: &str = "[";
 pub const RBRACKET: &str = "]";
 pub const LCURLY: &str = "{";
@@ -17,6 +15,15 @@ pub const TRUE: &str = "true";
 pub const FALSE: &str = "false";
 
 pub type TextRange = std::ops::Range<usize>;
+pub type TokenRange = std::ops::Range<usize>;
+
+pub trait ToTextRange {
+    fn to_text_range(&self) -> TextRange;
+}
+
+pub trait ToTokenRange {
+    fn to_token_range(&self) -> TokenRange;
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TokenType {
@@ -70,6 +77,12 @@ pub struct Token {
     pub errors: Vec<Error>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TokenStream<'a> {
+    tokens: &'a [Token],
+    first_ptr: *const Token,
+}
+
 impl Token {
     pub const fn new(token_type: TokenType, range: TextRange) -> Self {
         Self {
@@ -117,7 +130,137 @@ impl TokenType {
     }
 }
 
-impl Display for TokenType {
+impl<'a> TokenStream<'a> {
+    pub const fn new(tokens: &'a [Token]) -> Self {
+        Self {
+            tokens,
+            first_ptr: tokens.as_ptr(),
+        }
+    }
+
+    pub fn first_token(&self) -> Option<&Token> {
+        self.tokens.get(0)
+    }
+}
+
+impl TokenStream<'_> {
+    fn distance(first: *const Token, second: *const Token) -> usize {
+        // because we do pointer arithmetic, the size of `Token` in memory is needed,
+        // to calculate the offset.
+        let size = std::mem::size_of::<Token>();
+
+        (second as usize - first as usize) / size
+    }
+
+    pub fn location_offset(&self) -> usize {
+        TokenStream::distance(self.first_ptr, self.tokens.as_ptr())
+    }
+
+    pub fn tokens(&self) -> Vec<Token> {
+        self.tokens.to_owned()
+    }
+}
+
+impl<'a> ToTokenRange for TokenStream<'a> {
+    fn to_token_range(&self) -> TokenRange {
+        self.first_token().map_or(0..0, |token| token.range.clone())
+    }
+}
+
+/// source: [Stackoverflow](https://stackoverflow.com/a/57203324)
+/// enables indexing and slicing
+impl<'a, Idx> std::ops::Index<Idx> for TokenStream<'a>
+where
+    Idx: std::slice::SliceIndex<[Token]>,
+{
+    type Output = Idx::Output;
+
+    fn index(&self, index: Idx) -> &Self::Output {
+        &self.tokens[index]
+    }
+}
+
+impl<'a> nom::InputLength for TokenStream<'a> {
+    fn input_len(&self) -> usize {
+        self.tokens.len()
+    }
+}
+
+impl<'a> nom::InputTake for TokenStream<'a> {
+    fn take(&self, count: usize) -> Self {
+        Self {
+            tokens: &self.tokens[0..count],
+            ..self.clone()
+        }
+    }
+
+    fn take_split(&self, count: usize) -> (Self, Self) {
+        (
+            Self {
+                tokens: &self.tokens[count..],
+                ..self.clone()
+            },
+            Self {
+                tokens: &self.tokens[0..count],
+                ..self.clone()
+            },
+        )
+    }
+}
+
+/// source: [nom traits](https://docs.rs/nom/latest/src/nom/traits.rs.html#62-69)
+impl<'a> nom::Offset for TokenStream<'a> {
+    fn offset(&self, second: &Self) -> usize {
+        let fst = self.tokens.as_ptr();
+        let snd = second.tokens.as_ptr();
+        TokenStream::distance(fst, snd)
+    }
+}
+
+impl<'a> nom::Slice<std::ops::RangeTo<usize>> for TokenStream<'a> {
+    fn slice(&self, range: std::ops::RangeTo<usize>) -> Self {
+        Self {
+            tokens: &self.tokens[range],
+            ..self.clone()
+        }
+    }
+}
+
+/// source: [Monkey Rust lexer](https://github.com/Rydgel/monkey-rust/blob/master/lib/lexer/token.rs)
+impl<'a> nom::InputIter for TokenStream<'a> {
+    type Item = &'a Token;
+    type Iter = std::iter::Enumerate<std::slice::Iter<'a, Token>>;
+    type IterElem = std::slice::Iter<'a, Token>;
+
+    #[inline]
+    fn iter_indices(&self) -> std::iter::Enumerate<std::slice::Iter<'a, Token>> {
+        self.tokens.iter().enumerate()
+    }
+
+    #[inline]
+    fn iter_elements(&self) -> std::slice::Iter<'a, Token> {
+        self.tokens.iter()
+    }
+
+    #[inline]
+    fn position<P>(&self, predicate: P) -> Option<usize>
+    where
+        P: Fn(Self::Item) -> bool,
+    {
+        self.tokens.iter().position(predicate)
+    }
+
+    #[inline]
+    fn slice_index(&self, count: usize) -> Result<usize, nom::Needed> {
+        if self.tokens.len() >= count {
+            Ok(count)
+        } else {
+            Err(nom::Needed::Unknown)
+        }
+    }
+}
+
+impl std::fmt::Display for TokenType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use TokenType::*;
         let token_string = match self {
@@ -131,7 +274,7 @@ impl Display for TokenType {
     }
 }
 
-impl Display for Token {
+impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.token_type)
     }

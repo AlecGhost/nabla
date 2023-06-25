@@ -1,3 +1,4 @@
 #![warn(clippy::nursery)]
-pub mod token;
 pub mod lexer;
+pub mod parser;
+pub mod token;

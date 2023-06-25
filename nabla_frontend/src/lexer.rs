@@ -1,4 +1,4 @@
-use crate::token::{Error, ErrorMessage, TextRange, Token, TokenType};
+use crate::token::{Error, ErrorMessage, TextRange, ToTextRange, Token, TokenType};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_till},
@@ -12,10 +12,6 @@ use utility::{alpha_numeric1, expect, is_alpha_numeric};
 #[cfg(test)]
 mod tests;
 mod utility;
-
-trait ToTextRange {
-    fn to_text_range(&self) -> TextRange;
-}
 
 /// Type alias for nom_locate::LocatedSpan.
 /// Tracks range inside source code during lexical analysis.
