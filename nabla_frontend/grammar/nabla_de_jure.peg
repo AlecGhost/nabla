@@ -4,12 +4,14 @@ Program <- Global* EOF
 
 Global <- Use / Def / Let / Init
 
-Use <- USE IDENT NestedUse?
-NestedUse <- DOUBLE_COLON (
+Use <- USE IDENT UseBody?
+UseBody <- DOUBLE_COLON UseKind
+UseKind <-
     STAR
-    / LCURLY (IDENT NestedUse?)+ RCURLY 
-    / IDENT NestedUse?)
-    AS IDENT
+    / UseItem
+    / UseItems
+UseItem <- IDENT UseBody? (AS IDENT)?
+UseItems <- LCURLY UseItem+ RCURLY
 
 Def <-  DEF IDENT EQ Expr
 

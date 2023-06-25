@@ -5,13 +5,15 @@ Program <- Global* EOF
 Global <- Use / Def / Let / Init / GlobalError
 GlobalError <- (!GlobalLA .)+
 
-Use <- USE IDENT? NestedUse?
-NestedUse <- DOUBLE_COLON (
+Use <- USE IDENT? UseBody?
+UseBody <- DOUBLE_COLON UseKind?
+UseKind <-
     STAR
-    / LCURLY (IDENT NestedUse?)* RCURLY?
-    / IDENT NestedUse?
-    / UseError)
-    AS IDENT?
+    / UseItem
+    / UseItems
+    / UseError
+UseItem <- IDENT UseBody? (AS IDENT?)?
+UseItems <- LCURLY UseItem* RCURLY?
 UseError <- (!UseLA .)+
 
 Def <-  DEF IDENT? EQ? Expr?
