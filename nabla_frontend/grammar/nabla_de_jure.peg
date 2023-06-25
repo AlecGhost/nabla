@@ -27,7 +27,7 @@ UnionAlternative <- PIPE Single
 Single <- Struct / List / Named / Primitive
 
 Struct <- LCURLY StructField* RCURLY
-StructField <- IDENT (COLON Expr)? (EQ Expr)? AS STRING
+StructField <- IDENT (COLON Expr)? (EQ Expr)? (AS STRING)?
 
 List <- LBRACKET Expr RBRACKET
 
