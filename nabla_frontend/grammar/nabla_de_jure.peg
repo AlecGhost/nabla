@@ -1,0 +1,35 @@
+# Nabla Grammar (de jure)
+
+Program <- Global* EOF
+
+Global <- Use / Def / Let / Init
+
+Use <- USE IDENT NestedUse?
+NestedUse <- DOUBLE_COLON (
+    STAR
+    / LCURLY (IDENT NestedUse?)+ RCURLY 
+    / IDENT NestedUse?)
+    AS IDENT
+
+Def <-  DEF IDENT EQ Expr
+
+LET <- LET IDENT EQ Expr
+
+Init <- Expr
+
+Expr <- Union / Single 
+
+Union <- Single (PIPE Single)+
+
+Single <- Struct / List / Named / Primitive
+
+Struct <- LCURLY StructField* RCURLY
+StructField <- IDENT (COLON Expr)? (EQ Expr)? AS STRING
+
+List <- LBRACKET Expr RBRACKET
+
+Named <- IDENT (DOUBLE_COLON IDENT)* Expr?
+
+Primitive <- STRING / CHAR / NUMBER / Bool
+
+Bool <- TRUE / FALSE
