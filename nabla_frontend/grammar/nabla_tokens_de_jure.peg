@@ -26,10 +26,11 @@ Symbol <-
     / ":"
 
 Keyword <-
-    "use"
+    ("use"
     / "def"
     / "let"
-    / "as"
+    / "as")
+    ![A-Za-z0-9_]
 
 Bool <-
     "true"
