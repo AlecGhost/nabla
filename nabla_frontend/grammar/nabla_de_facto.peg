@@ -5,20 +5,20 @@ Program <- Global* EOF
 Global <- Use / Def / Let / Init / GlobalError
 GlobalError <- (!GlobalLA .)+
 
-Use <- USE IDENT? UseBody?
+Use <- USE Ident? UseBody?
 UseBody <- DOUBLE_COLON UseKind?
 UseKind <-
     STAR
     / UseItem
     / UseItems
     / UseError
-UseItem <- IDENT UseBody? (AS IDENT?)?
+UseItem <- Ident UseBody? Alias?
 UseItems <- LCURLY UseItem* RCURLY?
 UseError <- (!UseLA .)+
 
-Def <-  DEF IDENT? EQ? Expr?
+Def <-  DEF Ident? EQ? Expr?
 
-LET <- LET IDENT? EQ? Expr?
+LET <- LET Ident? EQ? Expr?
 
 Init <- Expr
 
@@ -31,16 +31,20 @@ UnionAlternative <- PIPE Single?
 Single <- Struct / List / Named / Primitive
 
 Struct <- LCURLY StructField* RCURLY?
-StructField <- IDENT (COLON Expr?)? (EQ Expr?)? (AS STRING?)?
+StructField <- Ident (COLON Expr?)? (EQ Expr?)? Alias?
 
 List <- LBRACKET Expr? RBRACKET?
 
-Named <- IDENT InnerName* Expr?
-InnerName <- DOUBLE_COLON IDENT?
+Named <- Ident InnerName* Expr?
+InnerName <- DOUBLE_COLON Ident?
 
 Primitive <- STRING / CHAR / NUMBER / Bool
 
 Bool <- TRUE / FALSE
+
+Alias <- AS (STRING / Ident)?
+
+Ident <- IDENT
 
 # Lookaheads
 
