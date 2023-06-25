@@ -21,7 +21,8 @@ Init <- Expr
 
 Expr <- Union / Single 
 
-Union <- Single (PIPE Single)+
+Union <- Single UnionAlternative+
+UnionAlternative <- PIPE Single
 
 Single <- Struct / List / Named / Primitive
 
@@ -30,7 +31,8 @@ StructField <- IDENT (COLON Expr)? (EQ Expr)? AS STRING
 
 List <- LBRACKET Expr RBRACKET
 
-Named <- IDENT (DOUBLE_COLON IDENT)* Expr?
+Named <- IDENT InnerName* Expr?
+InnerName <- DOUBLE_COLON IDENT
 
 Primitive <- STRING / CHAR / NUMBER / Bool
 
