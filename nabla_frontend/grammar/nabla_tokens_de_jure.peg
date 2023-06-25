@@ -29,6 +29,7 @@ Keyword <-
     "use"
     / "def"
     / "let"
+    / "as"
 
 Bool <-
     "true"

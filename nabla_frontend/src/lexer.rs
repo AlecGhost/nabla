@@ -95,6 +95,7 @@ impl Lexer for Token {
             lex_keyword!(TokenType::Use),
             lex_keyword!(TokenType::Def),
             lex_keyword!(TokenType::Let),
+            lex_keyword!(TokenType::As),
             lex_keyword!(TokenType::True),
             lex_keyword!(TokenType::False),
             alt((

@@ -10,7 +10,7 @@ fn empty() {
 
 #[test]
 fn all_in_one() {
-    let src = "@//abc\n \t\r\ntest 0123.456789'\\n'\"xyz\"true false use def let :=|*::[]{}";
+    let src = "@//abc\n \t\r\ntest 0123.456789'\\n'\"xyz\"true false use def let as :=|*::[]{}";
     let tokens = lex(src);
     assert_eq!(
         vec![
@@ -33,16 +33,18 @@ fn all_in_one() {
             Token::new(TokenType::Whitespace(" ".to_string()), 54..55),
             Token::new(TokenType::Let, 55..58),
             Token::new(TokenType::Whitespace(" ".to_string()), 58..59),
-            Token::new(TokenType::Colon, 59..60),
-            Token::new(TokenType::Eq, 60..61),
-            Token::new(TokenType::Pipe, 61..62),
-            Token::new(TokenType::Star, 62..63),
-            Token::new(TokenType::DoubleColon, 63..65),
-            Token::new(TokenType::LBracket, 65..66),
-            Token::new(TokenType::RBracket, 66..67),
-            Token::new(TokenType::LCurly, 67..68),
-            Token::new(TokenType::RCurly, 68..69),
-            Token::new(TokenType::Eof, 69..69)
+            Token::new(TokenType::As, 59..61),
+            Token::new(TokenType::Whitespace(" ".to_string()), 61..62),
+            Token::new(TokenType::Colon, 62..63),
+            Token::new(TokenType::Eq, 63..64),
+            Token::new(TokenType::Pipe, 64..65),
+            Token::new(TokenType::Star, 65..66),
+            Token::new(TokenType::DoubleColon, 66..68),
+            Token::new(TokenType::LBracket, 68..69),
+            Token::new(TokenType::RBracket, 69..70),
+            Token::new(TokenType::LCurly, 70..71),
+            Token::new(TokenType::RCurly, 71..72),
+            Token::new(TokenType::Eof, 72..72)
         ],
         tokens
     );

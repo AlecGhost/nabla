@@ -12,6 +12,7 @@ pub const COLON: &str = ":";
 pub const USE: &str = "use";
 pub const DEF: &str = "def";
 pub const LET: &str = "let";
+pub const AS: &str = "as";
 pub const TRUE: &str = "true";
 pub const FALSE: &str = "false";
 
@@ -31,6 +32,7 @@ pub enum TokenType {
     Use,
     Def,
     Let,
+    As,
     True,
     False,
     String(String),
@@ -106,6 +108,7 @@ impl TokenType {
             Use => Some(USE),
             Def => Some(DEF),
             Let => Some(LET),
+            As => Some(AS),
             True => Some(TRUE),
             False => Some(FALSE),
             Eof => Some(""),
