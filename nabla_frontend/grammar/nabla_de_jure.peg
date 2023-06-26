@@ -15,7 +15,7 @@ UseItems <- LCURLY UseItem+ RCURLY
 
 Def <-  DEF IDENT EQ Expr
 
-LET <- LET IDENT EQ Expr
+Let <- LET IDENT EQ Expr
 
 Init <- Expr
 

@@ -18,7 +18,7 @@ UseError <- (!UseLA .)+
 
 Def <-  DEF Ident? EQ? Expr?
 
-LET <- LET Ident? EQ? Expr?
+Let <- LET Ident? EQ? Expr?
 
 Init <- Expr
 
