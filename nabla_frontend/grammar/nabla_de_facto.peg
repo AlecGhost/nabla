@@ -35,7 +35,7 @@ StructField <- Ident (COLON Expr?)? (EQ Expr?)? Alias?
 
 List <- LBRACKET Expr? RBRACKET?
 
-Named <- Ident InnerName* Expr?
+Named <- Ident InnerName* (Struct / List)?
 InnerName <- DOUBLE_COLON Ident?
 
 Primitive <- STRING / CHAR / NUMBER / Bool

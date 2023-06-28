@@ -3,9 +3,13 @@ use crate::token::{TokenRange, TokenStream};
 /// Syntax error message
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorMessage {
-    MissingClosingSingleQuote,
-    MissingDecimals,
-    Unknown,
+    ExpectedIdent,
+    ExpectedUseKind,
+    ExpectedEQ,
+    ExpectedExpr,
+    ExpectedSingle,
+    MissingClosingCurly,
+    MissingClosingBracket,
 }
 
 /// Syntax error
@@ -14,6 +18,12 @@ pub enum ErrorMessage {
 pub struct Error {
     pub message: ErrorMessage,
     pub range: TokenRange,
+}
+
+impl Error {
+    pub const fn new(message: ErrorMessage, range: TokenRange) -> Self {
+        Self { message, range }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -42,4 +52,3 @@ impl<'a> nom::error::ParseError<TokenStream<'a>> for ParserError<'a> {
         }
     }
 }
-

@@ -1,2 +1,5 @@
 [workspace]
 members = [ "nabla_frontend" ]
+
+[profile.dev.package.insta]
+opt-level = 3

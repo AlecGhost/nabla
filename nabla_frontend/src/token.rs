@@ -16,6 +16,7 @@ pub const FALSE: &str = "false";
 
 pub type TextRange = std::ops::Range<usize>;
 pub type TokenRange = std::ops::Range<usize>;
+type ParserError = crate::parser::Error;
 
 pub trait ToTextRange {
     fn to_text_range(&self) -> TextRange;
@@ -81,6 +82,7 @@ pub struct Token {
 pub struct TokenStream<'a> {
     tokens: &'a [Token],
     first_ptr: *const Token,
+    error_buffer: Vec<ParserError>,
 }
 
 impl Token {
@@ -131,13 +133,6 @@ impl TokenType {
 }
 
 impl<'a> TokenStream<'a> {
-    pub const fn new(tokens: &'a [Token]) -> Self {
-        Self {
-            tokens,
-            first_ptr: tokens.as_ptr(),
-        }
-    }
-
     pub fn first_token(&self) -> Option<&Token> {
         self.tokens.get(0)
     }
@@ -156,14 +151,32 @@ impl TokenStream<'_> {
         TokenStream::distance(self.first_ptr, self.tokens.as_ptr())
     }
 
-    pub fn tokens(&self) -> Vec<Token> {
-        self.tokens.to_owned()
+    pub fn tokens(&self) -> &[Token] {
+        self.tokens
+    }
+
+    pub fn append_error(&mut self, error: ParserError) {
+        self.error_buffer.push(error);
+    }
+
+    pub fn switch_error_buffer(&mut self, new_buffer: Vec<ParserError>) -> Vec<ParserError> {
+        std::mem::replace(&mut self.error_buffer, new_buffer)
     }
 }
 
 impl<'a> ToTokenRange for TokenStream<'a> {
     fn to_token_range(&self) -> TokenRange {
         self.first_token().map_or(0..0, |token| token.range.clone())
+    }
+}
+
+impl<'a> From<&'a [Token]> for TokenStream<'a> {
+    fn from(tokens: &'a [Token]) -> Self {
+        Self {
+            tokens,
+            first_ptr: tokens.as_ptr(),
+            error_buffer: Vec::new(),
+        }
     }
 }
 

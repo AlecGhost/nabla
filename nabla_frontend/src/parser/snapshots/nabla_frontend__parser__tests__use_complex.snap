@@ -1,0 +1,253 @@
+---
+source: nabla_frontend/src/parser/tests.rs
+expression: program
+---
+Program {
+    globals: [
+        Use(
+            Use {
+                use_kw: AstInfo {
+                    range: 0..1,
+                    errors: [],
+                },
+                name: Some(
+                    Ident {
+                        name: "a",
+                        info: AstInfo {
+                            range: 1..3,
+                            errors: [],
+                        },
+                    },
+                ),
+                body: Some(
+                    UseBody {
+                        double_colon: AstInfo {
+                            range: 3..4,
+                            errors: [],
+                        },
+                        kind: Some(
+                            Multiple(
+                                UseItems {
+                                    lcurly: AstInfo {
+                                        range: 4..5,
+                                        errors: [],
+                                    },
+                                    names: [
+                                        UseItem {
+                                            name: Ident {
+                                                name: "b",
+                                                info: AstInfo {
+                                                    range: 5..6,
+                                                    errors: [],
+                                                },
+                                            },
+                                            body: Some(
+                                                UseBody {
+                                                    double_colon: AstInfo {
+                                                        range: 6..7,
+                                                        errors: [],
+                                                    },
+                                                    kind: Some(
+                                                        Multiple(
+                                                            UseItems {
+                                                                lcurly: AstInfo {
+                                                                    range: 7..8,
+                                                                    errors: [],
+                                                                },
+                                                                names: [
+                                                                    UseItem {
+                                                                        name: Ident {
+                                                                            name: "c",
+                                                                            info: AstInfo {
+                                                                                range: 8..10,
+                                                                                errors: [],
+                                                                            },
+                                                                        },
+                                                                        body: Some(
+                                                                            UseBody {
+                                                                                double_colon: AstInfo {
+                                                                                    range: 10..11,
+                                                                                    errors: [],
+                                                                                },
+                                                                                kind: Some(
+                                                                                    Single(
+                                                                                        UseItem {
+                                                                                            name: Ident {
+                                                                                                name: "d",
+                                                                                                info: AstInfo {
+                                                                                                    range: 11..12,
+                                                                                                    errors: [],
+                                                                                                },
+                                                                                            },
+                                                                                            body: None,
+                                                                                            alias: Some(
+                                                                                                Alias {
+                                                                                                    as_kw: AstInfo {
+                                                                                                        range: 12..14,
+                                                                                                        errors: [],
+                                                                                                    },
+                                                                                                    name: Some(
+                                                                                                        Ident(
+                                                                                                            Ident {
+                                                                                                                name: "x",
+                                                                                                                info: AstInfo {
+                                                                                                                    range: 14..16,
+                                                                                                                    errors: [],
+                                                                                                                },
+                                                                                                            },
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                    info: AstInfo {
+                                                                                                        range: 12..16,
+                                                                                                        errors: [],
+                                                                                                    },
+                                                                                                },
+                                                                                            ),
+                                                                                            info: AstInfo {
+                                                                                                range: 11..16,
+                                                                                                errors: [],
+                                                                                            },
+                                                                                        },
+                                                                                    ),
+                                                                                ),
+                                                                                info: AstInfo {
+                                                                                    range: 10..16,
+                                                                                    errors: [],
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        alias: None,
+                                                                        info: AstInfo {
+                                                                            range: 8..16,
+                                                                            errors: [],
+                                                                        },
+                                                                    },
+                                                                    UseItem {
+                                                                        name: Ident {
+                                                                            name: "e",
+                                                                            info: AstInfo {
+                                                                                range: 16..18,
+                                                                                errors: [],
+                                                                            },
+                                                                        },
+                                                                        body: Some(
+                                                                            UseBody {
+                                                                                double_colon: AstInfo {
+                                                                                    range: 18..19,
+                                                                                    errors: [],
+                                                                                },
+                                                                                kind: Some(
+                                                                                    All(
+                                                                                        AstInfo {
+                                                                                            range: 19..20,
+                                                                                            errors: [],
+                                                                                        },
+                                                                                    ),
+                                                                                ),
+                                                                                info: AstInfo {
+                                                                                    range: 18..20,
+                                                                                    errors: [],
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        alias: None,
+                                                                        info: AstInfo {
+                                                                            range: 16..20,
+                                                                            errors: [],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                                rcurly: Some(
+                                                                    AstInfo {
+                                                                        range: 20..22,
+                                                                        errors: [],
+                                                                    },
+                                                                ),
+                                                                info: AstInfo {
+                                                                    range: 7..22,
+                                                                    errors: [],
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                    info: AstInfo {
+                                                        range: 6..22,
+                                                        errors: [],
+                                                    },
+                                                },
+                                            ),
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 5..22,
+                                                errors: [],
+                                            },
+                                        },
+                                        UseItem {
+                                            name: Ident {
+                                                name: "f",
+                                                info: AstInfo {
+                                                    range: 22..24,
+                                                    errors: [],
+                                                },
+                                            },
+                                            body: None,
+                                            alias: Some(
+                                                Alias {
+                                                    as_kw: AstInfo {
+                                                        range: 24..26,
+                                                        errors: [],
+                                                    },
+                                                    name: Some(
+                                                        Ident(
+                                                            Ident {
+                                                                name: "y",
+                                                                info: AstInfo {
+                                                                    range: 26..28,
+                                                                    errors: [],
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                    info: AstInfo {
+                                                        range: 24..28,
+                                                        errors: [],
+                                                    },
+                                                },
+                                            ),
+                                            info: AstInfo {
+                                                range: 22..28,
+                                                errors: [],
+                                            },
+                                        },
+                                    ],
+                                    rcurly: Some(
+                                        AstInfo {
+                                            range: 28..29,
+                                            errors: [],
+                                        },
+                                    ),
+                                    info: AstInfo {
+                                        range: 4..29,
+                                        errors: [],
+                                    },
+                                },
+                            ),
+                        ),
+                        info: AstInfo {
+                            range: 3..29,
+                            errors: [],
+                        },
+                    },
+                ),
+                info: AstInfo {
+                    range: 0..29,
+                    errors: [],
+                },
+            },
+        ),
+    ],
+    info: AstInfo {
+        range: 0..30,
+        errors: [],
+    },
+}

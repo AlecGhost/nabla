@@ -24,6 +24,17 @@ impl AstInfo {
     pub fn append_error(&mut self, error: parser::Error) {
         self.errors.push(error);
     }
+
+    pub fn join(self, other: Self) -> Self {
+        let start = self.range.start.min(other.range.start);
+        let end = self.range.end.max(other.range.end);
+        let mut errors = self.errors;
+        errors.extend(other.errors);
+        Self {
+            range: start..end,
+            errors,
+        }
+    }
 }
 
 impl ToTokenRange for AstInfo {
@@ -44,7 +55,7 @@ pub enum Global {
     Def(Def),
     Let(Let),
     Init(Expr),
-    GlobalError(AstInfo),
+    Error(AstInfo),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -101,12 +112,6 @@ pub struct Let {
     pub name: Option<Ident>,
     pub eq: Option<AstInfo>,
     pub expr: Option<Expr>,
-    pub info: AstInfo,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Init {
-    pub expr: Expr,
     pub info: AstInfo,
 }
 
@@ -170,7 +175,7 @@ pub struct List {
 pub struct Named {
     pub name: Ident,
     pub inner_names: Vec<InnerName>,
-    pub expr: Option<Box<Expr>>,
+    pub expr: Option<StructOrList>,
     pub info: AstInfo,
 }
 
@@ -182,10 +187,16 @@ pub struct InnerName {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub enum StructOrList {
+    Struct(Struct),
+    List(List),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Primitive {
-    String(AstInfo),
-    Char(AstInfo),
-    Number(AstInfo),
+    String(PrimiveValue),
+    Char(PrimiveValue),
+    Number(PrimiveValue),
     Bool(AstInfo), // Either token TRUE or FALSE
 }
 
@@ -198,7 +209,7 @@ pub struct Alias {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AliasName {
-    String(Ident), // STRING token, but holds the same information as `Ident`.
+    String(PrimiveValue),
     Ident(Ident),
 }
 
@@ -206,4 +217,19 @@ pub enum AliasName {
 pub struct Ident {
     pub name: String,
     pub info: AstInfo,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PrimiveValue {
+    pub value: String,
+    pub info: AstInfo,
+}
+
+impl PrimiveValue {
+    // clippy proposes to make the function const, but the compiler disagrees
+    #[allow(clippy::missing_const_for_fn)]
+    pub(crate) fn new(tuple: (String, AstInfo)) -> Self {
+        let (value, info) = tuple;
+        Self { value, info }
+    }
 }
