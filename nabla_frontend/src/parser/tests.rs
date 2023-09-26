@@ -182,13 +182,15 @@ fn def_union() {
                 name: Some(ident("ok", 1..3)),
                 eq: Some(info(3..5)),
                 expr: Some(Expr::Union(Union {
-                    single: Single::Primitive(Primitive::String(PrimiveValue {
+                    single: Single::Primitive(Primitive::String(PrimitiveValue {
                         value: "yes".to_string(),
                         info: info(5..7),
                     })),
                     alternatives: vec![UnionAlternative {
                         pipe: info(7..9),
-                        single: Some(Single::Primitive(Primitive::Bool(info(9..11)))),
+                        single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(
+                            9..11
+                        ))))),
                         info: info(7..11),
                     }],
                     info: info(5..11),
@@ -244,7 +246,7 @@ def Person = {
                             }))),
                             eq: Some(info(18..20)),
                             expr: Some(Expr::Single(Single::Primitive(Primitive::Number(
-                                PrimiveValue {
+                                PrimitiveValue {
                                     value: "0".to_string(),
                                     info: info(20..22),
                                 }
@@ -277,12 +279,12 @@ fn def_list() {
                 eq: Some(info(3..5)),
                 expr: Some(Expr::Single(Single::List(List {
                     lbracket: info(5..7),
-                    expr: Some(Box::new(Expr::Single(Single::Named(Named {
+                    exprs: vec![Expr::Single(Single::Named(Named {
                         name: ident("string", 7..9),
                         inner_names: Vec::new(),
                         expr: None,
                         info: info(7..9),
-                    })))),
+                    }))],
                     rbracket: Some(info(9..11)),
                     info: info(5..11),
                 }))),

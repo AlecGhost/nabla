@@ -295,12 +295,12 @@ impl Parser for List {
         map(
             info(tuple((
                 token::lbracket,
-                expect(Expr::parse, ErrorMessage::ExpectedExpr),
+                many0(Expr::parse),
                 expect(token::rbracket, ErrorMessage::MissingClosingBracket),
             ))),
-            |((lbracket, expr, rbracket), info)| Self {
+            |((lbracket, exprs, rbracket), info)| Self {
                 lbracket,
-                expr: expr.map(Box::new),
+                exprs,
                 rbracket,
                 info,
             },
@@ -348,10 +348,10 @@ impl Parser for InnerName {
 impl Parser for Primitive {
     fn parse(input: TokenStream) -> IResult<Self> {
         alt((
-            map(map(token::string, PrimiveValue::new), Self::String),
-            map(map(token::char, PrimiveValue::new), Self::Char),
-            map(map(token::number, PrimiveValue::new), Self::Number),
-            map(alt((token::r#true, token::r#false)), Self::Bool),
+            map(map(token::string, PrimitiveValue::new), Self::String),
+            map(map(token::char, PrimitiveValue::new), Self::Char),
+            map(map(token::number, PrimitiveValue::new), Self::Number),
+            map(Bool::parse, Self::Bool),
         ))(input)
     }
 }
@@ -371,7 +371,7 @@ impl Parser for Alias {
 impl Parser for AliasName {
     fn parse(input: TokenStream) -> IResult<Self> {
         alt((
-            map(map(token::string, PrimiveValue::new), Self::String),
+            map(map(token::string, PrimitiveValue::new), Self::String),
             map(Ident::parse, Self::Ident),
         ))(input)
     }
@@ -380,6 +380,15 @@ impl Parser for AliasName {
 impl Parser for Ident {
     fn parse(input: TokenStream) -> IResult<Self> {
         map(token::ident, |(name, info)| Self { name, info })(input)
+    }
+}
+
+impl Parser for Bool {
+    fn parse(input: TokenStream) -> IResult<Self> {
+        alt((
+            map(token::r#true, Self::new_true),
+            map(token::r#false, Self::new_false),
+        ))(input)
     }
 }
 

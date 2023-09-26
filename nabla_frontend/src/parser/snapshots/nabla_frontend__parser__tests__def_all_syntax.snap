@@ -323,7 +323,7 @@ Program {
                                             Single(
                                                 Primitive(
                                                     String(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "expr",
                                                             info: AstInfo {
                                                                 range: 43..45,
@@ -385,7 +385,7 @@ Program {
                                             Single(
                                                 Primitive(
                                                     Number(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "1",
                                                             info: AstInfo {
                                                                 range: 52..54,
@@ -447,7 +447,7 @@ Program {
                                                 },
                                                 name: Some(
                                                     String(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "x",
                                                             info: AstInfo {
                                                                 range: 61..63,
@@ -487,7 +487,7 @@ Program {
                                             Single(
                                                 Primitive(
                                                     String(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "expr",
                                                             info: AstInfo {
                                                                 range: 67..69,
@@ -506,7 +506,7 @@ Program {
                                                 },
                                                 name: Some(
                                                     String(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "y",
                                                             info: AstInfo {
                                                                 range: 71..73,
@@ -571,7 +571,7 @@ Program {
                                             Single(
                                                 Primitive(
                                                     Number(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "1",
                                                             info: AstInfo {
                                                                 range: 80..82,
@@ -590,7 +590,7 @@ Program {
                                                 },
                                                 name: Some(
                                                     String(
-                                                        PrimiveValue {
+                                                        PrimitiveValue {
                                                             value: "z",
                                                             info: AstInfo {
                                                                 range: 84..86,

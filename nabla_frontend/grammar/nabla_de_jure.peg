@@ -29,7 +29,7 @@ Single <- Struct / List / Named / Primitive
 Struct <- LCURLY StructField* RCURLY
 StructField <- IDENT (COLON Expr)? (EQ Expr)? (AS STRING)?
 
-List <- LBRACKET Expr RBRACKET
+List <- LBRACKET Expr* RBRACKET
 
 Named <- IDENT InnerName* (Struct / List)?
 InnerName <- DOUBLE_COLON IDENT

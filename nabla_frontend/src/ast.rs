@@ -166,7 +166,7 @@ pub struct StructField {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct List {
     pub lbracket: AstInfo,
-    pub expr: Option<Box<Expr>>,
+    pub exprs: Vec<Expr>,
     pub rbracket: Option<AstInfo>,
     pub info: AstInfo,
 }
@@ -194,10 +194,10 @@ pub enum StructOrList {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Primitive {
-    String(PrimiveValue),
-    Char(PrimiveValue),
-    Number(PrimiveValue),
-    Bool(AstInfo), // Either token TRUE or FALSE
+    String(PrimitiveValue),
+    Char(PrimitiveValue),
+    Number(PrimitiveValue),
+    Bool(Bool), // Either token TRUE or FALSE
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -209,7 +209,7 @@ pub struct Alias {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AliasName {
-    String(PrimiveValue),
+    String(PrimitiveValue),
     Ident(Ident),
 }
 
@@ -220,16 +220,32 @@ pub struct Ident {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PrimiveValue {
+pub struct PrimitiveValue {
     pub value: String,
     pub info: AstInfo,
 }
 
-impl PrimiveValue {
+impl PrimitiveValue {
     // clippy proposes to make the function const, but the compiler disagrees
     #[allow(clippy::missing_const_for_fn)]
     pub(crate) fn new(tuple: (String, AstInfo)) -> Self {
         let (value, info) = tuple;
         Self { value, info }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Bool {
+    pub value: bool,
+    pub info: AstInfo,
+}
+
+impl Bool {
+    pub(crate) fn new_true(info: AstInfo) -> Self {
+        Self { value: true, info }
+    }
+
+    pub(crate) fn new_false(info: AstInfo) -> Self {
+        Self { value: false, info }
     }
 }
