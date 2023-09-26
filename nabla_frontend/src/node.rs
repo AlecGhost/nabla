@@ -1,21 +1,50 @@
 use crate::ast::*;
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Node {
-    kind: NodeKind,
-    children: Vec<Node>,
-    info: AstInfo,
+    pub kind: NodeKind,
+    pub children: Vec<Node>,
+    pub value: Option<String>,
+    pub info: AstInfo,
 }
 
 impl Node {
-    fn childless(kind: NodeKind, info: AstInfo) -> Self {
+    const fn childless(kind: NodeKind, info: AstInfo) -> Self {
         Self {
             kind,
             children: Vec::new(),
+            value: None,
             info,
         }
     }
+
+    pub fn query(&self, kind: NodeKind) -> Vec<&Self> {
+        let mut result = Vec::new();
+        if self.kind == kind {
+            result.push(self);
+        }
+        let children: Vec<&Self> = self
+            .children
+            .iter()
+            .flat_map(|child| child.query(kind))
+            .collect();
+        result.extend(children);
+        result
+    }
+
+    pub fn path_query(&self, path: &[NodeKind]) -> Vec<&Self> {
+        let mut nodes: Vec<&Self> = vec![self];
+        for kind in path {
+            nodes = nodes
+                .into_iter()
+                .flat_map(|node| node.query(*kind))
+                .collect();
+        }
+        nodes
+    }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum NodeKind {
     Program,
     GlobalError,
@@ -39,9 +68,9 @@ pub enum NodeKind {
     String,
     Char,
     Number,
-    Bool(bool),
-    Ident(String),
-    PrimitiveValue(String),
+    Bool,
+    Ident,
+    PrimitiveValue,
     UseKw,
     DefKw,
     LetKw,
@@ -72,6 +101,7 @@ impl From<&Program> for Node {
         Self {
             kind: NodeKind::Program,
             children: value.globals.iter().map(Self::from).collect(),
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -98,6 +128,7 @@ impl From<&Use> for Node {
         Self {
             kind: NodeKind::Use,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -111,6 +142,7 @@ impl From<&UseBody> for Node {
         Self {
             kind: NodeKind::UseBody,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -130,14 +162,15 @@ impl From<&UseKind> for Node {
 impl From<&UseItem> for Node {
     fn from(value: &UseItem) -> Self {
         let mut children = Vec::new();
-        children.push(Node::from(&value.name));
+        children.push(Self::from(&value.name));
         if let Some(body) = &value.body {
-            children.push(Node::from(body.as_ref()))
+            children.push(Self::from(body.as_ref()))
         }
         push!(children, &value.alias);
         Self {
             kind: NodeKind::UseItem,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -148,7 +181,7 @@ impl From<&UseItems> for Node {
         let mut children = Vec::new();
         push!(children, NodeKind::LCurly, value.lcurly.clone());
         for use_item in &value.names {
-            children.push(Node::from(use_item));
+            children.push(Self::from(use_item));
         }
         if let Some(info) = &value.rcurly {
             push!(children, NodeKind::RCurly, info.clone());
@@ -156,6 +189,7 @@ impl From<&UseItems> for Node {
         Self {
             kind: NodeKind::UseItems,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -173,6 +207,7 @@ impl From<&Def> for Node {
         Self {
             kind: NodeKind::Def,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -190,6 +225,7 @@ impl From<&Let> for Node {
         Self {
             kind: NodeKind::Def,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -208,13 +244,14 @@ impl From<&Expr> for Node {
 impl From<&Union> for Node {
     fn from(value: &Union) -> Self {
         let mut children = Vec::new();
-        children.push(Node::from(&value.single));
+        children.push(Self::from(&value.single));
         for union_alternative in &value.alternatives {
-            children.push(Node::from(union_alternative));
+            children.push(Self::from(union_alternative));
         }
         Self {
             kind: NodeKind::Union,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -228,6 +265,7 @@ impl From<&UnionAlternative> for Node {
         Self {
             kind: NodeKind::UnionAlternative,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -249,7 +287,7 @@ impl From<&Struct> for Node {
         let mut children = Vec::new();
         push!(children, NodeKind::LCurly, value.lcurly.clone());
         for field in &value.fields {
-            children.push(Node::from(field));
+            children.push(Self::from(field));
         }
         if let Some(info) = &value.rcurly {
             push!(children, NodeKind::RCurly, info.clone());
@@ -257,6 +295,7 @@ impl From<&Struct> for Node {
         Self {
             kind: NodeKind::Struct,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -265,7 +304,7 @@ impl From<&Struct> for Node {
 impl From<&StructField> for Node {
     fn from(value: &StructField) -> Self {
         let mut children = Vec::new();
-        children.push(Node::from(&value.name));
+        children.push(Self::from(&value.name));
         if let Some(info) = &value.colon {
             push!(children, NodeKind::Colon, info.clone());
         }
@@ -278,6 +317,7 @@ impl From<&StructField> for Node {
         Self {
             kind: NodeKind::StructField,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -297,7 +337,7 @@ impl From<&List> for Node {
         let mut children = Vec::new();
         push!(children, NodeKind::LBracket, value.lbracket.clone());
         for expr in &value.exprs {
-            children.push(Node::from(expr));
+            children.push(Self::from(expr));
         }
         if let Some(info) = &value.rbracket {
             push!(children, NodeKind::RBracket, info.clone());
@@ -305,6 +345,7 @@ impl From<&List> for Node {
         Self {
             kind: NodeKind::List,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -313,14 +354,15 @@ impl From<&List> for Node {
 impl From<&Named> for Node {
     fn from(value: &Named) -> Self {
         let mut children = Vec::new();
-        children.push(Node::from(&value.name));
+        children.push(Self::from(&value.name));
         for inner_name in &value.inner_names {
-            children.push(Node::from(inner_name));
+            children.push(Self::from(inner_name));
         }
         push!(children, &value.expr);
         Self {
             kind: NodeKind::Named,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -334,6 +376,7 @@ impl From<&InnerName> for Node {
         Self {
             kind: NodeKind::Named,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -358,6 +401,7 @@ impl From<&Alias> for Node {
         Self {
             kind: NodeKind::Alias,
             children,
+            value: None,
             info: value.info.clone(),
         }
     }
@@ -375,8 +419,9 @@ impl From<&AliasName> for Node {
 impl From<&Ident> for Node {
     fn from(value: &Ident) -> Self {
         Self {
-            kind: NodeKind::Ident(value.name.clone()),
+            kind: NodeKind::Ident,
             children: Vec::new(),
+            value: Some(value.name.clone()),
             info: value.info.clone(),
         }
     }
@@ -384,15 +429,22 @@ impl From<&Ident> for Node {
 
 impl From<&PrimitiveValue> for Node {
     fn from(value: &PrimitiveValue) -> Self {
-        Node::childless(
-            NodeKind::PrimitiveValue(value.value.clone()),
-            value.info.clone(),
-        )
+        Self {
+            kind: NodeKind::PrimitiveValue,
+            children: Vec::new(),
+            value: Some(value.value.to_string()),
+            info: value.info.clone(),
+        }
     }
 }
 
 impl From<&Bool> for Node {
     fn from(value: &Bool) -> Self {
-        Node::childless(NodeKind::Bool(value.value), value.info.clone())
+        Self {
+            kind: NodeKind::Bool,
+            children: Vec::new(),
+            value: Some(value.value.to_string()),
+            info: value.info.clone(),
+        }
     }
 }

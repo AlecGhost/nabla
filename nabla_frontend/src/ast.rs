@@ -241,11 +241,11 @@ pub struct Bool {
 }
 
 impl Bool {
-    pub(crate) fn new_true(info: AstInfo) -> Self {
+    pub(crate) const fn new_true(info: AstInfo) -> Self {
         Self { value: true, info }
     }
 
-    pub(crate) fn new_false(info: AstInfo) -> Self {
+    pub(crate) const fn new_false(info: AstInfo) -> Self {
         Self { value: false, info }
     }
 }

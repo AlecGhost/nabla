@@ -151,7 +151,7 @@ impl TokenStream<'_> {
         TokenStream::distance(self.first_ptr, self.tokens.as_ptr())
     }
 
-    pub fn tokens(&self) -> &[Token] {
+    pub const fn tokens(&self) -> &[Token] {
         self.tokens
     }
 
