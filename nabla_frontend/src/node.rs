@@ -8,6 +8,12 @@ pub struct Node {
     pub info: AstInfo,
 }
 
+pub enum QueryType {
+    AnyLevel,
+    FirstLevel,
+    DirectChildren,
+}
+
 impl Node {
     const fn childless(kind: NodeKind, info: AstInfo) -> Self {
         Self {
@@ -18,27 +24,52 @@ impl Node {
         }
     }
 
-    pub fn query(&self, kind: NodeKind) -> Vec<&Self> {
+    fn wrapper(kind: NodeKind, child: Node) -> Self {
+        Self {
+            kind,
+            info: child.info.clone(),
+            children: vec![child],
+            value: None,
+        }
+    }
+
+    fn level_query(&self, kind: NodeKind, stop_after_first: bool) -> Vec<&Self> {
         let mut result = Vec::new();
         if self.kind == kind {
             result.push(self);
+            if stop_after_first {
+                return result;
+            }
         }
         let children: Vec<&Self> = self
             .children
             .iter()
-            .flat_map(|child| child.query(kind))
+            .flat_map(|child| child.level_query(kind, stop_after_first))
             .collect();
         result.extend(children);
         result
     }
 
-    pub fn path_query(&self, path: &[NodeKind]) -> Vec<&Self> {
+    pub fn query(&self, params: &[(NodeKind, QueryType)]) -> Vec<&Self> {
         let mut nodes: Vec<&Self> = vec![self];
-        for kind in path {
-            nodes = nodes
-                .into_iter()
-                .flat_map(|node| node.query(*kind))
-                .collect();
+        for (kind, query_type) in params {
+            match query_type {
+                QueryType::AnyLevel | QueryType::FirstLevel => {
+                    nodes = nodes
+                        .into_iter()
+                        .flat_map(|node| {
+                            node.level_query(*kind, matches!(query_type, QueryType::FirstLevel))
+                        })
+                        .collect();
+                }
+                QueryType::DirectChildren => {
+                    nodes = nodes
+                        .into_iter()
+                        .flat_map(|node| &node.children)
+                        .filter(|child_node| child_node.kind == *kind)
+                        .collect()
+                }
+            }
         }
         nodes
     }
@@ -56,7 +87,10 @@ pub enum NodeKind {
     UseItems,
     Def,
     Let,
+    Init,
+    Expr,
     ExprError,
+    Single,
     Union,
     UnionAlternative,
     Struct,
@@ -70,6 +104,7 @@ pub enum NodeKind {
     Number,
     Bool,
     Ident,
+    Primitive,
     PrimitiveValue,
     UseKw,
     DefKw,
@@ -113,7 +148,7 @@ impl From<&Global> for Node {
             Global::Use(global) => global.into(),
             Global::Def(global) => global.into(),
             Global::Let(global) => global.into(),
-            Global::Init(global) => global.into(),
+            Global::Init(global) => Node::wrapper(NodeKind::Init, global.into()),
             Global::Error(info) => Self::childless(NodeKind::GlobalError, info.clone()),
         }
     }
@@ -233,11 +268,12 @@ impl From<&Let> for Node {
 
 impl From<&Expr> for Node {
     fn from(value: &Expr) -> Self {
-        match value {
+        let child_node = match value {
             Expr::Union(union) => union.into(),
             Expr::Single(single) => single.into(),
             Expr::Error(info) => Self::childless(NodeKind::ExprError, info.clone()),
-        }
+        };
+        Node::wrapper(NodeKind::Expr, child_node)
     }
 }
 
@@ -273,12 +309,13 @@ impl From<&UnionAlternative> for Node {
 
 impl From<&Single> for Node {
     fn from(value: &Single) -> Self {
-        match value {
+        let child_node = match value {
             Single::Struct(s) => s.into(),
             Single::List(list) => list.into(),
             Single::Named(named) => named.into(),
             Single::Primitive(primitive) => primitive.into(),
-        }
+        };
+        Node::wrapper(NodeKind::Single, child_node)
     }
 }
 
@@ -384,12 +421,13 @@ impl From<&InnerName> for Node {
 
 impl From<&Primitive> for Node {
     fn from(value: &Primitive) -> Self {
-        match value {
-            Primitive::String(s) => s.into(),
-            Primitive::Char(c) => c.into(),
-            Primitive::Number(n) => n.into(),
+        let child_node = match value {
+            Primitive::String(s) => Node::wrapper(NodeKind::String, s.into()),
+            Primitive::Char(c) => Node::wrapper(NodeKind::Char, c.into()),
+            Primitive::Number(n) => Node::wrapper(NodeKind::Number, n.into()),
             Primitive::Bool(b) => b.into(),
-        }
+        };
+        Node::wrapper(NodeKind::Primitive, child_node)
     }
 }
 
@@ -410,7 +448,7 @@ impl From<&Alias> for Node {
 impl From<&AliasName> for Node {
     fn from(value: &AliasName) -> Self {
         match value {
-            AliasName::String(s) => s.into(),
+            AliasName::String(s) => Node::wrapper(NodeKind::String, s.into()),
             AliasName::Ident(ident) => ident.into(),
         }
     }
