@@ -1,4 +1,20 @@
 use crate::token::{TokenRange, TokenStream};
+use thiserror::Error;
+
+/// Syntax error
+/// Contains an error message and the token range, where the error occurred.
+#[derive(Clone, Debug, Error, PartialEq, Eq)]
+#[error("Token {}-{}: {message}", .range.start, .range.end)]
+pub struct Error {
+    pub message: ErrorMessage,
+    pub range: TokenRange,
+}
+
+impl Error {
+    pub const fn new(message: ErrorMessage, range: TokenRange) -> Self {
+        Self { message, range }
+    }
+}
 
 /// Syntax error message
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -12,17 +28,18 @@ pub enum ErrorMessage {
     MissingClosingBracket,
 }
 
-/// Syntax error
-/// Contains an error message and the text range, where the error occurred.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Error {
-    pub message: ErrorMessage,
-    pub range: TokenRange,
-}
-
-impl Error {
-    pub const fn new(message: ErrorMessage, range: TokenRange) -> Self {
-        Self { message, range }
+impl std::fmt::Display for ErrorMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            ErrorMessage::ExpectedIdent => "expected ident",
+            ErrorMessage::ExpectedUseKind => "expected use expression",
+            ErrorMessage::ExpectedEQ => "expected `=`",
+            ErrorMessage::ExpectedExpr => "expected expression",
+            ErrorMessage::ExpectedSingle => "expected only a single expression",
+            ErrorMessage::MissingClosingCurly => "missing closing `}`",
+            ErrorMessage::MissingClosingBracket => "missing closing `]`",
+        };
+        write!(f, "{}", message)
     }
 }
 
