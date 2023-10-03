@@ -27,9 +27,9 @@ pub enum ErrorMessage {
 impl std::fmt::Display for ErrorMessage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
-            ErrorMessage::AliasMustBeString => "alias must be a string",
-            ErrorMessage::AliasMustBeIdent => "alias must be an identifier",
-            ErrorMessage::UnionInInit => "unions cannot be used in initializations",
+            Self::AliasMustBeString => "alias must be a string",
+            Self::AliasMustBeIdent => "alias must be an identifier",
+            Self::UnionInInit => "unions cannot be used in initializations",
         };
         write!(f, "{}", message)
     }

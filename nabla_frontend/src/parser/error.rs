@@ -31,13 +31,13 @@ pub enum ErrorMessage {
 impl std::fmt::Display for ErrorMessage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
-            ErrorMessage::ExpectedIdent => "expected ident",
-            ErrorMessage::ExpectedUseKind => "expected use expression",
-            ErrorMessage::ExpectedEQ => "expected `=`",
-            ErrorMessage::ExpectedExpr => "expected expression",
-            ErrorMessage::ExpectedSingle => "expected only a single expression",
-            ErrorMessage::MissingClosingCurly => "missing closing `}`",
-            ErrorMessage::MissingClosingBracket => "missing closing `]`",
+            Self::ExpectedIdent => "expected ident",
+            Self::ExpectedUseKind => "expected use expression",
+            Self::ExpectedEQ => "expected `=`",
+            Self::ExpectedExpr => "expected expression",
+            Self::ExpectedSingle => "expected only a single expression",
+            Self::MissingClosingCurly => "missing closing `}`",
+            Self::MissingClosingBracket => "missing closing `]`",
         };
         write!(f, "{}", message)
     }
