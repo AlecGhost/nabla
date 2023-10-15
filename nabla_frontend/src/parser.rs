@@ -116,7 +116,7 @@ impl Parser for UseItems {
             ))),
             |((lcurly, names, rcurly), info)| Self {
                 lcurly,
-                names,
+                items: names,
                 rcurly,
                 info,
             },

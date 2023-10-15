@@ -92,7 +92,7 @@ pub struct UseItem {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UseItems {
     pub lcurly: AstInfo,
-    pub names: Vec<UseItem>,
+    pub items: Vec<UseItem>,
     pub rcurly: Option<AstInfo>,
     pub info: AstInfo,
 }
@@ -122,6 +122,16 @@ pub enum Expr {
     Error(AstInfo),
 }
 
+impl Expr {
+    pub fn info(&self) -> &AstInfo {
+        match self {
+            Expr::Union(union) => &union.info,
+            Expr::Single(single) => single.info(),
+            Expr::Error(info) => info,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Union {
     pub single: Single,
@@ -142,6 +152,17 @@ pub enum Single {
     List(List),
     Named(Named),
     Primitive(Primitive),
+}
+
+impl Single {
+    pub fn info(&self) -> &AstInfo {
+        match self {
+            Single::Struct(Struct { info, .. })
+            | Single::List(List { info, .. })
+            | Single::Named(Named { info, .. }) => info,
+            Single::Primitive(primitive) => primitive.info(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -200,6 +221,29 @@ pub enum Primitive {
     Bool(Bool), // Either token TRUE or FALSE
 }
 
+impl Primitive {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Primitive::String(value) | Primitive::Char(value) | Primitive::Number(value) => {
+                &value.value
+            }
+            Primitive::Bool(Bool { value, .. }) => match value {
+                true => "true",
+                false => "false",
+            },
+        }
+    }
+
+    pub fn info(&self) -> &AstInfo {
+        match self {
+            Primitive::String(PrimitiveValue { info, .. })
+            | Primitive::Char(PrimitiveValue { info, .. })
+            | Primitive::Number(PrimitiveValue { info, .. })
+            | Primitive::Bool(Bool { info, .. }) => info,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Alias {
     pub as_kw: AstInfo,
@@ -213,13 +257,25 @@ pub enum AliasName {
     Ident(Ident),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq)]
 pub struct Ident {
     pub name: String,
     pub info: AstInfo,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+impl PartialEq for Ident {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl std::hash::Hash for Ident {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+    }
+}
+
+#[derive(Clone, Debug, Eq)]
 pub struct PrimitiveValue {
     pub value: String,
     pub info: AstInfo,
@@ -234,7 +290,13 @@ impl PrimitiveValue {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+impl PartialEq for PrimitiveValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+#[derive(Clone, Debug, Eq)]
 pub struct Bool {
     pub value: bool,
     pub info: AstInfo,
@@ -247,5 +309,11 @@ impl Bool {
 
     pub(crate) const fn new_false(info: AstInfo) -> Self {
         Self { value: false, info }
+    }
+}
+
+impl PartialEq for Bool {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
     }
 }

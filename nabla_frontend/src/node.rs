@@ -215,7 +215,7 @@ impl From<&UseItems> for Node {
     fn from(value: &UseItems) -> Self {
         let mut children = Vec::new();
         push!(children, NodeKind::LCurly, value.lcurly.clone());
-        for use_item in &value.names {
+        for use_item in &value.items {
             children.push(Self::from(use_item));
         }
         if let Some(info) = &value.rcurly {

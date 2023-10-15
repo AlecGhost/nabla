@@ -73,7 +73,7 @@ Program {
                                         range: 11..12,
                                         errors: [],
                                     },
-                                    names: [
+                                    items: [
                                         UseItem {
                                             name: Ident {
                                                 name: "x",
@@ -95,7 +95,7 @@ Program {
                                                                     range: 14..15,
                                                                     errors: [],
                                                                 },
-                                                                names: [
+                                                                items: [
                                                                     UseItem {
                                                                         name: Ident {
                                                                             name: "y",

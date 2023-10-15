@@ -110,7 +110,7 @@ fn use_multiple() {
                     double_colon: info(3..4),
                     kind: Some(UseKind::Multiple(UseItems {
                         lcurly: info(4..5),
-                        names: vec![
+                        items: vec![
                             UseItem {
                                 name: ident("b", 5..6),
                                 body: None,

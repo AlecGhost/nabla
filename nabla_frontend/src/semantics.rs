@@ -1,42 +1,28 @@
-use crate::{
-    ast::Program,
-    node::{Node, NodeKind, QueryType},
-};
-
-use self::error::{Error, ErrorMessage};
+use crate::ast::{Global, Program};
+use error::{Error, ErrorMessage};
 
 mod error;
+#[cfg(test)]
+mod tests;
+mod type_analysis;
 
-pub fn analyze_structure(program: &Program) -> Vec<Error> {
-    let mut errors = Vec::new();
-    let program_node = Node::from(program);
-    let mut query = |path, message: ErrorMessage| {
-        program_node
-            .query(path)
-            .iter()
-            .map(|node| Error::new(message.clone(), node.info.range.clone()))
-            .for_each(|error| errors.push(error));
-    };
-    query(
-        &[
-            (NodeKind::Use, QueryType::DirectChildren),
-            (NodeKind::UseItem, QueryType::AnyLevel),
-            (NodeKind::Alias, QueryType::AnyLevel),
-            (NodeKind::String, QueryType::DirectChildren),
-        ],
-        ErrorMessage::AliasMustBeIdent,
-    );
-    query(
-        &[
-            (NodeKind::StructField, QueryType::AnyLevel),
-            (NodeKind::Alias, QueryType::FirstLevel),
-            (NodeKind::Ident, QueryType::DirectChildren),
-        ],
-        ErrorMessage::AliasMustBeString,
-    );
-    query(
-        &[(NodeKind::Init, QueryType::DirectChildren), (NodeKind::Union, QueryType::AnyLevel)],
-        ErrorMessage::UnionInInit,
-    );
-    errors
+pub fn analyze(program: &Program) -> Vec<Error> {
+    vec![
+        type_analysis::analyze(program),
+        check_multiple_inits(program),
+    ]
+    .concat()
+}
+
+fn check_multiple_inits(program: &Program) -> Vec<Error> {
+    program
+        .globals
+        .iter()
+        .filter_map(|global| match global {
+            Global::Init(init) => Some(init),
+            _ => None,
+        })
+        .skip(1)
+        .map(|init| Error::new(ErrorMessage::MultipleInits, init.info().range.clone()))
+        .collect()
 }
