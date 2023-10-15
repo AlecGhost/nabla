@@ -4,11 +4,11 @@ use error::{Error, ErrorMessage};
 mod error;
 #[cfg(test)]
 mod tests;
-mod type_analysis;
+mod types;
 
 pub fn analyze(program: &Program) -> Vec<Error> {
     vec![
-        type_analysis::analyze(program),
+        types::analyze(program),
         check_multiple_inits(program),
     ]
     .concat()
