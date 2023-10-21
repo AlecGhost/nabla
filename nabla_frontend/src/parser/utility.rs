@@ -61,19 +61,19 @@ pub(super) fn info<'a, O, F>(
 where
     F: FnMut(TokenStream<'a>) -> IResult<'a, O>,
 {
-    move |mut input| {
+    move |input| {
         let start = input.location_offset();
-        let error_backup = input.switch_error_buffer(Vec::new());
+        let error_len = input.error_buffer.len();
         match parser(input) {
-            Ok((mut input, o)) => {
-                let errors = input.switch_error_buffer(error_backup);
+            Ok((input, o)) => {
                 let end = input.location_offset();
                 let range = start..end;
-                let info = AstInfo::new_with_errors(range, errors);
+                let info = AstInfo::new(range);
                 Ok((input, (o, info)))
             }
             Err(nom::Err::Error(mut err)) => {
-                err.input.switch_error_buffer(error_backup);
+                // remove errors that where added in the meantime
+                err.input.error_buffer.truncate(error_len);
                 Err(nom::Err::Error(err))
             }
             Err(_) => panic!("info: unexpected error"),

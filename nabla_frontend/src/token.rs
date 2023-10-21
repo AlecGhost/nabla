@@ -14,6 +14,7 @@ pub const AS: &str = "as";
 pub const TRUE: &str = "true";
 pub const FALSE: &str = "false";
 pub const NULL: &str = "null";
+pub const EOF: &str = "";
 
 pub type TextRange = std::ops::Range<usize>;
 pub type TokenRange = std::ops::Range<usize>;
@@ -80,13 +81,6 @@ pub struct Token {
     pub errors: Vec<Error>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct TokenStream<'a> {
-    tokens: &'a [Token],
-    first_ptr: *const Token,
-    error_buffer: Vec<ParserError>,
-}
-
 impl Token {
     pub const fn new(token_type: TokenType, range: TextRange) -> Self {
         Self {
@@ -129,10 +123,17 @@ impl TokenType {
             True => Some(TRUE),
             False => Some(FALSE),
             Null => Some(NULL),
-            Eof => Some(""),
+            Eof => Some(EOF),
             _ => None,
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TokenStream<'a> {
+    tokens: &'a [Token],
+    first_ptr: *const Token,
+    pub error_buffer: Vec<ParserError>,
 }
 
 impl<'a> TokenStream<'a> {
@@ -160,10 +161,6 @@ impl TokenStream<'_> {
 
     pub fn append_error(&mut self, error: ParserError) {
         self.error_buffer.push(error);
-    }
-
-    pub fn switch_error_buffer(&mut self, new_buffer: Vec<ParserError>) -> Vec<ParserError> {
-        std::mem::replace(&mut self.error_buffer, new_buffer)
     }
 }
 

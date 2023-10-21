@@ -8,14 +8,12 @@ Program {
             Use {
                 use_kw: AstInfo {
                     range: 0..2,
-                    errors: [],
                 },
                 name: Some(
                     Ident {
                         name: "other_dir",
                         info: AstInfo {
                             range: 2..4,
-                            errors: [],
                         },
                     },
                 ),
@@ -23,25 +21,21 @@ Program {
                     UseBody {
                         double_colon: AstInfo {
                             range: 4..5,
-                            errors: [],
                         },
                         kind: Some(
                             All(
                                 AstInfo {
                                     range: 5..6,
-                                    errors: [],
                                 },
                             ),
                         ),
                         info: AstInfo {
                             range: 4..6,
-                            errors: [],
                         },
                     },
                 ),
                 info: AstInfo {
                     range: 0..6,
-                    errors: [],
                 },
             },
         ),
@@ -49,14 +43,12 @@ Program {
             Use {
                 use_kw: AstInfo {
                     range: 6..8,
-                    errors: [],
                 },
                 name: Some(
                     Ident {
                         name: "dir2",
                         info: AstInfo {
                             range: 8..10,
-                            errors: [],
                         },
                     },
                 ),
@@ -64,14 +56,12 @@ Program {
                     UseBody {
                         double_colon: AstInfo {
                             range: 10..11,
-                            errors: [],
                         },
                         kind: Some(
                             Multiple(
                                 UseItems {
                                     lcurly: AstInfo {
                                         range: 11..12,
-                                        errors: [],
                                     },
                                     items: [
                                         UseItem {
@@ -79,21 +69,18 @@ Program {
                                                 name: "x",
                                                 info: AstInfo {
                                                     range: 12..13,
-                                                    errors: [],
                                                 },
                                             },
                                             body: Some(
                                                 UseBody {
                                                     double_colon: AstInfo {
                                                         range: 13..14,
-                                                        errors: [],
                                                     },
                                                     kind: Some(
                                                         Multiple(
                                                             UseItems {
                                                                 lcurly: AstInfo {
                                                                     range: 14..15,
-                                                                    errors: [],
                                                                 },
                                                                 items: [
                                                                     UseItem {
@@ -101,40 +88,34 @@ Program {
                                                                             name: "y",
                                                                             info: AstInfo {
                                                                                 range: 15..16,
-                                                                                errors: [],
                                                                             },
                                                                         },
                                                                         body: None,
                                                                         alias: None,
                                                                         info: AstInfo {
                                                                             range: 15..16,
-                                                                            errors: [],
                                                                         },
                                                                     },
                                                                 ],
                                                                 rcurly: Some(
                                                                     AstInfo {
                                                                         range: 16..17,
-                                                                        errors: [],
                                                                     },
                                                                 ),
                                                                 info: AstInfo {
                                                                     range: 14..17,
-                                                                    errors: [],
                                                                 },
                                                             },
                                                         ),
                                                     ),
                                                     info: AstInfo {
                                                         range: 13..17,
-                                                        errors: [],
                                                     },
                                                 },
                                             ),
                                             alias: None,
                                             info: AstInfo {
                                                 range: 12..17,
-                                                errors: [],
                                             },
                                         },
                                         UseItem {
@@ -142,39 +123,33 @@ Program {
                                                 name: "z",
                                                 info: AstInfo {
                                                     range: 17..19,
-                                                    errors: [],
                                                 },
                                             },
                                             body: None,
                                             alias: None,
                                             info: AstInfo {
                                                 range: 17..19,
-                                                errors: [],
                                             },
                                         },
                                     ],
                                     rcurly: Some(
                                         AstInfo {
                                             range: 19..20,
-                                            errors: [],
                                         },
                                     ),
                                     info: AstInfo {
                                         range: 11..20,
-                                        errors: [],
                                     },
                                 },
                             ),
                         ),
                         info: AstInfo {
                             range: 10..20,
-                            errors: [],
                         },
                     },
                 ),
                 info: AstInfo {
                     range: 6..20,
-                    errors: [],
                 },
             },
         ),
@@ -182,14 +157,12 @@ Program {
             Use {
                 use_kw: AstInfo {
                     range: 20..22,
-                    errors: [],
                 },
                 name: Some(
                     Ident {
                         name: "dir3",
                         info: AstInfo {
                             range: 22..24,
-                            errors: [],
                         },
                     },
                 ),
@@ -197,7 +170,6 @@ Program {
                     UseBody {
                         double_colon: AstInfo {
                             range: 24..25,
-                            errors: [],
                         },
                         kind: Some(
                             Single(
@@ -206,27 +178,23 @@ Program {
                                         name: "test",
                                         info: AstInfo {
                                             range: 25..26,
-                                            errors: [],
                                         },
                                     },
                                     body: None,
                                     alias: None,
                                     info: AstInfo {
                                         range: 25..26,
-                                        errors: [],
                                     },
                                 },
                             ),
                         ),
                         info: AstInfo {
                             range: 24..26,
-                            errors: [],
                         },
                     },
                 ),
                 info: AstInfo {
                     range: 20..26,
-                    errors: [],
                 },
             },
         ),
@@ -234,14 +202,12 @@ Program {
             Def {
                 def_kw: AstInfo {
                     range: 26..28,
-                    errors: [],
                 },
                 name: Some(
                     Ident {
                         name: "x",
                         info: AstInfo {
                             range: 28..30,
-                            errors: [],
                         },
                     },
                 ),
@@ -250,7 +216,6 @@ Program {
                 eq: Some(
                     AstInfo {
                         range: 30..32,
-                        errors: [],
                     },
                 ),
                 expr: Some(
@@ -259,7 +224,6 @@ Program {
                             Struct {
                                 lcurly: AstInfo {
                                     range: 32..34,
-                                    errors: [],
                                 },
                                 fields: [
                                     StructField {
@@ -267,13 +231,11 @@ Program {
                                             name: "only_type",
                                             info: AstInfo {
                                                 range: 34..36,
-                                                errors: [],
                                             },
                                         },
                                         colon: Some(
                                             AstInfo {
                                                 range: 36..37,
-                                                errors: [],
                                             },
                                         ),
                                         type_expr: Some(
@@ -284,14 +246,12 @@ Program {
                                                             name: "string",
                                                             info: AstInfo {
                                                                 range: 37..39,
-                                                                errors: [],
                                                             },
                                                         },
                                                         inner_names: [],
                                                         expr: None,
                                                         info: AstInfo {
                                                             range: 37..39,
-                                                            errors: [],
                                                         },
                                                     },
                                                 ),
@@ -302,7 +262,6 @@ Program {
                                         alias: None,
                                         info: AstInfo {
                                             range: 34..39,
-                                            errors: [],
                                         },
                                     },
                                     StructField {
@@ -310,7 +269,6 @@ Program {
                                             name: "only_expr",
                                             info: AstInfo {
                                                 range: 39..41,
-                                                errors: [],
                                             },
                                         },
                                         colon: None,
@@ -318,7 +276,6 @@ Program {
                                         eq: Some(
                                             AstInfo {
                                                 range: 41..43,
-                                                errors: [],
                                             },
                                         ),
                                         expr: Some(
@@ -329,7 +286,6 @@ Program {
                                                             value: "expr",
                                                             info: AstInfo {
                                                                 range: 43..45,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
@@ -339,7 +295,6 @@ Program {
                                         alias: None,
                                         info: AstInfo {
                                             range: 39..45,
-                                            errors: [],
                                         },
                                     },
                                     StructField {
@@ -347,13 +302,11 @@ Program {
                                             name: "type_and_expr",
                                             info: AstInfo {
                                                 range: 45..47,
-                                                errors: [],
                                             },
                                         },
                                         colon: Some(
                                             AstInfo {
                                                 range: 47..48,
-                                                errors: [],
                                             },
                                         ),
                                         type_expr: Some(
@@ -364,14 +317,12 @@ Program {
                                                             name: "number",
                                                             info: AstInfo {
                                                                 range: 48..50,
-                                                                errors: [],
                                                             },
                                                         },
                                                         inner_names: [],
                                                         expr: None,
                                                         info: AstInfo {
                                                             range: 48..50,
-                                                            errors: [],
                                                         },
                                                     },
                                                 ),
@@ -380,7 +331,6 @@ Program {
                                         eq: Some(
                                             AstInfo {
                                                 range: 50..52,
-                                                errors: [],
                                             },
                                         ),
                                         expr: Some(
@@ -391,7 +341,6 @@ Program {
                                                             value: "1",
                                                             info: AstInfo {
                                                                 range: 52..54,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
@@ -401,7 +350,6 @@ Program {
                                         alias: None,
                                         info: AstInfo {
                                             range: 45..54,
-                                            errors: [],
                                         },
                                     },
                                     StructField {
@@ -409,13 +357,11 @@ Program {
                                             name: "only_type_as",
                                             info: AstInfo {
                                                 range: 54..56,
-                                                errors: [],
                                             },
                                         },
                                         colon: Some(
                                             AstInfo {
                                                 range: 56..57,
-                                                errors: [],
                                             },
                                         ),
                                         type_expr: Some(
@@ -426,14 +372,12 @@ Program {
                                                             name: "string",
                                                             info: AstInfo {
                                                                 range: 57..59,
-                                                                errors: [],
                                                             },
                                                         },
                                                         inner_names: [],
                                                         expr: None,
                                                         info: AstInfo {
                                                             range: 57..59,
-                                                            errors: [],
                                                         },
                                                     },
                                                 ),
@@ -445,7 +389,6 @@ Program {
                                             Alias {
                                                 as_kw: AstInfo {
                                                     range: 59..61,
-                                                    errors: [],
                                                 },
                                                 name: Some(
                                                     String(
@@ -453,20 +396,17 @@ Program {
                                                             value: "x",
                                                             info: AstInfo {
                                                                 range: 61..63,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
                                                 ),
                                                 info: AstInfo {
                                                     range: 59..63,
-                                                    errors: [],
                                                 },
                                             },
                                         ),
                                         info: AstInfo {
                                             range: 54..63,
-                                            errors: [],
                                         },
                                     },
                                     StructField {
@@ -474,7 +414,6 @@ Program {
                                             name: "only_expr_as",
                                             info: AstInfo {
                                                 range: 63..65,
-                                                errors: [],
                                             },
                                         },
                                         colon: None,
@@ -482,7 +421,6 @@ Program {
                                         eq: Some(
                                             AstInfo {
                                                 range: 65..67,
-                                                errors: [],
                                             },
                                         ),
                                         expr: Some(
@@ -493,7 +431,6 @@ Program {
                                                             value: "expr",
                                                             info: AstInfo {
                                                                 range: 67..69,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
@@ -504,7 +441,6 @@ Program {
                                             Alias {
                                                 as_kw: AstInfo {
                                                     range: 69..71,
-                                                    errors: [],
                                                 },
                                                 name: Some(
                                                     String(
@@ -512,20 +448,17 @@ Program {
                                                             value: "y",
                                                             info: AstInfo {
                                                                 range: 71..73,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
                                                 ),
                                                 info: AstInfo {
                                                     range: 69..73,
-                                                    errors: [],
                                                 },
                                             },
                                         ),
                                         info: AstInfo {
                                             range: 63..73,
-                                            errors: [],
                                         },
                                     },
                                     StructField {
@@ -533,13 +466,11 @@ Program {
                                             name: "type_and_expr_as",
                                             info: AstInfo {
                                                 range: 73..75,
-                                                errors: [],
                                             },
                                         },
                                         colon: Some(
                                             AstInfo {
                                                 range: 75..76,
-                                                errors: [],
                                             },
                                         ),
                                         type_expr: Some(
@@ -550,14 +481,12 @@ Program {
                                                             name: "number",
                                                             info: AstInfo {
                                                                 range: 76..78,
-                                                                errors: [],
                                                             },
                                                         },
                                                         inner_names: [],
                                                         expr: None,
                                                         info: AstInfo {
                                                             range: 76..78,
-                                                            errors: [],
                                                         },
                                                     },
                                                 ),
@@ -566,7 +495,6 @@ Program {
                                         eq: Some(
                                             AstInfo {
                                                 range: 78..80,
-                                                errors: [],
                                             },
                                         ),
                                         expr: Some(
@@ -577,7 +505,6 @@ Program {
                                                             value: "1",
                                                             info: AstInfo {
                                                                 range: 80..82,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
@@ -588,7 +515,6 @@ Program {
                                             Alias {
                                                 as_kw: AstInfo {
                                                     range: 82..84,
-                                                    errors: [],
                                                 },
                                                 name: Some(
                                                     String(
@@ -596,32 +522,27 @@ Program {
                                                             value: "z",
                                                             info: AstInfo {
                                                                 range: 84..86,
-                                                                errors: [],
                                                             },
                                                         },
                                                     ),
                                                 ),
                                                 info: AstInfo {
                                                     range: 82..86,
-                                                    errors: [],
                                                 },
                                             },
                                         ),
                                         info: AstInfo {
                                             range: 73..86,
-                                            errors: [],
                                         },
                                     },
                                 ],
                                 rcurly: Some(
                                     AstInfo {
                                         range: 86..88,
-                                        errors: [],
                                     },
                                 ),
                                 info: AstInfo {
                                     range: 32..88,
-                                    errors: [],
                                 },
                             },
                         ),
@@ -629,13 +550,11 @@ Program {
                 ),
                 info: AstInfo {
                     range: 26..88,
-                    errors: [],
                 },
             },
         ),
     ],
     info: AstInfo {
         range: 0..90,
-        errors: [],
     },
 }

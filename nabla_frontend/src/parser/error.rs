@@ -26,6 +26,7 @@ pub enum ErrorMessage {
     ExpectedSingle,
     MissingClosingCurly,
     MissingClosingBracket,
+    TokensAfterEof,
 }
 
 impl std::fmt::Display for ErrorMessage {
@@ -38,6 +39,7 @@ impl std::fmt::Display for ErrorMessage {
             Self::ExpectedSingle => "expected only a single expression",
             Self::MissingClosingCurly => "missing closing `}`",
             Self::MissingClosingBracket => "missing closing `]`",
+            Self::TokensAfterEof => "EOF was not the last provided token",
         };
         write!(f, "{}", message)
     }

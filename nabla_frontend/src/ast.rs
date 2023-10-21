@@ -1,39 +1,19 @@
-use crate::{
-    parser,
-    token::{self, ToTokenRange, TokenRange},
-};
+use crate::token::{self, ToTokenRange, TokenRange};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AstInfo {
     pub range: TokenRange,
-    pub errors: Vec<parser::Error>,
 }
 
 impl AstInfo {
     pub const fn new(range: TokenRange) -> Self {
-        Self {
-            range,
-            errors: Vec::new(),
-        }
-    }
-
-    pub fn new_with_errors(range: TokenRange, errors: Vec<parser::Error>) -> Self {
-        Self { range, errors }
-    }
-
-    pub fn append_error(&mut self, error: parser::Error) {
-        self.errors.push(error);
+        Self { range }
     }
 
     pub fn join(self, other: Self) -> Self {
         let start = self.range.start.min(other.range.start);
         let end = self.range.end.max(other.range.end);
-        let mut errors = self.errors;
-        errors.extend(other.errors);
-        Self {
-            range: start..end,
-            errors,
-        }
+        Self { range: start..end }
     }
 }
 
