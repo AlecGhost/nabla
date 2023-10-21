@@ -33,12 +33,27 @@ fn analyze_binding<'a>(
     expr: Option<&'a Expr>,
     type_info: &mut TypeInfo<'a>,
 ) {
+    fn check_self_reference(ident: &Ident, expr: Option<&Expr>) -> bool {
+        match expr {
+            Some(Expr::Single(Single::Named(Named { name, .. }))) if ident == name => true,
+            _ => false,
+        }
+    }
     let TypeInfo {
         ref mut rules,
         ref mut assertions,
         ref mut idents,
         ref mut errors,
     } = type_info;
+    if let Some(name) = name {
+        if check_self_reference(name, type_expr) || check_self_reference(name, expr) {
+            errors.push(Error::new(
+                ErrorMessage::SelfReference(name.name.clone()),
+                name.info.range.clone(),
+            ));
+            return;
+        }
+    }
     let ident_entry = name.as_ref().and_then(|name| {
         use std::collections::hash_map::Entry;
         match idents.entry(name) {

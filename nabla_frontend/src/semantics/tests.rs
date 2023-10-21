@@ -246,13 +246,54 @@ Config {
     assert_eq!(Vec::<Error>::new(), errors);
 }
 
-// #[test] fn self_reference() {
-//     let src = "
-// def Optional = Optional {}
-// ";
-//     let (tokens, errors) = lex(src);
-//     let (program, errors) = parse(&tokens);
-//     assert!(errors.is_empty());
-//     let errors = super::analyze(&program);
-//     assert!(errors.is_empty());
-// }
+#[test]
+fn self_reference_expr() {
+    let src = "
+def Type = Type {}
+";
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
+    let (program, errors) = parse(&tokens);
+    assert!(errors.is_empty());
+    let errors = super::analyze(&program);
+    assert_eq!(
+        vec![Error::new(
+            ErrorMessage::SelfReference("Type".to_string()),
+            2..4
+        )],
+        errors
+    );
+}
+
+#[test]
+fn self_reference_type_expr() {
+    let src = "
+def Type: Type = {}
+";
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
+    let (program, errors) = parse(&tokens);
+    assert!(errors.is_empty());
+    let errors = super::analyze(&program);
+    assert_eq!(
+        vec![Error::new(
+            ErrorMessage::SelfReference("Type".to_string()),
+            2..4
+        )],
+        errors
+    );
+}
+
+#[test]
+fn legal_self_reference() {
+    let src = r#"
+def Type = [ Type | String ]
+Type [ "a" [ "b" ] ]
+"#;
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
+    let (program, errors) = parse(&tokens);
+    assert!(errors.is_empty());
+    let errors = super::analyze(&program);
+    assert!(errors.is_empty());
+}
