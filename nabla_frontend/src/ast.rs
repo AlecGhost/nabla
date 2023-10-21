@@ -1,6 +1,6 @@
 use crate::{
     parser,
-    token::{ToTokenRange, TokenRange},
+    token::{self, ToTokenRange, TokenRange},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -217,12 +217,13 @@ pub enum StructOrList {
     List(List),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq)]
 pub enum Primitive {
     String(PrimitiveValue),
     Char(PrimitiveValue),
     Number(PrimitiveValue),
-    Bool(Bool), // Either token TRUE or FALSE
+    Bool(Bool),    // Either token `true` or `false`
+    Null(AstInfo), // The token `null`
 }
 
 impl Primitive {
@@ -235,6 +236,7 @@ impl Primitive {
                 true => "true",
                 false => "false",
             },
+            Primitive::Null(_) => token::NULL,
         }
     }
 
@@ -244,6 +246,20 @@ impl Primitive {
             | Primitive::Char(PrimitiveValue { info, .. })
             | Primitive::Number(PrimitiveValue { info, .. })
             | Primitive::Bool(Bool { info, .. }) => info,
+            Primitive::Null(info) => info,
+        }
+    }
+}
+
+impl PartialEq for Primitive {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Primitive::String(s1), Primitive::String(s2)) => s1 == s2,
+            (Primitive::Char(c1), Primitive::Char(c2)) => c1 == c2,
+            (Primitive::Number(n1), Primitive::Number(n2)) => n1 == n2,
+            (Primitive::Bool(b1), Primitive::Bool(b2)) => b1 == b2,
+            (Primitive::Null(_), Primitive::Null(_)) => true,
+            _ => false,
         }
     }
 }

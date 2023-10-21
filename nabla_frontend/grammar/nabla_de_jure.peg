@@ -34,6 +34,6 @@ List <- LBRACKET Expr* RBRACKET
 Named <- IDENT InnerName* (Struct / List)?
 InnerName <- DOUBLE_COLON IDENT
 
-Primitive <- STRING / CHAR / NUMBER / Bool
+Primitive <- STRING / CHAR / NUMBER / Bool / NULL
 
 Bool <- TRUE / FALSE

@@ -95,9 +95,9 @@ Person {
 #[test]
 fn optional() {
     let src = "
-def Optional = Number | None
-let opt_none = None
-let opt_some = 1
+def Optional = Number | null
+let opt_none: Optional = null
+let opt_some: Optional = 1
 ";
     let tokens = lex(src);
     let program = parse(&tokens);
@@ -169,7 +169,7 @@ fn evaluate_complex_struct() {
         }
         {
             key = "b"
-            value = 1
+            value = null
         }
         {
             key = "c"
@@ -199,7 +199,7 @@ fn evaluate_complex_struct() {
                 "map",
                 Value::from([
                     Value::from([("key", Value::from("a")), ("value", Value::from("1")),]),
-                    Value::from([("key", Value::from("b")), ("value", Value::from(1)),]),
+                    Value::from([("key", Value::from("b")), ("value", Value::Null),]),
                     Value::from([("key", Value::from("c")), ("value", Value::from(true)),]),
                 ])
             )

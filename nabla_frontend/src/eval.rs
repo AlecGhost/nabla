@@ -6,7 +6,7 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Value {
     Unknown,
-    None,
+    Null,
     Bool(bool),
     Number(String),
     String(String),
@@ -134,6 +134,7 @@ impl Eval for Primitive {
             Primitive::Char(PrimitiveValue { value, .. }) => Value::String(value.clone()),
             Primitive::Number(PrimitiveValue { value, .. }) => Value::Number(value.clone()),
             Primitive::Bool(Bool { value, .. }) => Value::Bool(*value),
+            Primitive::Null(_) => Value::Null,
         }
     }
 }

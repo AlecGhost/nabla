@@ -164,10 +164,6 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
             expected_rule.info.range.clone(),
         )],
         // built in
-        (
-            TypeDescription::BuiltIn(BuiltInType::None),
-            TypeDescription::BuiltIn(BuiltInType::None),
-        ) => Vec::new(),
         (TypeDescription::BuiltIn(expected), TypeDescription::Primitive(actual)) => {
             check_value(expected, actual)
         }

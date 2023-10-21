@@ -94,6 +94,7 @@ impl Lexer for Token {
             lex_keyword!(TokenType::As),
             lex_keyword!(TokenType::True),
             lex_keyword!(TokenType::False),
+            lex_keyword!(TokenType::Null),
             alt((
                 String::lex,
                 Char::lex,

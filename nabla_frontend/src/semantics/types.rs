@@ -11,6 +11,10 @@ use std::{array::IntoIter, collections::HashMap};
 mod analysis;
 mod assertions;
 
+pub const STRING: &str = "String";
+pub const NUMBER: &str = "Number";
+pub const BOOL: &str = "Bool";
+
 /// Index into rule list
 type RuleIndex = usize;
 
@@ -39,26 +43,20 @@ enum BuiltInType {
     String,
     Number,
     Bool,
-    None,
 }
 
 impl BuiltInType {
     const fn as_str(&self) -> &'static str {
         match self {
-            BuiltInType::String => "String",
-            BuiltInType::Number => "Number",
-            BuiltInType::Bool => "Bool",
-            BuiltInType::None => "None",
+            BuiltInType::String => STRING,
+            BuiltInType::Number => NUMBER,
+            BuiltInType::Bool => BOOL,
         }
     }
 
-    fn into_iter() -> IntoIter<BuiltInType, 4> {
-        static BUILT_INS: [BuiltInType; 4] = [
-            BuiltInType::String,
-            BuiltInType::Number,
-            BuiltInType::Bool,
-            BuiltInType::None,
-        ];
+    fn into_iter() -> IntoIter<BuiltInType, 3> {
+        static BUILT_INS: [BuiltInType; 3] =
+            [BuiltInType::String, BuiltInType::Number, BuiltInType::Bool];
         BUILT_INS.into_iter()
     }
 

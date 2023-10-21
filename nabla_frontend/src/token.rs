@@ -13,6 +13,7 @@ pub const LET: &str = "let";
 pub const AS: &str = "as";
 pub const TRUE: &str = "true";
 pub const FALSE: &str = "false";
+pub const NULL: &str = "null";
 
 pub type TextRange = std::ops::Range<usize>;
 pub type TokenRange = std::ops::Range<usize>;
@@ -43,6 +44,7 @@ pub enum TokenType {
     As,
     True,
     False,
+    Null,
     String(String),
     Char(String),
     Number(String),
@@ -126,6 +128,7 @@ impl TokenType {
             As => Some(AS),
             True => Some(TRUE),
             False => Some(FALSE),
+            Null => Some(NULL),
             Eof => Some(""),
             _ => None,
         }

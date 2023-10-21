@@ -349,6 +349,7 @@ impl Parser for Primitive {
             map(map(token::char, PrimitiveValue::new), Self::Char),
             map(map(token::number, PrimitiveValue::new), Self::Number),
             map(Bool::parse, Self::Bool),
+            map(token::null, Self::Null),
         ))(input)
     }
 }
@@ -503,6 +504,7 @@ mod token {
     simple_token_parser!(r#as, TokenType::As);
     simple_token_parser!(r#true, TokenType::True);
     simple_token_parser!(r#false, TokenType::False);
+    simple_token_parser!(null, TokenType::Null);
     simple_token_parser!(eof, TokenType::Eof);
 
     // Tokens with string inside.
