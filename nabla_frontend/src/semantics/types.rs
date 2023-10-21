@@ -48,25 +48,25 @@ enum BuiltInType {
 impl BuiltInType {
     const fn as_str(&self) -> &'static str {
         match self {
-            BuiltInType::String => STRING,
-            BuiltInType::Number => NUMBER,
-            BuiltInType::Bool => BOOL,
+            Self::String => STRING,
+            Self::Number => NUMBER,
+            Self::Bool => BOOL,
         }
     }
 
-    fn into_iter() -> IntoIter<BuiltInType, 3> {
+    fn into_iter() -> IntoIter<Self, 3> {
         static BUILT_INS: [BuiltInType; 3] =
             [BuiltInType::String, BuiltInType::Number, BuiltInType::Bool];
         BUILT_INS.into_iter()
     }
 
-    fn matches(&self, value: &Primitive) -> bool {
-        match (self, value) {
-            (BuiltInType::String, Primitive::String(_)) => true,
-            (BuiltInType::Number, Primitive::Number(_)) => true,
-            (BuiltInType::Bool, Primitive::Bool(_)) => true,
-            _ => false,
-        }
+    const fn matches(&self, value: &Primitive) -> bool {
+        matches!(
+            (self, value),
+            (Self::String, Primitive::String(_))
+                | (Self::Number, Primitive::Number(_))
+                | (Self::Bool, Primitive::Bool(_))
+        )
     }
 }
 
@@ -110,11 +110,11 @@ fn replace_rules(type_info: &mut TypeInfo) {
     for rule in type_info.rules.iter_mut() {
         let replacement = match &rule.type_description {
             TypeDescription::Ident(ident) => {
-                let rule_index = type_info.idents.get(ident).map(|index| *index);
+                let rule_index = type_info.idents.get(ident).copied();
                 if let Some(rule_index) = rule_index {
                     Some(TypeDescription::ValidIdent(rule_index))
                 } else if let Some(built_in) =
-                    BuiltInType::into_iter().find(|built_in| built_in.as_str() == &ident.name)
+                    BuiltInType::into_iter().find(|built_in| built_in.as_str() == ident.name)
                 {
                     Some(TypeDescription::BuiltIn(built_in))
                 } else {

@@ -127,11 +127,11 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn info(&self) -> &AstInfo {
+    pub const fn info(&self) -> &AstInfo {
         match self {
-            Expr::Union(union) => &union.info,
-            Expr::Single(single) => single.info(),
-            Expr::Error(info) => info,
+            Self::Union(union) => &union.info,
+            Self::Single(single) => single.info(),
+            Self::Error(info) => info,
         }
     }
 }
@@ -159,12 +159,12 @@ pub enum Single {
 }
 
 impl Single {
-    pub fn info(&self) -> &AstInfo {
+    pub const fn info(&self) -> &AstInfo {
         match self {
-            Single::Struct(Struct { info, .. })
-            | Single::List(List { info, .. })
-            | Single::Named(Named { info, .. }) => info,
-            Single::Primitive(primitive) => primitive.info(),
+            Self::Struct(Struct { info, .. })
+            | Self::List(List { info, .. })
+            | Self::Named(Named { info, .. }) => info,
+            Self::Primitive(primitive) => primitive.info(),
         }
     }
 }
@@ -229,24 +229,22 @@ pub enum Primitive {
 impl Primitive {
     pub fn as_str(&self) -> &str {
         match self {
-            Primitive::String(value) | Primitive::Char(value) | Primitive::Number(value) => {
-                &value.value
-            }
-            Primitive::Bool(Bool { value, .. }) => match value {
+            Self::String(value) | Self::Char(value) | Self::Number(value) => &value.value,
+            Self::Bool(Bool { value, .. }) => match value {
                 true => "true",
                 false => "false",
             },
-            Primitive::Null(_) => token::NULL,
+            Self::Null(_) => token::NULL,
         }
     }
 
-    pub fn info(&self) -> &AstInfo {
+    pub const fn info(&self) -> &AstInfo {
         match self {
-            Primitive::String(PrimitiveValue { info, .. })
-            | Primitive::Char(PrimitiveValue { info, .. })
-            | Primitive::Number(PrimitiveValue { info, .. })
-            | Primitive::Bool(Bool { info, .. }) => info,
-            Primitive::Null(info) => info,
+            Self::String(PrimitiveValue { info, .. })
+            | Self::Char(PrimitiveValue { info, .. })
+            | Self::Number(PrimitiveValue { info, .. })
+            | Self::Bool(Bool { info, .. }) => info,
+            Self::Null(info) => info,
         }
     }
 }
@@ -254,11 +252,11 @@ impl Primitive {
 impl PartialEq for Primitive {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Primitive::String(s1), Primitive::String(s2)) => s1 == s2,
-            (Primitive::Char(c1), Primitive::Char(c2)) => c1 == c2,
-            (Primitive::Number(n1), Primitive::Number(n2)) => n1 == n2,
-            (Primitive::Bool(b1), Primitive::Bool(b2)) => b1 == b2,
-            (Primitive::Null(_), Primitive::Null(_)) => true,
+            (Self::String(s1), Self::String(s2)) => s1 == s2,
+            (Self::Char(c1), Self::Char(c2)) => c1 == c2,
+            (Self::Number(n1), Self::Number(n2)) => n1 == n2,
+            (Self::Bool(b1), Self::Bool(b2)) => b1 == b2,
+            (Self::Null(_), Self::Null(_)) => true,
             _ => false,
         }
     }

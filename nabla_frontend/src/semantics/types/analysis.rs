@@ -65,11 +65,8 @@ fn analyze_binding<'a>(
         (Some(index), None) | (None, Some(index)) => Some(index),
         (None, None) => None,
     };
-    match (ident_entry, rule_index) {
-        (Some(entry), Some(index)) => {
-            entry.insert(index);
-        }
-        _ => {}
+    if let (Some(entry), Some(index)) = (ident_entry, rule_index) {
+        entry.insert(index);
     }
 }
 
@@ -143,7 +140,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
             };
             rules.push(import_rule);
             path_stack.pop();
-            let import_rule_index = rule_index(&rules);
+            let import_rule_index = rule_index(rules);
             let name = item
                 .alias
                 .as_ref()
@@ -152,9 +149,9 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
                     AliasName::Ident(ident) => Some(ident),
                     AliasName::String(_) => None,
                 })
-                .unwrap_or_else(|| &item.name);
+                .unwrap_or(&item.name);
             use std::collections::hash_map::Entry;
-            match idents.entry(&name) {
+            match idents.entry(name) {
                 Entry::Vacant(entry) => {
                     entry.insert(import_rule_index);
                 }
@@ -183,7 +180,8 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
     }
 }
 
-fn rule_index(rules: &[Rule]) -> RuleIndex {
+#[inline]
+const fn rule_index(rules: &[Rule]) -> RuleIndex {
     rules.len() - 1
 }
 
@@ -202,9 +200,9 @@ impl TypeAnalyzer for Expr {
         assertions: &mut Vec<(RuleIndex, RuleIndex)>,
     ) -> RuleIndex {
         match self {
-            Expr::Union(union) => union.analyze(rules, assertions),
-            Expr::Single(single) => single.analyze(rules, assertions),
-            Expr::Error(info) => {
+            Self::Union(union) => union.analyze(rules, assertions),
+            Self::Single(single) => single.analyze(rules, assertions),
+            Self::Error(info) => {
                 rules.push(Rule {
                     type_description: TypeDescription::Unknown,
                     info: info.clone(),
@@ -247,10 +245,10 @@ impl TypeAnalyzer for Single {
         assertions: &mut Vec<(RuleIndex, RuleIndex)>,
     ) -> RuleIndex {
         match self {
-            Single::Struct(s) => s.analyze(rules, assertions),
-            Single::List(list) => list.analyze(rules, assertions),
-            Single::Named(named) => named.analyze(rules, assertions),
-            Single::Primitive(primitive) => primitive.analyze(rules, assertions),
+            Self::Struct(s) => s.analyze(rules, assertions),
+            Self::List(list) => list.analyze(rules, assertions),
+            Self::Named(named) => named.analyze(rules, assertions),
+            Self::Primitive(primitive) => primitive.analyze(rules, assertions),
         }
     }
 }
@@ -262,8 +260,8 @@ impl TypeAnalyzer for StructOrList {
         assertions: &mut Vec<(RuleIndex, RuleIndex)>,
     ) -> RuleIndex {
         match self {
-            StructOrList::Struct(s) => s.analyze(rules, assertions),
-            StructOrList::List(l) => l.analyze(rules, assertions),
+            Self::Struct(s) => s.analyze(rules, assertions),
+            Self::List(l) => l.analyze(rules, assertions),
         }
     }
 }
@@ -353,7 +351,7 @@ impl TypeAnalyzer for Named {
             info: self.name.info.clone(),
         };
         rules.push(named_rule);
-        let named_rule_index = rule_index(&rules);
+        let named_rule_index = rule_index(rules);
         if let Some(expr_rule_index) = self
             .expr
             .as_ref()

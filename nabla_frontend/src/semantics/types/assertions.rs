@@ -21,7 +21,7 @@ pub(super) fn check(type_info: &mut TypeInfo) {
 
 fn check_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) -> Vec<Error> {
     for expected_rule in expected
-        .into_iter()
+        .iter()
         .map(|rule_index| rules.get(*rule_index).expect("Rule must exist"))
     {
         if check_rules(rules, expected_rule, actual_rule).is_empty() {
@@ -85,7 +85,7 @@ fn check_list(
         1 => {
             let expected_rule = rules.get(expected_indices[0]).expect("Rule must exist");
             actual_indices
-                .into_iter()
+                .iter()
                 .map(|rule_index| rules.get(*rule_index).expect("Rule must exist"))
                 .flat_map(|actual_rule| check_rules(rules, expected_rule, actual_rule))
                 .collect()
