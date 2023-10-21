@@ -4,18 +4,19 @@ use pretty_assertions::assert_eq;
 #[test]
 fn empty() {
     let src = "";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     assert_eq!(vec![Token::new(TokenType::Eof, 0..0)], tokens);
 }
 
 #[test]
 fn all_in_one() {
     let src = "@//abc\n \t\r\ntest 0123.456789'\\n'\"xyz\"true false use def let as :=|*::[]{}";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert_eq!(vec![Error::new(ErrorMessage::Unknown, 0..1)], errors);
     assert_eq!(
         vec![
-            Token::new(TokenType::Unknown("@".to_string()), 0..1)
-                .append_error(Error::new(ErrorMessage::Unknown, 0..1)),
+            Token::new(TokenType::Unknown("@".to_string()), 0..1),
             Token::new(TokenType::Comment("//abc\n".to_string()), 1..7),
             Token::new(TokenType::Whitespace(" \t\r\n".to_string()), 7..11),
             Token::new(TokenType::Ident("test".to_string()), 11..15),
@@ -53,11 +54,14 @@ fn all_in_one() {
 #[test]
 fn number_missing_decimals() {
     let src = "123.";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::MissingDecimals, 4..4)],
+        errors
+    );
     assert_eq!(
         vec![
-            Token::new(TokenType::Number("123.".to_string()), 0..4)
-                .append_error(Error::new(ErrorMessage::MissingDecimals, 4..4)),
+            Token::new(TokenType::Number("123.".to_string()), 0..4),
             Token::new(TokenType::Eof, 4..4),
         ],
         tokens
@@ -67,11 +71,14 @@ fn number_missing_decimals() {
 #[test]
 fn char_missing_single_quote() {
     let src = "'a";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::MissingClosingSingleQuote, 2..2)],
+        errors
+    );
     assert_eq!(
         vec![
-            Token::new(TokenType::Char("a".to_string()), 0..2)
-                .append_error(Error::new(ErrorMessage::MissingClosingSingleQuote, 2..2)),
+            Token::new(TokenType::Char("a".to_string()), 0..2),
             Token::new(TokenType::Eof, 2..2),
         ],
         tokens
@@ -81,7 +88,8 @@ fn char_missing_single_quote() {
 #[test]
 fn char_escape() {
     let src = "'\\''";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     assert_eq!(
         vec![
             Token::new(TokenType::Char("\\'".to_string()), 0..4),
@@ -89,5 +97,4 @@ fn char_escape() {
         ],
         tokens
     );
-
 }

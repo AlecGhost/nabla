@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::token::{Error, ErrorMessage, TextRange, ToTextRange, Token, TokenType};
 use nom::{
     branch::alt,
@@ -15,7 +17,8 @@ mod utility;
 
 /// Type alias for nom_locate::LocatedSpan.
 /// Tracks range inside source code during lexical analysis.
-type Span<'a> = nom_locate::LocatedSpan<&'a str>;
+/// Stores the reported errors.
+type Span<'a> = nom_locate::LocatedSpan<&'a str, Rc<RefCell<Vec<Error>>>>;
 
 impl ToTextRange for Span<'_> {
     fn to_text_range(&self) -> TextRange {
@@ -32,12 +35,15 @@ type IResult<'a> = nom::IResult<Span<'a>, Token>;
 /// # Panics
 ///
 /// Panics if lexing fails.
-pub fn lex(src: &str) -> Vec<Token> {
-    let input = Span::new(src);
-    let (_, (mut tokens, eof_token)) =
+pub fn lex(src: &str) -> (Vec<Token>, Vec<Error>) {
+    let input = Span::new_extra(src, Rc::default());
+    let (input, (mut tokens, eof_token)) =
         pair(many0(Token::lex), Eof::lex)(input).expect("Lexing must not fail.");
     tokens.push(eof_token);
-    tokens
+    let errors = Rc::try_unwrap(input.extra)
+        .expect("There must only be one owner")
+        .into_inner();
+    (tokens, errors)
 }
 
 /// Try to parse `Span` into `Token`
@@ -136,9 +142,9 @@ impl Lexer for Char {
             expect(tag("'"), ErrorMessage::MissingClosingSingleQuote),
         ))(input)?;
         let end = input.location_offset();
-        let mut token = Token::new(TokenType::Char(char), start..end);
+        let token = Token::new(TokenType::Char(char), start..end);
         if let Err(quote_err) = closing_quote {
-            token = token.append_error(quote_err);
+            input.extra.borrow_mut().push(quote_err);
         }
         Ok((input, token))
     }
@@ -163,8 +169,8 @@ impl Lexer for Number {
                 range,
             ),
             Some(Err(decimal_err)) => {
+                input.extra.borrow_mut().push(decimal_err);
                 Token::new(TokenType::Number(pre_decimals.to_string() + "."), range)
-                    .append_error(decimal_err)
             }
             None => Token::new(TokenType::Number(pre_decimals.to_string()), range),
         };
@@ -216,8 +222,11 @@ impl Lexer for Unknown {
         let start = input.location_offset();
         let (input, char) = anychar(input)?;
         let end = input.location_offset();
-        let token = Token::new(TokenType::Unknown(char.to_string()), start..end)
-            .append_error(Error::new(ErrorMessage::Unknown, start..end));
+        input
+            .extra
+            .borrow_mut()
+            .push(Error::new(ErrorMessage::Unknown, start..end));
+        let token = Token::new(TokenType::Unknown(char.to_string()), start..end);
         Ok((input, token))
     }
 }

@@ -20,7 +20,8 @@ fn info(range: TokenRange) -> AstInfo {
 #[test]
 fn empty() {
     let src = "";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -45,7 +46,8 @@ fn token_after_eof() {
 #[test]
 fn missing_type_expr() {
     let src = "let a: = {}";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (_, errors) = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 3..3)], errors);
 }
@@ -53,7 +55,8 @@ fn missing_type_expr() {
 #[test]
 fn missing_expr() {
     let src = "let a =";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (_, errors) = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 4..4)], errors);
 }
@@ -61,7 +64,8 @@ fn missing_expr() {
 #[test]
 fn missing_multiple_exprs() {
     let src = "let a: =";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (_, errors) = parse(&tokens);
     assert_eq!(
         vec![
@@ -75,7 +79,8 @@ fn missing_multiple_exprs() {
 #[test]
 fn use_simple() {
     let src = "use a";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -95,7 +100,8 @@ fn use_simple() {
 #[test]
 fn use_all() {
     let src = "use a::*";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -119,7 +125,8 @@ fn use_all() {
 #[test]
 fn use_single() {
     let src = "use a::b";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -148,7 +155,8 @@ fn use_single() {
 #[test]
 fn use_multiple() {
     let src = "use a::{b c}";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -190,7 +198,8 @@ fn use_multiple() {
 #[test]
 fn use_complex() {
     let src = "use a::{b::{ c::d as x e::* } f as y}";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     insta::assert_debug_snapshot!(program);
@@ -199,7 +208,8 @@ fn use_complex() {
 #[test]
 fn def_ident() {
     let src = "def x = y";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -227,7 +237,8 @@ fn def_ident() {
 #[test]
 fn def_union() {
     let src = "def ok = \"yes\" | true";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -267,7 +278,8 @@ def Person = {
     name: string
     age: number = 0
 }";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -329,7 +341,8 @@ def Person = {
 #[test]
 fn def_list() {
     let src = "def Strings = [ string ]";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     assert_eq!(
@@ -375,7 +388,8 @@ def x = {
     type_and_expr_as: number = 1 as \"z\"
 }
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     insta::assert_debug_snapshot!(program);

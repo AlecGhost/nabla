@@ -27,7 +27,7 @@ where
 {
     move |input: Span| {
         let error_pos = input.location_offset();
-        match f(input) {
+        match f(input.clone()) {
             Ok((input, out)) => Ok((input, Ok(out))),
             Err(_) => {
                 let err = Error::new(error_msg.clone(), error_pos..error_pos);

@@ -78,22 +78,11 @@ pub struct Error {
 pub struct Token {
     pub token_type: TokenType,
     pub range: TextRange,
-    pub errors: Vec<Error>,
 }
 
 impl Token {
     pub const fn new(token_type: TokenType, range: TextRange) -> Self {
-        Self {
-            token_type,
-            range,
-            errors: Vec::new(),
-        }
-    }
-
-    pub fn append_error(self, error: Error) -> Self {
-        let mut errors = self.errors;
-        errors.push(error);
-        Self { errors, ..self }
+        Self { token_type, range }
     }
 }
 

@@ -13,7 +13,8 @@ use pretty_assertions::assert_eq;
 #[test]
 fn empty() {
     let src = "";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -27,7 +28,8 @@ use a
 use b::{c d::e}
 use f::g as h
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -40,7 +42,8 @@ fn reimport() {
 use a::b
 use c::b
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -59,7 +62,8 @@ fn no_reimport_alias() {
 use a::b
 use c::b as d
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -72,7 +76,8 @@ fn empty_list() {
 def EmptyList = []
 EmptyList []
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -91,7 +96,8 @@ Person {
     age: 0
 }
 "#;
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = analyze(&program);
@@ -105,7 +111,8 @@ def Optional = Number | null
 let opt_none: Optional = null
 let opt_some: Optional = 1
 ";
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = super::analyze(&program);
@@ -121,7 +128,8 @@ fn evaluate_struct() {
     const: "x"  = "x"
 }
 "#;
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = super::analyze(&program);
@@ -148,7 +156,8 @@ fn evaluate_struct() {
 #[test]
 fn evaluate_list() {
     let src = r#"["a" "b" "c"]"#;
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = super::analyze(&program);
@@ -187,7 +196,8 @@ fn evaluate_complex_struct() {
     ]
 }
 "#;
-    let tokens = lex(src);
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
     let (program, errors) = parse(&tokens);
     assert!(errors.is_empty());
     let errors = super::analyze(&program);
@@ -222,7 +232,7 @@ fn evaluate_complex_struct() {
 //     let src = "
 // def Optional = Optional {}
 // ";
-//     let tokens = lex(src);
+//     let (tokens, errors) = lex(src);
 //     let (program, errors) = parse(&tokens);
 //     assert!(errors.is_empty());
 //     let errors = super::analyze(&program);
