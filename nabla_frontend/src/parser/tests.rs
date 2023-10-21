@@ -163,7 +163,7 @@ fn use_multiple() {
         Program {
             globals: vec![Global::Use(Use {
                 use_kw: info(0..1),
-                name: Some(ident("a", 1..3)),
+                name: Some(ident("a", 2..3)),
                 body: Some(UseBody {
                     double_colon: info(3..4),
                     kind: Some(UseKind::Multiple(UseItems {
@@ -176,7 +176,7 @@ fn use_multiple() {
                                 info: info(5..6),
                             },
                             UseItem {
-                                name: ident("c", 6..8),
+                                name: ident("c", 7..8),
                                 body: None,
                                 alias: None,
                                 info: info(6..8),
@@ -216,12 +216,12 @@ fn def_ident() {
         Program {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
-                name: Some(ident("x", 1..3)),
+                name: Some(ident("x", 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(3..5)),
+                eq: Some(info(4..5)),
                 expr: Some(Expr::Single(Single::Named(Named {
-                    name: ident("y", 5..7),
+                    name: ident("y", 6..7),
                     inner_names: Vec::new(),
                     expr: None,
                     info: info(5..7),
@@ -245,19 +245,19 @@ fn def_union() {
         Program {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
-                name: Some(ident("ok", 1..3)),
+                name: Some(ident("ok", 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(3..5)),
+                eq: Some(info(4..5)),
                 expr: Some(Expr::Union(Union {
                     single: Single::Primitive(Primitive::String(PrimitiveValue {
                         value: "yes".to_string(),
-                        info: info(5..7),
+                        info: info(6..7),
                     })),
                     alternatives: vec![UnionAlternative {
-                        pipe: info(7..9),
+                        pipe: info(8..9),
                         single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(
-                            9..11
+                            10..11
                         ))))),
                         info: info(7..11),
                     }],
@@ -285,19 +285,19 @@ def Person = {
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
-                def_kw: info(0..2),
-                name: Some(ident("Person", 2..4)),
+                def_kw: info(1..2),
+                name: Some(ident("Person", 3..4)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(4..6)),
+                eq: Some(info(5..6)),
                 expr: Some(Expr::Single(Single::Struct(Struct {
-                    lcurly: info(6..8),
+                    lcurly: info(7..8),
                     fields: vec![
                         StructField {
-                            name: ident("name", 8..10),
+                            name: ident("name", 9..10),
                             colon: Some(info(10..11)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
-                                name: ident("string", 11..13),
+                                name: ident("string", 12..13),
                                 inner_names: Vec::new(),
                                 expr: None,
                                 info: info(11..13),
@@ -308,26 +308,26 @@ def Person = {
                             info: info(8..13),
                         },
                         StructField {
-                            name: ident("age", 13..15),
+                            name: ident("age", 14..15),
                             colon: Some(info(15..16)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
-                                name: ident("number", 16..18),
+                                name: ident("number", 17..18),
                                 inner_names: Vec::new(),
                                 expr: None,
                                 info: info(16..18),
                             }))),
-                            eq: Some(info(18..20)),
+                            eq: Some(info(19..20)),
                             expr: Some(Expr::Single(Single::Primitive(Primitive::Number(
                                 PrimitiveValue {
                                     value: "0".to_string(),
-                                    info: info(20..22),
+                                    info: info(21..22),
                                 }
                             )))),
                             alias: None,
                             info: info(13..22),
                         },
                     ],
-                    rcurly: Some(info(22..24)),
+                    rcurly: Some(info(23..24)),
                     info: info(6..24),
                 }))),
                 info: info(0..24),
@@ -349,19 +349,19 @@ fn def_list() {
         Program {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
-                name: Some(ident("Strings", 1..3)),
+                name: Some(ident("Strings", 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(3..5)),
+                eq: Some(info(4..5)),
                 expr: Some(Expr::Single(Single::List(List {
-                    lbracket: info(5..7),
+                    lbracket: info(6..7),
                     exprs: vec![Expr::Single(Single::Named(Named {
-                        name: ident("string", 7..9),
+                        name: ident("string", 8..9),
                         inner_names: Vec::new(),
                         expr: None,
                         info: info(7..9),
                     }))],
-                    rbracket: Some(info(9..11)),
+                    rbracket: Some(info(10..11)),
                     info: info(5..11),
                 }))),
                 info: info(0..11),

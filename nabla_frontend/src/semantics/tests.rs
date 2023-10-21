@@ -259,7 +259,7 @@ def Type = Type {}
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
-            2..4
+            3..4
         )],
         errors
     );
@@ -278,7 +278,7 @@ def Type: Type = {}
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
-            2..4
+            3..4
         )],
         errors
     );

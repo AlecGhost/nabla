@@ -454,8 +454,10 @@ mod token {
         ($name:ident, $token_type:pat) => {
             pub fn $name(input: TokenStream) -> IResult<AstInfo> {
                 let original_input = input.clone();
-                let (input, ((_, token_stream), info)) =
-                    info(tuple((many0(alt((comment, whitespace))), take(1usize))))(input)?;
+                let (input, ((_, (token_stream, info)), _)) = info(tuple((
+                    many0(alt((comment, whitespace))),
+                    info(take(1usize)),
+                )))(input)?;
                 let token = token_stream
                     .first_token()
                     .cloned()
@@ -476,8 +478,10 @@ mod token {
         ($name:ident, $token_type:path) => {
             pub fn $name(input: TokenStream) -> IResult<(String, AstInfo)> {
                 let original_input = input.clone();
-                let (input, ((_, token_stream), info)) =
-                    info(tuple((many0(alt((comment, whitespace))), take(1usize))))(input)?;
+                let (input, ((_, (token_stream, info)), _)) = info(tuple((
+                    many0(alt((comment, whitespace))),
+                    info(take(1usize)),
+                )))(input)?;
                 let token = token_stream
                     .first_token()
                     .cloned()
