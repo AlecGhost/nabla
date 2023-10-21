@@ -10,56 +10,66 @@ use crate::{
 use super::RuleIndex;
 
 pub(super) fn analyze_def<'a>(def: &'a Def, type_info: &mut TypeInfo<'a>) {
-    let TypeInfo {
-        ref mut rules,
-        ref mut assertions,
-        ref mut idents,
-        ref mut errors,
-    } = type_info;
-    if let Some(rule_index) = def
-        .expr
-        .as_ref()
-        .map(|expr| expr.analyze(rules, assertions))
-    {
-        if let Some(name) = &def.name {
-            use std::collections::hash_map::Entry;
-            match idents.entry(name) {
-                Entry::Vacant(entry) => {
-                    entry.insert(rule_index);
-                }
-                Entry::Occupied(_) => {
-                    errors.push(Error::new(
-                        ErrorMessage::Redeclaration(name.name.clone()),
-                        name.info.range.clone(),
-                    ));
-                }
-            }
-        }
-    }
+    analyze_binding(
+        def.name.as_ref(),
+        def.type_expr.as_ref(),
+        def.expr.as_ref(),
+        type_info,
+    );
 }
 
 pub(super) fn analyze_let<'a>(l: &'a Let, type_info: &mut TypeInfo<'a>) {
+    analyze_binding(
+        l.name.as_ref(),
+        l.type_expr.as_ref(),
+        l.expr.as_ref(),
+        type_info,
+    );
+}
+
+fn analyze_binding<'a>(
+    name: Option<&'a Ident>,
+    type_expr: Option<&'a Expr>,
+    expr: Option<&'a Expr>,
+    type_info: &mut TypeInfo<'a>,
+) {
     let TypeInfo {
         ref mut rules,
         ref mut assertions,
         ref mut idents,
         ref mut errors,
     } = type_info;
-    if let Some(rule_index) = l.expr.as_ref().map(|expr| expr.analyze(rules, assertions)) {
-        if let Some(name) = &l.name {
-            use std::collections::hash_map::Entry;
-            match idents.entry(name) {
-                Entry::Vacant(entry) => {
-                    entry.insert(rule_index);
-                }
-                Entry::Occupied(_) => {
-                    errors.push(Error::new(
-                        ErrorMessage::Redeclaration(name.name.clone()),
-                        name.info.range.clone(),
-                    ));
-                }
+    let ident_entry = name.as_ref().and_then(|name| {
+        use std::collections::hash_map::Entry;
+        match idents.entry(name) {
+            Entry::Vacant(entry) => Some(entry),
+            Entry::Occupied(_) => {
+                errors.push(Error::new(
+                    ErrorMessage::Redeclaration(name.name.clone()),
+                    name.info.range.clone(),
+                ));
+                None
             }
         }
+    });
+    let rule_index = match (
+        type_expr
+            .as_ref()
+            .map(|type_expr| type_expr.analyze(rules, assertions)),
+        expr.as_ref().map(|expr| expr.analyze(rules, assertions)),
+    ) {
+        (Some(type_expr_index), Some(expr_index)) => {
+            assertions.push((type_expr_index, expr_index));
+            Some(type_expr_index)
+        }
+        (Some(index), None) | (None, Some(index)) => Some(index),
+        (None, None) => None,
+    };
+    match (ident_entry, rule_index) {
+        (Some(entry), Some(index)) => {
+            entry.insert(index);
+        }
+        _ => {}
     }
 }
 
