@@ -38,7 +38,7 @@ enum TypeDescription {
     Unknown,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum BuiltInType {
     String,
     Number,

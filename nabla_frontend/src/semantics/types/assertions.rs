@@ -1,7 +1,10 @@
-use crate::semantics::{
-    error::ErrorMessage,
-    types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
-    Error,
+use crate::{
+    semantics::{
+        error::ErrorMessage,
+        types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
+        Error,
+    },
+    token::TokenRange,
 };
 use std::collections::HashMap;
 
@@ -95,6 +98,14 @@ fn check_list(
     }
 }
 
+fn check_built_in(expected: &BuiltInType, actual: &BuiltInType, range: TokenRange) -> Vec<Error> {
+    if expected == actual {
+        Vec::new()
+    } else {
+        vec![Error::new(ErrorMessage::TypeMismatch, range)]
+    }
+}
+
 fn check_primitive(expected: &Primitive, actual: &Primitive) -> Vec<Error> {
     if expected == actual {
         Vec::new()
@@ -166,6 +177,9 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         // built in
         (TypeDescription::BuiltIn(expected), TypeDescription::Primitive(actual)) => {
             check_value(expected, actual)
+        }
+        (TypeDescription::BuiltIn(expected), TypeDescription::BuiltIn(actual)) => {
+            check_built_in(expected, actual, actual_rule.info.range.clone())
         }
         // struct
         (TypeDescription::Struct(expected), TypeDescription::Struct(actual)) => {

@@ -228,6 +228,24 @@ fn evaluate_complex_struct() {
     );
 }
 
+#[test]
+fn built_in_type_equality() {
+    let src = r#"
+def Config = {
+    version: String
+}
+Config {
+    version: String = "1.0.0"
+}
+"#;
+    let (tokens, errors) = lex(src);
+    assert!(errors.is_empty());
+    let (program, errors) = parse(&tokens);
+    assert!(errors.is_empty());
+    let errors = super::analyze(&program);
+    assert_eq!(Vec::<Error>::new(), errors);
+}
+
 // #[test] fn self_reference() {
 //     let src = "
 // def Optional = Optional {}
