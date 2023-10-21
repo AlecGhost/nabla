@@ -16,9 +16,9 @@ UseItem <- Ident UseBody? Alias?
 UseItems <- LCURLY UseItem* RCURLY?
 UseError <- (!UseLA .)+
 
-Def <-  DEF Ident? EQ? Expr?
+Def <-  DEF Ident? (COLON EXPR?)? EQ? Expr?
 
-Let <- LET Ident? EQ? Expr?
+Let <- LET Ident? (COLON EXPR?)? EQ? Expr?
 
 Init <- Expr
 

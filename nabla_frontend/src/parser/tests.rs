@@ -155,6 +155,8 @@ fn def_ident() {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
                 name: Some(ident("x", 1..3)),
+                colon: None,
+                type_expr: None,
                 eq: Some(info(3..5)),
                 expr: Some(Expr::Single(Single::Named(Named {
                     name: ident("y", 5..7),
@@ -180,6 +182,8 @@ fn def_union() {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
                 name: Some(ident("ok", 1..3)),
+                colon: None,
+                type_expr: None,
                 eq: Some(info(3..5)),
                 expr: Some(Expr::Union(Union {
                     single: Single::Primitive(Primitive::String(PrimitiveValue {
@@ -217,6 +221,8 @@ def Person = {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..2),
                 name: Some(ident("Person", 2..4)),
+                colon: None,
+                type_expr: None,
                 eq: Some(info(4..6)),
                 expr: Some(Expr::Single(Single::Struct(Struct {
                     lcurly: info(6..8),
@@ -276,6 +282,8 @@ fn def_list() {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..1),
                 name: Some(ident("Strings", 1..3)),
+                colon: None,
+                type_expr: None,
                 eq: Some(info(3..5)),
                 expr: Some(Expr::Single(Single::List(List {
                     lbracket: info(5..7),

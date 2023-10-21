@@ -148,12 +148,15 @@ impl Parser for Def {
             info(tuple((
                 token::def,
                 expect(Ident::parse, ErrorMessage::ExpectedIdent),
+                parse_type_annotation,
                 expect(token::eq, ErrorMessage::ExpectedEQ),
                 expect(Expr::parse, ErrorMessage::ExpectedExpr),
             ))),
-            |((def_kw, name, eq, expr), info)| Self {
+            |((def_kw, name, (colon, type_expr), eq, expr), info)| Self {
                 def_kw,
                 name,
+                colon,
+                type_expr,
                 eq,
                 expr,
                 info,
@@ -168,12 +171,15 @@ impl Parser for Let {
             info(tuple((
                 token::r#let,
                 expect(Ident::parse, ErrorMessage::ExpectedIdent),
+                parse_type_annotation,
                 expect(token::eq, ErrorMessage::ExpectedEQ),
                 expect(Expr::parse, ErrorMessage::ExpectedExpr),
             ))),
-            |((let_kw, name, eq, expr), info)| Self {
+            |((let_kw, name, (colon, type_expr), eq, expr), info)| Self {
                 let_kw,
                 name,
+                colon,
+                type_expr,
                 eq,
                 expr,
                 info,
@@ -255,16 +261,7 @@ impl Parser for StructField {
         map(
             info(tuple((
                 Ident::parse,
-                map(
-                    opt(tuple((
-                        token::colon,
-                        expect(Expr::parse, ErrorMessage::ExpectedExpr),
-                    ))),
-                    |opt| match opt {
-                        Some((colon, type_expr)) => (Some(colon), type_expr),
-                        None => (None, None),
-                    },
-                ),
+                parse_type_annotation,
                 map(
                     opt(tuple((
                         token::eq,
@@ -390,6 +387,19 @@ impl Parser for Bool {
             map(token::r#false, Self::new_false),
         ))(input)
     }
+}
+
+fn parse_type_annotation(input: TokenStream) -> IResult<(Option<AstInfo>, Option<Expr>)> {
+    map(
+        opt(tuple((
+            token::colon,
+            expect(Expr::parse, ErrorMessage::ExpectedExpr),
+        ))),
+        |opt| match opt {
+            Some((colon, type_expr)) => (Some(colon), type_expr),
+            None => (None, None),
+        },
+    )(input)
 }
 
 mod token {

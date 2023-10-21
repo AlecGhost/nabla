@@ -101,6 +101,8 @@ pub struct UseItems {
 pub struct Def {
     pub def_kw: AstInfo,
     pub name: Option<Ident>,
+    pub colon: Option<AstInfo>,
+    pub type_expr: Option<Expr>,
     pub eq: Option<AstInfo>,
     pub expr: Option<Expr>,
     pub info: AstInfo,
@@ -110,6 +112,8 @@ pub struct Def {
 pub struct Let {
     pub let_kw: AstInfo,
     pub name: Option<Ident>,
+    pub colon: Option<AstInfo>,
+    pub type_expr: Option<Expr>,
     pub eq: Option<AstInfo>,
     pub expr: Option<Expr>,
     pub info: AstInfo,

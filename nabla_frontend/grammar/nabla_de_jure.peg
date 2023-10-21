@@ -13,9 +13,9 @@ UseKind <-
 UseItem <- IDENT UseBody? (AS IDENT)?
 UseItems <- LCURLY UseItem+ RCURLY
 
-Def <-  DEF IDENT EQ Expr
+Def <-  DEF IDENT (COLON Expr)? EQ Expr
 
-Let <- LET IDENT EQ Expr
+Let <- LET IDENT (COLON Expr)? EQ Expr
 
 Init <- Expr
 
