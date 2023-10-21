@@ -1,4 +1,6 @@
 use crate::{
+    ast::Global,
+    eval::{eval, Value},
     lexer::lex,
     parser::parse,
     semantics::{
@@ -60,10 +62,11 @@ use c::b as d
     assert_eq!(Vec::<Error>::new(), errors);
 }
 
-#[test] fn empty_list() {
+#[test]
+fn empty_list() {
     let src = "
 def EmptyList = []
-EmptyList [ 0 ]
+EmptyList []
 ";
     let tokens = lex(src);
     let program = parse(&tokens);
@@ -71,32 +74,138 @@ EmptyList [ 0 ]
     assert_eq!(Vec::<Error>::new(), errors);
 }
 
-#[test] fn struct_fields() {
-    let src = "
+#[test]
+fn struct_fields() {
+    let src = r#"
 def Person = {
     name: String
     age: Number
 }
 Person {
-    name: \"Test\"
-    age: true
+    name: "Test"
+    age: 0
 }
-";
+"#;
     let tokens = lex(src);
     let program = parse(&tokens);
     let errors = analyze(&program);
     assert_eq!(Vec::<Error>::new(), errors);
 }
 
-#[test] fn optional() {
+#[test]
+fn optional() {
     let src = "
 def Optional = Number | None
-Optional 1
+let opt_none = None
+let opt_some = 1
 ";
     let tokens = lex(src);
     let program = parse(&tokens);
     let errors = super::analyze(&program);
     assert_eq!(Vec::<Error>::new(), errors);
+}
+
+#[test]
+fn evaluate_struct() {
+    let src = r#"
+{
+    name = "Test"
+    age = 0
+    const: "x"  = "x"
+}
+"#;
+    let tokens = lex(src);
+    let program = parse(&tokens);
+    let errors = super::analyze(&program);
+    assert_eq!(Vec::<Error>::new(), errors);
+    let init = program
+        .globals
+        .iter()
+        .find_map(|global| match global {
+            Global::Init(init) => Some(init),
+            _ => None,
+        })
+        .unwrap();
+    let value = eval(init);
+    assert_eq!(
+        Value::from([
+            ("name", Value::from("Test")),
+            ("age", Value::from(0)),
+            ("const", Value::from("x"))
+        ]),
+        value
+    );
+}
+
+#[test]
+fn evaluate_list() {
+    let src = r#"["a" "b" "c"]"#;
+    let tokens = lex(src);
+    let program = parse(&tokens);
+    let errors = super::analyze(&program);
+    assert_eq!(Vec::<Error>::new(), errors);
+    let init = program
+        .globals
+        .iter()
+        .find_map(|global| match global {
+            Global::Init(init) => Some(init),
+            _ => None,
+        })
+        .unwrap();
+    let value = eval(init);
+    assert_eq!(Value::from(["a", "b", "c"]), value);
+}
+
+#[test]
+fn evaluate_complex_struct() {
+    let src = r#"
+{
+    random_number = 42
+    primes = [1 2 3 5 7]
+    map = [
+        {
+            key = "a"
+            value = "1"
+        }
+        {
+            key = "b"
+            value = 1
+        }
+        {
+            key = "c"
+            value = true
+        }
+    ]
+}
+"#;
+    let tokens = lex(src);
+    let program = parse(&tokens);
+    let errors = super::analyze(&program);
+    assert_eq!(Vec::<Error>::new(), errors);
+    let init = program
+        .globals
+        .iter()
+        .find_map(|global| match global {
+            Global::Init(init) => Some(init),
+            _ => None,
+        })
+        .unwrap();
+    let value = eval(init);
+    assert_eq!(
+        Value::from([
+            ("random_number", Value::from(42)),
+            ("primes", Value::from([1, 2, 3, 5, 7])),
+            (
+                "map",
+                Value::from([
+                    Value::from([("key", Value::from("a")), ("value", Value::from("1")),]),
+                    Value::from([("key", Value::from("b")), ("value", Value::from(1)),]),
+                    Value::from([("key", Value::from("c")), ("value", Value::from(true)),]),
+                ])
+            )
+        ]),
+        value
+    );
 }
 
 // #[test] fn self_reference() {

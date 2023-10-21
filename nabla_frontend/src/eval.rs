@@ -14,6 +14,57 @@ pub enum Value {
     Struct(HashMap<String, Value>),
 }
 
+impl From<String> for Value {
+    fn from(value: String) -> Self {
+        Value::String(value)
+    }
+}
+
+impl From<usize> for Value {
+    fn from(value: usize) -> Self {
+        Value::Number(value.to_string())
+    }
+}
+
+impl From<f64> for Value {
+    fn from(value: f64) -> Self {
+        Value::Number(value.to_string())
+    }
+}
+
+impl From<&str> for Value {
+    fn from(value: &str) -> Self {
+        Value::from(value.to_string())
+    }
+}
+
+impl From<bool> for Value {
+    fn from(value: bool) -> Self {
+        Value::Bool(value)
+    }
+}
+
+impl<V, const N: usize> From<[V; N]> for Value
+where
+    V: Into<Value>,
+{
+    fn from(value: [V; N]) -> Self {
+        let list = value.map(|v| v.into());
+        Value::List(Vec::from(list))
+    }
+}
+
+impl<K, V, const N: usize> From<[(K, V); N]> for Value
+where
+    K: Into<String>,
+    V: Into<Value>,
+{
+    fn from(value: [(K, V); N]) -> Self {
+        let map: [(String, Value); N] = value.map(|(k, v)| (k.into(), v.into()));
+        Self::Struct(HashMap::from(map))
+    }
+}
+
 pub fn eval(expr: &Expr) -> Value {
     expr.eval()
 }
