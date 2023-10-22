@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 pub const LBRACKET: &str = "[";
 pub const RBRACKET: &str = "]";
 pub const LCURLY: &str = "{";
@@ -57,16 +59,20 @@ pub enum TokenType {
 }
 
 /// Lexical error message
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Error)]
 pub enum ErrorMessage {
+    #[error("Missing closing single quote")]
     MissingClosingSingleQuote,
+    #[error("Missing decimals after comma")]
     MissingDecimals,
+    #[error("Unknown character")]
     Unknown,
 }
 
 /// Lexical error
 /// Contains an error message and the text range, where the error occurred.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Error)]
+#[error("{}..{}: {message}", .range.start, .range.end)]
 pub struct Error {
     pub message: ErrorMessage,
     pub range: TextRange,
