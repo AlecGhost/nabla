@@ -7,11 +7,7 @@ mod tests;
 mod types;
 
 pub fn analyze(program: &Program) -> Vec<Error> {
-    vec![
-        types::analyze(program),
-        check_multiple_inits(program),
-    ]
-    .concat()
+    [types::analyze(program), check_multiple_inits(program)].concat()
 }
 
 fn check_multiple_inits(program: &Program) -> Vec<Error> {
