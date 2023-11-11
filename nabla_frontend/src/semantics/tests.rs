@@ -14,11 +14,11 @@ use pretty_assertions::assert_eq;
 fn empty() {
     let src = "";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -29,11 +29,11 @@ use b::{c d::e}
 use f::g as h
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -43,9 +43,9 @@ use a::b
 use c::b
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
     assert_eq!(
         vec![Error::new(
@@ -63,11 +63,11 @@ use a::b
 use c::b as d
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -77,11 +77,11 @@ def EmptyList = []
 EmptyList []
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -97,11 +97,11 @@ Person {
 }
 "#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -112,11 +112,11 @@ let opt_none: Optional = null
 let opt_some: Optional = 1
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }
 
 #[test]
@@ -129,11 +129,11 @@ fn evaluate_struct() {
 }
 "#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let init = program
         .globals
         .iter()
@@ -157,11 +157,11 @@ fn evaluate_struct() {
 fn evaluate_list() {
     let src = r#"["a" "b" "c"]"#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let init = program
         .globals
         .iter()
@@ -197,11 +197,11 @@ fn evaluate_complex_struct() {
 }
 "#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let init = program
         .globals
         .iter()
@@ -239,11 +239,11 @@ Config {
 }
 "#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert_eq!(Vec::<Error>::new(), errors);
+    assert_empty!(errors);
 }
 
 #[test]
@@ -252,9 +252,9 @@ fn self_reference_expr() {
 def Type = Type {}
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
     assert_eq!(
         vec![Error::new(
@@ -271,9 +271,9 @@ fn self_reference_type_expr() {
 def Type: Type = {}
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
     assert_eq!(
         vec![Error::new(
@@ -291,9 +291,9 @@ def Type = [ Type | String ]
 Type [ "a" [ "b" ] ]
 "#;
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let errors = super::analyze(&program);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
 }

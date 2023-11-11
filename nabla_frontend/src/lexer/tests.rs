@@ -5,7 +5,7 @@ use pretty_assertions::assert_eq;
 fn empty() {
     let src = "";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(vec![Token::new(TokenType::Eof, 0..0)], tokens);
 }
 
@@ -89,7 +89,7 @@ fn char_missing_single_quote() {
 fn char_escape() {
     let src = "'\\''";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         vec![
             Token::new(TokenType::Char("\\'".to_string()), 0..4),
