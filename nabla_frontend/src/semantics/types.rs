@@ -86,7 +86,7 @@ pub fn analyze(program: &Program) -> Vec<Error> {
             Global::Def(def) => analysis::analyze_def(def, &mut type_info),
             Global::Let(l) => analysis::analyze_let(l, &mut type_info),
             Global::Init(init) => {
-                init.analyze(&mut type_info.rules, &mut type_info.assertions);
+                init.analyze(&mut type_info);
             }
             Global::Error(_) => { /* no types to check */ }
         }

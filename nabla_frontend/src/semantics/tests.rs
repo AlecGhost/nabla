@@ -351,3 +351,45 @@ A {
     let errors = super::analyze(&program);
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
+
+#[test]
+fn union_in_let() {
+    let src = r#"
+let a: String = "A" | "a"
+let b = "B" | "b"
+"#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let errors = super::analyze(&program);
+    assert_eq!(
+        vec![
+            Error::new(ErrorMessage::UnionInInit, 9..15),
+            Error::new(ErrorMessage::UnionInInit, 21..27),
+        ],
+        errors
+    );
+}
+
+#[test]
+fn union_in_field() {
+    let src = r#"
+def Test = {
+    a: String = "A" | "a"
+    b = "B" | "b"
+}
+"#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let errors = super::analyze(&program);
+    assert_eq!(
+        vec![
+            Error::new(ErrorMessage::UnionInInit, 15..21),
+            Error::new(ErrorMessage::UnionInInit, 25..31),
+        ],
+        errors
+    );
+}
