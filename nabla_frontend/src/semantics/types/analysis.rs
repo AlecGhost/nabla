@@ -34,11 +34,9 @@ fn analyze_binding<'a>(
     type_info: &mut TypeInfo<'a>,
 ) {
     fn check_self_reference(ident: &Ident, expr: Option<&Expr>) -> bool {
-        match expr {
-            Some(Expr::Single(Single::Named(Named { name, .. }))) if ident == name => true,
-            _ => false,
-        }
+        matches!(expr, Some(Expr::Single(Single::Named(Named { name, .. }))) if ident == name)
     }
+
     let TypeInfo {
         ref mut rules,
         ref mut assertions,
