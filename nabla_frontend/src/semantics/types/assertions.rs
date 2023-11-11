@@ -22,7 +22,24 @@ pub(super) fn check(type_info: &mut TypeInfo) {
     }
 }
 
-fn check_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) -> Vec<Error> {
+fn check_union(rules: &[Rule], expected: &[RuleIndex], actual: &[RuleIndex]) -> Vec<Error> {
+    let expected_rules: Vec<&Rule> = expected
+        .iter()
+        .map(|rule_index| rules.get(*rule_index).expect("Rule must exist"))
+        .collect();
+    actual
+        .iter()
+        .map(|rule_index| rules.get(*rule_index).expect("Rule must exist"))
+        .filter(|actual_rule| {
+            !expected_rules
+                .iter()
+                .any(|expected_rule| check_rules(rules, expected_rule, actual_rule).is_empty())
+        })
+        .map(|actual_rule| Error::new(ErrorMessage::TypeMismatch, actual_rule.info.range.clone()))
+        .collect()
+}
+
+fn check_in_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) -> Vec<Error> {
     for expected_rule in expected
         .iter()
         .map(|rule_index| rules.get(*rule_index).expect("Rule must exist"))
@@ -162,13 +179,10 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         | (_, TypeDescription::Rule(_))
         | (_, TypeDescription::Import(_)) => panic!("Unexpected type description"),
         // union
-        (_, TypeDescription::Union(_)) => {
-            vec![Error::new(
-                ErrorMessage::UnionInInit,
-                actual_rule.info.range.clone(),
-            )]
+        (TypeDescription::Union(expected), TypeDescription::Union(actual)) => {
+            check_union(rules, expected, actual)
         }
-        (TypeDescription::Union(union), _) => check_union(rules, union, actual_rule),
+        (TypeDescription::Union(union), _) => check_in_union(rules, union, actual_rule),
         // unknown
         (TypeDescription::Unknown, _) => vec![Error::new(
             ErrorMessage::UnknownType,

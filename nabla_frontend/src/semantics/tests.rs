@@ -297,3 +297,57 @@ Type [ "a" [ "b" ] ]
     let errors = super::analyze(&program);
     assert_empty!(errors);
 }
+
+#[test]
+fn type_annotation_in_init() {
+    let src = r#"
+def A = {
+    a: String | null
+}
+A {
+    a: String | null = null
+}
+"#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let errors = super::analyze(&program);
+    assert_empty!(errors);
+}
+
+#[test]
+fn type_annotation_subset() {
+    let src = r#"
+def A = {
+    a: String | Number | null
+}
+A {
+    a: String | null = null
+}
+"#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let errors = super::analyze(&program);
+    assert_empty!(errors);
+}
+
+#[test]
+fn type_annotation_superset() {
+    let src = r#"
+def A = {
+    a: String | null
+}
+A {
+    a: String | Number | null = null
+}
+"#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let errors = super::analyze(&program);
+    assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
+}
