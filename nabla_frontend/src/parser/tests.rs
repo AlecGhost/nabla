@@ -21,9 +21,9 @@ fn info(range: TokenRange) -> AstInfo {
 fn empty() {
     let src = "";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: Vec::new(),
@@ -47,7 +47,7 @@ fn token_after_eof() {
 fn missing_type_expr() {
     let src = "let a: = {}";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (_, errors) = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 3..3)], errors);
 }
@@ -56,7 +56,7 @@ fn missing_type_expr() {
 fn missing_expr() {
     let src = "let a =";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (_, errors) = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 4..4)], errors);
 }
@@ -65,7 +65,7 @@ fn missing_expr() {
 fn missing_multiple_exprs() {
     let src = "let a: =";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (_, errors) = parse(&tokens);
     assert_eq!(
         vec![
@@ -80,9 +80,9 @@ fn missing_multiple_exprs() {
 fn use_simple() {
     let src = "use a";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
@@ -101,9 +101,9 @@ fn use_simple() {
 fn use_all() {
     let src = "use a::*";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
@@ -126,9 +126,9 @@ fn use_all() {
 fn use_single() {
     let src = "use a::b";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
@@ -156,9 +156,9 @@ fn use_single() {
 fn use_multiple() {
     let src = "use a::{b c}";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
@@ -199,9 +199,9 @@ fn use_multiple() {
 fn use_complex() {
     let src = "use a::{b::{ c::d as x e::* } f as y}";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     insta::assert_debug_snapshot!(program);
 }
 
@@ -209,9 +209,9 @@ fn use_complex() {
 fn def_ident() {
     let src = "def x = y";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
@@ -238,9 +238,9 @@ fn def_ident() {
 fn def_union() {
     let src = "def ok = \"yes\" | true";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
@@ -279,9 +279,9 @@ def Person = {
     age: number = 0
 }";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
@@ -342,9 +342,9 @@ def Person = {
 fn def_list() {
     let src = "def Strings = [ string ]";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
@@ -389,8 +389,8 @@ def x = {
 }
 ";
     let (tokens, errors) = lex(src);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     let (program, errors) = parse(&tokens);
-    assert!(errors.is_empty());
+    assert_empty!(errors);
     insta::assert_debug_snapshot!(program);
 }
