@@ -1,0 +1,65 @@
+---
+source: nabla_frontend/src/parser/tests.rs
+expression: program
+---
+Program {
+    globals: [
+        Use(
+            Use {
+                use_kw: AstInfo {
+                    range: 0..1,
+                },
+                name: Some(
+                    Ident {
+                        name: "x",
+                        info: AstInfo {
+                            range: 2..3,
+                        },
+                    },
+                ),
+                body: Some(
+                    UseBody {
+                        double_colon: AstInfo {
+                            range: 3..4,
+                        },
+                        kind: Some(
+                            Multiple(
+                                UseItems {
+                                    lcurly: AstInfo {
+                                        range: 4..5,
+                                    },
+                                    items: [
+                                        Err(
+                                            UseItemError {
+                                                info: AstInfo {
+                                                    range: 5..6,
+                                                },
+                                            },
+                                        ),
+                                    ],
+                                    rcurly: Some(
+                                        AstInfo {
+                                            range: 6..7,
+                                        },
+                                    ),
+                                    info: AstInfo {
+                                        range: 4..7,
+                                    },
+                                },
+                            ),
+                        ),
+                        info: AstInfo {
+                            range: 3..7,
+                        },
+                    },
+                ),
+                info: AstInfo {
+                    range: 0..7,
+                },
+            },
+        ),
+    ],
+    info: AstInfo {
+        range: 0..8,
+    },
+}

@@ -1,0 +1,61 @@
+---
+source: nabla_frontend/src/parser/tests.rs
+expression: program
+---
+Program {
+    globals: [
+        Def(
+            Def {
+                def_kw: AstInfo {
+                    range: 0..1,
+                },
+                name: Some(
+                    Ident {
+                        name: "x",
+                        info: AstInfo {
+                            range: 2..3,
+                        },
+                    },
+                ),
+                colon: None,
+                type_expr: None,
+                eq: Some(
+                    AstInfo {
+                        range: 4..5,
+                    },
+                ),
+                expr: Some(
+                    Single(
+                        Struct(
+                            Struct {
+                                lcurly: AstInfo {
+                                    range: 6..7,
+                                },
+                                fields: [],
+                                rcurly: Some(
+                                    AstInfo {
+                                        range: 7..8,
+                                    },
+                                ),
+                                info: AstInfo {
+                                    range: 5..8,
+                                },
+                            },
+                        ),
+                    ),
+                ),
+                info: AstInfo {
+                    range: 0..8,
+                },
+            },
+        ),
+        Error(
+            AstInfo {
+                range: 8..9,
+            },
+        ),
+    ],
+    info: AstInfo {
+        range: 0..10,
+    },
+}

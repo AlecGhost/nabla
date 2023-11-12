@@ -101,7 +101,7 @@ impl Parser for UseKind {
             map(token::star, Self::All),
             map(UseItem::parse, Self::Single),
             map(UseItems::parse, Self::Multiple),
-            map(info(ignore_until(lookahead::r#use)), |(_, info)| {
+            map(info(ignore_until(lookahead::use_kind)), |(_, info)| {
                 Self::Error(info)
             }),
         ))(input)
@@ -113,7 +113,10 @@ impl Parser for UseItems {
         map(
             info(tuple((
                 token::lcurly,
-                many0(UseItem::parse),
+                many0(alt((
+                    map(UseItem::parse, Ok),
+                    map(UseItemError::parse, Err),
+                ))),
                 expect(
                     map(info(token::rcurly), |(_, info)| info),
                     ErrorMessage::MissingClosingCurly,
@@ -144,6 +147,14 @@ impl Parser for UseItem {
                 info,
             },
         )(input)
+    }
+}
+
+impl Parser for UseItemError {
+    fn parse(input: TokenStream) -> IResult<Self> {
+        map(info(ignore_until(lookahead::use_item)), |(_, info)| Self {
+            info,
+        })(input)
     }
 }
 
@@ -248,7 +259,10 @@ impl Parser for Struct {
         map(
             info(tuple((
                 token::lcurly,
-                many0(StructField::parse),
+                many0(alt((
+                    map(StructField::parse, Ok),
+                    map(StructFieldError::parse, Err),
+                ))),
                 expect(token::rcurly, ErrorMessage::MissingClosingCurly),
             ))),
             |((lcurly, fields, rcurly), info)| Self {
@@ -289,6 +303,14 @@ impl Parser for StructField {
                 info,
             },
         )(input)
+    }
+}
+
+impl Parser for StructFieldError {
+    fn parse(input: TokenStream) -> IResult<Self> {
+        map(info(ignore_until(lookahead::struct_field)), |(_, info)| {
+            Self { info }
+        })(input)
     }
 }
 
@@ -549,12 +571,19 @@ mod lookahead {
         token::def,
         token::r#let,
         token::lcurly,
-        token::rcurly,
         token::lbracket,
-        token::rbracket,
         token::ident,
         token::eof,
     );
-    lookahead_parser!(r#use, token::star, global,);
-    lookahead_parser!(expr, global, token::eq,);
+    lookahead_parser!(use_kind, token::star, token::r#as, token::rcurly, global,);
+    lookahead_parser!(use_item, use_kind,);
+    lookahead_parser!(
+        expr,
+        token::eq,
+        token::rcurly,
+        token::rbracket,
+        token::r#as,
+        global,
+    );
+    lookahead_parser!(struct_field, token::pipe, expr,);
 }

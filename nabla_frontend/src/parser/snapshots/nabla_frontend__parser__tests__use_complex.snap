@@ -29,166 +29,174 @@ Program {
                                         range: 4..5,
                                     },
                                     items: [
-                                        UseItem {
-                                            name: Ident {
-                                                name: "b",
-                                                info: AstInfo {
-                                                    range: 5..6,
-                                                },
-                                            },
-                                            body: Some(
-                                                UseBody {
-                                                    double_colon: AstInfo {
-                                                        range: 6..7,
+                                        Ok(
+                                            UseItem {
+                                                name: Ident {
+                                                    name: "b",
+                                                    info: AstInfo {
+                                                        range: 5..6,
                                                     },
-                                                    kind: Some(
-                                                        Multiple(
-                                                            UseItems {
-                                                                lcurly: AstInfo {
-                                                                    range: 7..8,
-                                                                },
-                                                                items: [
-                                                                    UseItem {
-                                                                        name: Ident {
-                                                                            name: "c",
-                                                                            info: AstInfo {
-                                                                                range: 9..10,
-                                                                            },
-                                                                        },
-                                                                        body: Some(
-                                                                            UseBody {
-                                                                                double_colon: AstInfo {
-                                                                                    range: 10..11,
+                                                },
+                                                body: Some(
+                                                    UseBody {
+                                                        double_colon: AstInfo {
+                                                            range: 6..7,
+                                                        },
+                                                        kind: Some(
+                                                            Multiple(
+                                                                UseItems {
+                                                                    lcurly: AstInfo {
+                                                                        range: 7..8,
+                                                                    },
+                                                                    items: [
+                                                                        Ok(
+                                                                            UseItem {
+                                                                                name: Ident {
+                                                                                    name: "c",
+                                                                                    info: AstInfo {
+                                                                                        range: 9..10,
+                                                                                    },
                                                                                 },
-                                                                                kind: Some(
-                                                                                    Single(
-                                                                                        UseItem {
-                                                                                            name: Ident {
-                                                                                                name: "d",
-                                                                                                info: AstInfo {
-                                                                                                    range: 11..12,
-                                                                                                },
-                                                                                            },
-                                                                                            body: None,
-                                                                                            alias: Some(
-                                                                                                Alias {
-                                                                                                    as_kw: AstInfo {
-                                                                                                        range: 13..14,
+                                                                                body: Some(
+                                                                                    UseBody {
+                                                                                        double_colon: AstInfo {
+                                                                                            range: 10..11,
+                                                                                        },
+                                                                                        kind: Some(
+                                                                                            Single(
+                                                                                                UseItem {
+                                                                                                    name: Ident {
+                                                                                                        name: "d",
+                                                                                                        info: AstInfo {
+                                                                                                            range: 11..12,
+                                                                                                        },
                                                                                                     },
-                                                                                                    name: Some(
-                                                                                                        Ident(
-                                                                                                            Ident {
-                                                                                                                name: "x",
-                                                                                                                info: AstInfo {
-                                                                                                                    range: 15..16,
-                                                                                                                },
+                                                                                                    body: None,
+                                                                                                    alias: Some(
+                                                                                                        Alias {
+                                                                                                            as_kw: AstInfo {
+                                                                                                                range: 13..14,
                                                                                                             },
-                                                                                                        ),
+                                                                                                            name: Some(
+                                                                                                                Ident(
+                                                                                                                    Ident {
+                                                                                                                        name: "x",
+                                                                                                                        info: AstInfo {
+                                                                                                                            range: 15..16,
+                                                                                                                        },
+                                                                                                                    },
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                            info: AstInfo {
+                                                                                                                range: 12..16,
+                                                                                                            },
+                                                                                                        },
                                                                                                     ),
                                                                                                     info: AstInfo {
-                                                                                                        range: 12..16,
+                                                                                                        range: 11..16,
                                                                                                     },
                                                                                                 },
                                                                                             ),
-                                                                                            info: AstInfo {
-                                                                                                range: 11..16,
-                                                                                            },
+                                                                                        ),
+                                                                                        info: AstInfo {
+                                                                                            range: 10..16,
                                                                                         },
-                                                                                    ),
+                                                                                    },
                                                                                 ),
+                                                                                alias: None,
                                                                                 info: AstInfo {
-                                                                                    range: 10..16,
+                                                                                    range: 8..16,
                                                                                 },
                                                                             },
                                                                         ),
-                                                                        alias: None,
-                                                                        info: AstInfo {
-                                                                            range: 8..16,
-                                                                        },
-                                                                    },
-                                                                    UseItem {
-                                                                        name: Ident {
-                                                                            name: "e",
-                                                                            info: AstInfo {
-                                                                                range: 17..18,
-                                                                            },
-                                                                        },
-                                                                        body: Some(
-                                                                            UseBody {
-                                                                                double_colon: AstInfo {
-                                                                                    range: 18..19,
+                                                                        Ok(
+                                                                            UseItem {
+                                                                                name: Ident {
+                                                                                    name: "e",
+                                                                                    info: AstInfo {
+                                                                                        range: 17..18,
+                                                                                    },
                                                                                 },
-                                                                                kind: Some(
-                                                                                    All(
-                                                                                        AstInfo {
-                                                                                            range: 19..20,
+                                                                                body: Some(
+                                                                                    UseBody {
+                                                                                        double_colon: AstInfo {
+                                                                                            range: 18..19,
                                                                                         },
-                                                                                    ),
+                                                                                        kind: Some(
+                                                                                            All(
+                                                                                                AstInfo {
+                                                                                                    range: 19..20,
+                                                                                                },
+                                                                                            ),
+                                                                                        ),
+                                                                                        info: AstInfo {
+                                                                                            range: 18..20,
+                                                                                        },
+                                                                                    },
                                                                                 ),
+                                                                                alias: None,
                                                                                 info: AstInfo {
-                                                                                    range: 18..20,
+                                                                                    range: 16..20,
                                                                                 },
                                                                             },
                                                                         ),
-                                                                        alias: None,
-                                                                        info: AstInfo {
-                                                                            range: 16..20,
+                                                                    ],
+                                                                    rcurly: Some(
+                                                                        AstInfo {
+                                                                            range: 20..22,
                                                                         },
+                                                                    ),
+                                                                    info: AstInfo {
+                                                                        range: 7..22,
                                                                     },
-                                                                ],
-                                                                rcurly: Some(
-                                                                    AstInfo {
-                                                                        range: 20..22,
-                                                                    },
-                                                                ),
-                                                                info: AstInfo {
-                                                                    range: 7..22,
                                                                 },
-                                                            },
+                                                            ),
                                                         ),
-                                                    ),
-                                                    info: AstInfo {
-                                                        range: 6..22,
+                                                        info: AstInfo {
+                                                            range: 6..22,
+                                                        },
                                                     },
-                                                },
-                                            ),
-                                            alias: None,
-                                            info: AstInfo {
-                                                range: 5..22,
-                                            },
-                                        },
-                                        UseItem {
-                                            name: Ident {
-                                                name: "f",
+                                                ),
+                                                alias: None,
                                                 info: AstInfo {
-                                                    range: 23..24,
+                                                    range: 5..22,
                                                 },
                                             },
-                                            body: None,
-                                            alias: Some(
-                                                Alias {
-                                                    as_kw: AstInfo {
-                                                        range: 25..26,
-                                                    },
-                                                    name: Some(
-                                                        Ident(
-                                                            Ident {
-                                                                name: "y",
-                                                                info: AstInfo {
-                                                                    range: 27..28,
-                                                                },
-                                                            },
-                                                        ),
-                                                    ),
+                                        ),
+                                        Ok(
+                                            UseItem {
+                                                name: Ident {
+                                                    name: "f",
                                                     info: AstInfo {
-                                                        range: 24..28,
+                                                        range: 23..24,
                                                     },
                                                 },
-                                            ),
-                                            info: AstInfo {
-                                                range: 22..28,
+                                                body: None,
+                                                alias: Some(
+                                                    Alias {
+                                                        as_kw: AstInfo {
+                                                            range: 25..26,
+                                                        },
+                                                        name: Some(
+                                                            Ident(
+                                                                Ident {
+                                                                    name: "y",
+                                                                    info: AstInfo {
+                                                                        range: 27..28,
+                                                                    },
+                                                                },
+                                                            ),
+                                                        ),
+                                                        info: AstInfo {
+                                                            range: 24..28,
+                                                        },
+                                                    },
+                                                ),
+                                                info: AstInfo {
+                                                    range: 22..28,
+                                                },
                                             },
-                                        },
+                                        ),
                                     ],
                                     rcurly: Some(
                                         AstInfo {

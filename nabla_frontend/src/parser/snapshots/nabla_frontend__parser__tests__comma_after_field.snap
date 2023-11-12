@@ -1,0 +1,104 @@
+---
+source: nabla_frontend/src/parser/tests.rs
+expression: program
+---
+Program {
+    globals: [
+        Def(
+            Def {
+                def_kw: AstInfo {
+                    range: 1..2,
+                },
+                name: Some(
+                    Ident {
+                        name: "x",
+                        info: AstInfo {
+                            range: 3..4,
+                        },
+                    },
+                ),
+                colon: None,
+                type_expr: None,
+                eq: Some(
+                    AstInfo {
+                        range: 5..6,
+                    },
+                ),
+                expr: Some(
+                    Single(
+                        Struct(
+                            Struct {
+                                lcurly: AstInfo {
+                                    range: 7..8,
+                                },
+                                fields: [
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "test",
+                                                info: AstInfo {
+                                                    range: 9..10,
+                                                },
+                                            },
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 10..11,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "String",
+                                                                info: AstInfo {
+                                                                    range: 12..13,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
+                                                            info: AstInfo {
+                                                                range: 11..13,
+                                                            },
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            eq: None,
+                                            expr: None,
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 8..13,
+                                            },
+                                        },
+                                    ),
+                                    Err(
+                                        StructFieldError {
+                                            info: AstInfo {
+                                                range: 13..14,
+                                            },
+                                        },
+                                    ),
+                                ],
+                                rcurly: Some(
+                                    AstInfo {
+                                        range: 15..16,
+                                    },
+                                ),
+                                info: AstInfo {
+                                    range: 6..16,
+                                },
+                            },
+                        ),
+                    ),
+                ),
+                info: AstInfo {
+                    range: 0..16,
+                },
+            },
+        ),
+    ],
+    info: AstInfo {
+        range: 0..18,
+    },
+}

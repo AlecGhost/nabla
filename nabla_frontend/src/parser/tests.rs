@@ -2,7 +2,7 @@ use crate::{
     ast::*,
     lexer::lex,
     parser::{parse, Error, ErrorMessage},
-    token::{Token, TokenRange, TokenType},
+    token::{self, Token, TokenRange, TokenType},
 };
 use pretty_assertions::assert_eq;
 
@@ -169,18 +169,18 @@ fn use_multiple() {
                     kind: Some(UseKind::Multiple(UseItems {
                         lcurly: info(4..5),
                         items: vec![
-                            UseItem {
+                            Ok(UseItem {
                                 name: ident("b", 5..6),
                                 body: None,
                                 alias: None,
                                 info: info(5..6),
-                            },
-                            UseItem {
+                            }),
+                            Ok(UseItem {
                                 name: ident("c", 7..8),
                                 body: None,
                                 alias: None,
                                 info: info(6..8),
-                            },
+                            }),
                         ],
                         rcurly: Some(info(8..9)),
                         info: info(4..9),
@@ -236,7 +236,7 @@ fn def_ident() {
 
 #[test]
 fn def_union() {
-    let src = "def ok = \"yes\" | true";
+    let src = r#"def ok = "yes" | true"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
@@ -293,7 +293,7 @@ def Person = {
                 expr: Some(Expr::Single(Single::Struct(Struct {
                     lcurly: info(7..8),
                     fields: vec![
-                        StructField {
+                        Ok(StructField {
                             name: ident("name", 9..10),
                             colon: Some(info(10..11)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
@@ -306,8 +306,8 @@ def Person = {
                             expr: None,
                             alias: None,
                             info: info(8..13),
-                        },
-                        StructField {
+                        }),
+                        Ok(StructField {
                             name: ident("age", 14..15),
                             colon: Some(info(15..16)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
@@ -325,7 +325,7 @@ def Person = {
                             )))),
                             alias: None,
                             info: info(13..22),
-                        },
+                        }),
                     ],
                     rcurly: Some(info(23..24)),
                     info: info(6..24),
@@ -374,23 +374,98 @@ fn def_list() {
 
 #[test]
 fn def_all_syntax() {
-    let src = "
+    let src = r#"
 use other_dir::*
 use dir2::{x::{y} z}
 use dir3::test
 
 def x = {
     only_type: string
-    only_expr = \"expr\"
+    only_expr = "expr"
     type_and_expr: number = 1
-    only_type_as: string as \"x\"
-    only_expr_as = \"expr\" as \"y\"
-    type_and_expr_as: number = 1 as \"z\"
+    only_type_as: string as "x"
+    only_expr_as = "expr" as "y"
+    type_and_expr_as: number = 1 as "z"
 }
-";
+"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_expr_error() {
+    let src = "def x = @";
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![token::Error::new(token::ErrorMessage::Unknown, 8..9)],
+        errors
+    );
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 5..7)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_global_error() {
+    let src = "def x = {}=";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 8..9)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_use_kind_error() {
+    let src = "use x::{y::=}";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 7..8)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_use_item_error() {
+    let src = "use x::{=}";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 5..6)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn comma_after_field() {
+    let src = "
+def x = {
+    test: String,
+}
+";
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![token::Error::new(token::ErrorMessage::Unknown, 27..28)],
+        errors
+    );
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 13..14)],
+        errors
+    );
     insta::assert_debug_snapshot!(program);
 }

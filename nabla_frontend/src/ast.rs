@@ -70,9 +70,14 @@ pub struct UseItem {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct UseItemError {
+    pub info: AstInfo,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UseItems {
     pub lcurly: AstInfo,
-    pub items: Vec<UseItem>,
+    pub items: Vec<Result<UseItem, UseItemError>>,
     pub rcurly: Option<AstInfo>,
     pub info: AstInfo,
 }
@@ -152,7 +157,7 @@ impl Single {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Struct {
     pub lcurly: AstInfo,
-    pub fields: Vec<StructField>,
+    pub fields: Vec<Result<StructField, StructFieldError>>,
     pub rcurly: Option<AstInfo>,
     pub info: AstInfo,
 }
@@ -165,6 +170,11 @@ pub struct StructField {
     pub eq: Option<AstInfo>,
     pub expr: Option<Expr>,
     pub alias: Option<Alias>,
+    pub info: AstInfo,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StructFieldError {
     pub info: AstInfo,
 }
 
