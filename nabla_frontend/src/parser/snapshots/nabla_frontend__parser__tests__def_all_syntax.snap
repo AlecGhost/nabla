@@ -64,73 +64,79 @@ Program {
                                         range: 11..12,
                                     },
                                     items: [
-                                        UseItem {
-                                            name: Ident {
-                                                name: "x",
-                                                info: AstInfo {
-                                                    range: 12..13,
-                                                },
-                                            },
-                                            body: Some(
-                                                UseBody {
-                                                    double_colon: AstInfo {
-                                                        range: 13..14,
-                                                    },
-                                                    kind: Some(
-                                                        Multiple(
-                                                            UseItems {
-                                                                lcurly: AstInfo {
-                                                                    range: 14..15,
-                                                                },
-                                                                items: [
-                                                                    UseItem {
-                                                                        name: Ident {
-                                                                            name: "y",
-                                                                            info: AstInfo {
-                                                                                range: 15..16,
-                                                                            },
-                                                                        },
-                                                                        body: None,
-                                                                        alias: None,
-                                                                        info: AstInfo {
-                                                                            range: 15..16,
-                                                                        },
-                                                                    },
-                                                                ],
-                                                                rcurly: Some(
-                                                                    AstInfo {
-                                                                        range: 16..17,
-                                                                    },
-                                                                ),
-                                                                info: AstInfo {
-                                                                    range: 14..17,
-                                                                },
-                                                            },
-                                                        ),
-                                                    ),
+                                        Ok(
+                                            UseItem {
+                                                name: Ident {
+                                                    name: "x",
                                                     info: AstInfo {
-                                                        range: 13..17,
+                                                        range: 12..13,
                                                     },
                                                 },
-                                            ),
-                                            alias: None,
-                                            info: AstInfo {
-                                                range: 12..17,
-                                            },
-                                        },
-                                        UseItem {
-                                            name: Ident {
-                                                name: "z",
+                                                body: Some(
+                                                    UseBody {
+                                                        double_colon: AstInfo {
+                                                            range: 13..14,
+                                                        },
+                                                        kind: Some(
+                                                            Multiple(
+                                                                UseItems {
+                                                                    lcurly: AstInfo {
+                                                                        range: 14..15,
+                                                                    },
+                                                                    items: [
+                                                                        Ok(
+                                                                            UseItem {
+                                                                                name: Ident {
+                                                                                    name: "y",
+                                                                                    info: AstInfo {
+                                                                                        range: 15..16,
+                                                                                    },
+                                                                                },
+                                                                                body: None,
+                                                                                alias: None,
+                                                                                info: AstInfo {
+                                                                                    range: 15..16,
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                    ],
+                                                                    rcurly: Some(
+                                                                        AstInfo {
+                                                                            range: 16..17,
+                                                                        },
+                                                                    ),
+                                                                    info: AstInfo {
+                                                                        range: 14..17,
+                                                                    },
+                                                                },
+                                                            ),
+                                                        ),
+                                                        info: AstInfo {
+                                                            range: 13..17,
+                                                        },
+                                                    },
+                                                ),
+                                                alias: None,
                                                 info: AstInfo {
-                                                    range: 18..19,
+                                                    range: 12..17,
                                                 },
                                             },
-                                            body: None,
-                                            alias: None,
-                                            info: AstInfo {
-                                                range: 17..19,
+                                        ),
+                                        Ok(
+                                            UseItem {
+                                                name: Ident {
+                                                    name: "z",
+                                                    info: AstInfo {
+                                                        range: 18..19,
+                                                    },
+                                                },
+                                                body: None,
+                                                alias: None,
+                                                info: AstInfo {
+                                                    range: 17..19,
+                                                },
                                             },
-                                        },
+                                        ),
                                     ],
                                     rcurly: Some(
                                         AstInfo {
@@ -226,315 +232,327 @@ Program {
                                     range: 33..34,
                                 },
                                 fields: [
-                                    StructField {
-                                        name: Ident {
-                                            name: "only_type",
-                                            info: AstInfo {
-                                                range: 35..36,
-                                            },
-                                        },
-                                        colon: Some(
-                                            AstInfo {
-                                                range: 36..37,
-                                            },
-                                        ),
-                                        type_expr: Some(
-                                            Single(
-                                                Named(
-                                                    Named {
-                                                        name: Ident {
-                                                            name: "string",
-                                                            info: AstInfo {
-                                                                range: 38..39,
-                                                            },
-                                                        },
-                                                        inner_names: [],
-                                                        expr: None,
-                                                        info: AstInfo {
-                                                            range: 37..39,
-                                                        },
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        eq: None,
-                                        expr: None,
-                                        alias: None,
-                                        info: AstInfo {
-                                            range: 34..39,
-                                        },
-                                    },
-                                    StructField {
-                                        name: Ident {
-                                            name: "only_expr",
-                                            info: AstInfo {
-                                                range: 40..41,
-                                            },
-                                        },
-                                        colon: None,
-                                        type_expr: None,
-                                        eq: Some(
-                                            AstInfo {
-                                                range: 42..43,
-                                            },
-                                        ),
-                                        expr: Some(
-                                            Single(
-                                                Primitive(
-                                                    String(
-                                                        PrimitiveValue {
-                                                            value: "expr",
-                                                            info: AstInfo {
-                                                                range: 44..45,
-                                                            },
-                                                        },
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                        alias: None,
-                                        info: AstInfo {
-                                            range: 39..45,
-                                        },
-                                    },
-                                    StructField {
-                                        name: Ident {
-                                            name: "type_and_expr",
-                                            info: AstInfo {
-                                                range: 46..47,
-                                            },
-                                        },
-                                        colon: Some(
-                                            AstInfo {
-                                                range: 47..48,
-                                            },
-                                        ),
-                                        type_expr: Some(
-                                            Single(
-                                                Named(
-                                                    Named {
-                                                        name: Ident {
-                                                            name: "number",
-                                                            info: AstInfo {
-                                                                range: 49..50,
-                                                            },
-                                                        },
-                                                        inner_names: [],
-                                                        expr: None,
-                                                        info: AstInfo {
-                                                            range: 48..50,
-                                                        },
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        eq: Some(
-                                            AstInfo {
-                                                range: 51..52,
-                                            },
-                                        ),
-                                        expr: Some(
-                                            Single(
-                                                Primitive(
-                                                    Number(
-                                                        PrimitiveValue {
-                                                            value: "1",
-                                                            info: AstInfo {
-                                                                range: 53..54,
-                                                            },
-                                                        },
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                        alias: None,
-                                        info: AstInfo {
-                                            range: 45..54,
-                                        },
-                                    },
-                                    StructField {
-                                        name: Ident {
-                                            name: "only_type_as",
-                                            info: AstInfo {
-                                                range: 55..56,
-                                            },
-                                        },
-                                        colon: Some(
-                                            AstInfo {
-                                                range: 56..57,
-                                            },
-                                        ),
-                                        type_expr: Some(
-                                            Single(
-                                                Named(
-                                                    Named {
-                                                        name: Ident {
-                                                            name: "string",
-                                                            info: AstInfo {
-                                                                range: 58..59,
-                                                            },
-                                                        },
-                                                        inner_names: [],
-                                                        expr: None,
-                                                        info: AstInfo {
-                                                            range: 57..59,
-                                                        },
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        eq: None,
-                                        expr: None,
-                                        alias: Some(
-                                            Alias {
-                                                as_kw: AstInfo {
-                                                    range: 60..61,
-                                                },
-                                                name: Some(
-                                                    String(
-                                                        PrimitiveValue {
-                                                            value: "x",
-                                                            info: AstInfo {
-                                                                range: 62..63,
-                                                            },
-                                                        },
-                                                    ),
-                                                ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "only_type",
                                                 info: AstInfo {
-                                                    range: 59..63,
+                                                    range: 35..36,
                                                 },
                                             },
-                                        ),
-                                        info: AstInfo {
-                                            range: 54..63,
-                                        },
-                                    },
-                                    StructField {
-                                        name: Ident {
-                                            name: "only_expr_as",
-                                            info: AstInfo {
-                                                range: 64..65,
-                                            },
-                                        },
-                                        colon: None,
-                                        type_expr: None,
-                                        eq: Some(
-                                            AstInfo {
-                                                range: 66..67,
-                                            },
-                                        ),
-                                        expr: Some(
-                                            Single(
-                                                Primitive(
-                                                    String(
-                                                        PrimitiveValue {
-                                                            value: "expr",
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 36..37,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "string",
+                                                                info: AstInfo {
+                                                                    range: 38..39,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
                                                             info: AstInfo {
-                                                                range: 68..69,
+                                                                range: 37..39,
                                                             },
                                                         },
                                                     ),
                                                 ),
                                             ),
-                                        ),
-                                        alias: Some(
-                                            Alias {
-                                                as_kw: AstInfo {
-                                                    range: 70..71,
+                                            eq: None,
+                                            expr: None,
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 34..39,
+                                            },
+                                        },
+                                    ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "only_expr",
+                                                info: AstInfo {
+                                                    range: 40..41,
                                                 },
-                                                name: Some(
-                                                    String(
-                                                        PrimitiveValue {
-                                                            value: "y",
+                                            },
+                                            colon: None,
+                                            type_expr: None,
+                                            eq: Some(
+                                                AstInfo {
+                                                    range: 42..43,
+                                                },
+                                            ),
+                                            expr: Some(
+                                                Single(
+                                                    Primitive(
+                                                        String(
+                                                            PrimitiveValue {
+                                                                value: "expr",
+                                                                info: AstInfo {
+                                                                    range: 44..45,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 39..45,
+                                            },
+                                        },
+                                    ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "type_and_expr",
+                                                info: AstInfo {
+                                                    range: 46..47,
+                                                },
+                                            },
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 47..48,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "number",
+                                                                info: AstInfo {
+                                                                    range: 49..50,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
                                                             info: AstInfo {
-                                                                range: 72..73,
+                                                                range: 48..50,
                                                             },
                                                         },
                                                     ),
                                                 ),
+                                            ),
+                                            eq: Some(
+                                                AstInfo {
+                                                    range: 51..52,
+                                                },
+                                            ),
+                                            expr: Some(
+                                                Single(
+                                                    Primitive(
+                                                        Number(
+                                                            PrimitiveValue {
+                                                                value: "1",
+                                                                info: AstInfo {
+                                                                    range: 53..54,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 45..54,
+                                            },
+                                        },
+                                    ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "only_type_as",
                                                 info: AstInfo {
-                                                    range: 69..73,
+                                                    range: 55..56,
                                                 },
                                             },
-                                        ),
-                                        info: AstInfo {
-                                            range: 63..73,
-                                        },
-                                    },
-                                    StructField {
-                                        name: Ident {
-                                            name: "type_and_expr_as",
-                                            info: AstInfo {
-                                                range: 74..75,
-                                            },
-                                        },
-                                        colon: Some(
-                                            AstInfo {
-                                                range: 75..76,
-                                            },
-                                        ),
-                                        type_expr: Some(
-                                            Single(
-                                                Named(
-                                                    Named {
-                                                        name: Ident {
-                                                            name: "number",
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 56..57,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "string",
+                                                                info: AstInfo {
+                                                                    range: 58..59,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
                                                             info: AstInfo {
-                                                                range: 77..78,
+                                                                range: 57..59,
                                                             },
                                                         },
-                                                        inner_names: [],
-                                                        expr: None,
-                                                        info: AstInfo {
-                                                            range: 76..78,
-                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            eq: None,
+                                            expr: None,
+                                            alias: Some(
+                                                Alias {
+                                                    as_kw: AstInfo {
+                                                        range: 60..61,
                                                     },
-                                                ),
-                                            ),
-                                        ),
-                                        eq: Some(
-                                            AstInfo {
-                                                range: 79..80,
-                                            },
-                                        ),
-                                        expr: Some(
-                                            Single(
-                                                Primitive(
-                                                    Number(
-                                                        PrimitiveValue {
-                                                            value: "1",
-                                                            info: AstInfo {
-                                                                range: 81..82,
+                                                    name: Some(
+                                                        String(
+                                                            PrimitiveValue {
+                                                                value: "x",
+                                                                info: AstInfo {
+                                                                    range: 62..63,
+                                                                },
                                                             },
-                                                        },
+                                                        ),
                                                     ),
-                                                ),
+                                                    info: AstInfo {
+                                                        range: 59..63,
+                                                    },
+                                                },
                                             ),
-                                        ),
-                                        alias: Some(
-                                            Alias {
-                                                as_kw: AstInfo {
-                                                    range: 83..84,
-                                                },
-                                                name: Some(
-                                                    String(
-                                                        PrimitiveValue {
-                                                            value: "z",
-                                                            info: AstInfo {
-                                                                range: 85..86,
-                                                            },
-                                                        },
-                                                    ),
-                                                ),
-                                                info: AstInfo {
-                                                    range: 82..86,
-                                                },
+                                            info: AstInfo {
+                                                range: 54..63,
                                             },
-                                        ),
-                                        info: AstInfo {
-                                            range: 73..86,
                                         },
-                                    },
+                                    ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "only_expr_as",
+                                                info: AstInfo {
+                                                    range: 64..65,
+                                                },
+                                            },
+                                            colon: None,
+                                            type_expr: None,
+                                            eq: Some(
+                                                AstInfo {
+                                                    range: 66..67,
+                                                },
+                                            ),
+                                            expr: Some(
+                                                Single(
+                                                    Primitive(
+                                                        String(
+                                                            PrimitiveValue {
+                                                                value: "expr",
+                                                                info: AstInfo {
+                                                                    range: 68..69,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            alias: Some(
+                                                Alias {
+                                                    as_kw: AstInfo {
+                                                        range: 70..71,
+                                                    },
+                                                    name: Some(
+                                                        String(
+                                                            PrimitiveValue {
+                                                                value: "y",
+                                                                info: AstInfo {
+                                                                    range: 72..73,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                    info: AstInfo {
+                                                        range: 69..73,
+                                                    },
+                                                },
+                                            ),
+                                            info: AstInfo {
+                                                range: 63..73,
+                                            },
+                                        },
+                                    ),
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "type_and_expr_as",
+                                                info: AstInfo {
+                                                    range: 74..75,
+                                                },
+                                            },
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 75..76,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "number",
+                                                                info: AstInfo {
+                                                                    range: 77..78,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
+                                                            info: AstInfo {
+                                                                range: 76..78,
+                                                            },
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            eq: Some(
+                                                AstInfo {
+                                                    range: 79..80,
+                                                },
+                                            ),
+                                            expr: Some(
+                                                Single(
+                                                    Primitive(
+                                                        Number(
+                                                            PrimitiveValue {
+                                                                value: "1",
+                                                                info: AstInfo {
+                                                                    range: 81..82,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            alias: Some(
+                                                Alias {
+                                                    as_kw: AstInfo {
+                                                        range: 83..84,
+                                                    },
+                                                    name: Some(
+                                                        String(
+                                                            PrimitiveValue {
+                                                                value: "z",
+                                                                info: AstInfo {
+                                                                    range: 85..86,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ),
+                                                    info: AstInfo {
+                                                        range: 82..86,
+                                                    },
+                                                },
+                                            ),
+                                            info: AstInfo {
+                                                range: 73..86,
+                                            },
+                                        },
+                                    ),
                                 ],
                                 rcurly: Some(
                                     AstInfo {

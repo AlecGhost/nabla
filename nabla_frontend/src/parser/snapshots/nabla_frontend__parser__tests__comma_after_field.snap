@@ -32,68 +32,69 @@ Program {
                                     range: 7..8,
                                 },
                                 fields: [
-                                    StructField {
-                                        name: Ident {
-                                            name: "test",
-                                            info: AstInfo {
-                                                range: 9..10,
+                                    Ok(
+                                        StructField {
+                                            name: Ident {
+                                                name: "test",
+                                                info: AstInfo {
+                                                    range: 9..10,
+                                                },
                                             },
-                                        },
-                                        colon: Some(
-                                            AstInfo {
-                                                range: 10..11,
-                                            },
-                                        ),
-                                        type_expr: Some(
-                                            Single(
-                                                Named(
-                                                    Named {
-                                                        name: Ident {
-                                                            name: "String",
+                                            colon: Some(
+                                                AstInfo {
+                                                    range: 10..11,
+                                                },
+                                            ),
+                                            type_expr: Some(
+                                                Single(
+                                                    Named(
+                                                        Named {
+                                                            name: Ident {
+                                                                name: "String",
+                                                                info: AstInfo {
+                                                                    range: 12..13,
+                                                                },
+                                                            },
+                                                            inner_names: [],
+                                                            expr: None,
                                                             info: AstInfo {
-                                                                range: 12..13,
+                                                                range: 11..13,
                                                             },
                                                         },
-                                                        inner_names: [],
-                                                        expr: None,
-                                                        info: AstInfo {
-                                                            range: 11..13,
-                                                        },
-                                                    },
+                                                    ),
                                                 ),
                                             ),
-                                        ),
-                                        eq: None,
-                                        expr: None,
-                                        alias: None,
-                                        info: AstInfo {
-                                            range: 8..13,
+                                            eq: None,
+                                            expr: None,
+                                            alias: None,
+                                            info: AstInfo {
+                                                range: 8..13,
+                                            },
                                         },
-                                    },
+                                    ),
+                                    Err(
+                                        StructFieldError {
+                                            info: AstInfo {
+                                                range: 13..14,
+                                            },
+                                        },
+                                    ),
                                 ],
-                                rcurly: None,
+                                rcurly: Some(
+                                    AstInfo {
+                                        range: 15..16,
+                                    },
+                                ),
                                 info: AstInfo {
-                                    range: 6..13,
+                                    range: 6..16,
                                 },
                             },
                         ),
                     ),
                 ),
                 info: AstInfo {
-                    range: 0..13,
+                    range: 0..16,
                 },
-            },
-        ),
-        Init(
-            Error(
-                AstInfo {
-                    range: 13..14,
-                },
-            ),
-        ),
-        Error(
-            AstInfo {
-                range: 14..16,
             },
         ),
     ],

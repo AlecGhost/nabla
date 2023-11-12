@@ -169,18 +169,18 @@ fn use_multiple() {
                     kind: Some(UseKind::Multiple(UseItems {
                         lcurly: info(4..5),
                         items: vec![
-                            UseItem {
+                            Ok(UseItem {
                                 name: ident("b", 5..6),
                                 body: None,
                                 alias: None,
                                 info: info(5..6),
-                            },
-                            UseItem {
+                            }),
+                            Ok(UseItem {
                                 name: ident("c", 7..8),
                                 body: None,
                                 alias: None,
                                 info: info(6..8),
-                            },
+                            }),
                         ],
                         rcurly: Some(info(8..9)),
                         info: info(4..9),
@@ -293,7 +293,7 @@ def Person = {
                 expr: Some(Expr::Single(Single::Struct(Struct {
                     lcurly: info(7..8),
                     fields: vec![
-                        StructField {
+                        Ok(StructField {
                             name: ident("name", 9..10),
                             colon: Some(info(10..11)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
@@ -306,8 +306,8 @@ def Person = {
                             expr: None,
                             alias: None,
                             info: info(8..13),
-                        },
-                        StructField {
+                        }),
+                        Ok(StructField {
                             name: ident("age", 14..15),
                             colon: Some(info(15..16)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
@@ -325,7 +325,7 @@ def Person = {
                             )))),
                             alias: None,
                             info: info(13..22),
-                        },
+                        }),
                     ],
                     rcurly: Some(info(23..24)),
                     info: info(6..24),
@@ -425,13 +425,26 @@ fn ignore_global_error() {
 }
 
 #[test]
-fn ignore_use_error() {
+fn ignore_use_kind_error() {
     let src = "use x::{y::=}";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 7..8)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_use_item_error() {
+    let src = "use x::{=}";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 5..6)],
         errors
     );
     insta::assert_debug_snapshot!(program);
@@ -451,11 +464,7 @@ def x = {
     );
     let (program, errors) = parse(&tokens);
     assert_eq!(
-        vec![
-            Error::new(ErrorMessage::MissingClosingCurly, 12..12),
-            Error::new(ErrorMessage::UnexpectedTokens, 13..14),
-            Error::new(ErrorMessage::UnexpectedTokens, 14..16),
-        ],
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 13..14)],
         errors
     );
     insta::assert_debug_snapshot!(program);

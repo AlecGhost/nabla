@@ -108,6 +108,7 @@ impl Eval for Struct {
         Value::Struct(
             self.fields
                 .iter()
+                .flatten()
                 .map(|field| {
                     let value = field
                         .expr

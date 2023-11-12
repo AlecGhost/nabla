@@ -11,10 +11,11 @@ UseKind <-
     STAR
     / UseItem
     / UseItems
-    / UseError
+    / UseKindError
 UseItem <- Ident UseBody? Alias?
-UseItems <- LCURLY UseItem* RCURLY?
-UseError <- (!UseLA .)+
+UseItems <- LCURLY (UseItem / UseItemError)* RCURLY?
+UseKindError <- (!UseKindLA .)+
+UseItemError <- (!UseItemLA .)+
 
 Def <-  DEF Ident? (COLON EXPR?)? EQ? Expr?
 
@@ -30,8 +31,9 @@ UnionAlternative <- PIPE Single?
 
 Single <- Struct / List / Named / Primitive
 
-Struct <- LCURLY StructField* RCURLY?
+Struct <- LCURLY (StructField / StructFieldError)* RCURLY?
 StructField <- Ident (COLON Expr?)? (EQ Expr?)? Alias?
+StructFieldError <- (!StructFieldLA .)+
 
 List <- LBRACKET Expr* RBRACKET?
 
@@ -56,12 +58,18 @@ GlobalLA <-
     / LBRACKET
     / IDENT
     / EOF
-UseLA <- STAR
+UseKindLA <-
+    STAR
     / AS
     / RCURLY
     / GlobalLA
-ExprLA <- EQ
+UseItemLA <- UseKindLA
+ExprLA <-
+    EQ
     / RCURLY
     / RBRACKET
     / AS
     / GlobalLA
+StructFieldLA <-
+    PIPE
+    / ExprLA

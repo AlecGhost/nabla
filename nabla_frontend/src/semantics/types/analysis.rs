@@ -109,7 +109,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
                     true
                 }
                 UseKind::Multiple(items) => {
-                    items.items.iter().for_each(|item| {
+                    items.items.iter().flatten().for_each(|item| {
                         analyze_item(item, type_info, path_stack);
                     });
                     false
@@ -271,6 +271,7 @@ impl TypeAnalyzer for Struct {
         let field_rule_indices = self
             .fields
             .iter()
+            .flatten()
             .map(|field| (field.name.name.clone(), field.analyze(type_info)))
             .collect();
         let rules = &mut type_info.rules;
