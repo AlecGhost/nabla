@@ -2,7 +2,7 @@ use crate::{
     ast::*,
     lexer::lex,
     parser::{parse, Error, ErrorMessage},
-    token::{Token, TokenRange, TokenType},
+    token::{self, Token, TokenRange, TokenType},
 };
 use pretty_assertions::assert_eq;
 
@@ -236,7 +236,7 @@ fn def_ident() {
 
 #[test]
 fn def_union() {
-    let src = "def ok = \"yes\" | true";
+    let src = r#"def ok = "yes" | true"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
@@ -374,23 +374,89 @@ fn def_list() {
 
 #[test]
 fn def_all_syntax() {
-    let src = "
+    let src = r#"
 use other_dir::*
 use dir2::{x::{y} z}
 use dir3::test
 
 def x = {
     only_type: string
-    only_expr = \"expr\"
+    only_expr = "expr"
     type_and_expr: number = 1
-    only_type_as: string as \"x\"
-    only_expr_as = \"expr\" as \"y\"
-    type_and_expr_as: number = 1 as \"z\"
+    only_type_as: string as "x"
+    only_expr_as = "expr" as "y"
+    type_and_expr_as: number = 1 as "z"
 }
-";
+"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_expr_error() {
+    let src = "def x = @";
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![token::Error::new(token::ErrorMessage::Unknown, 8..9)],
+        errors
+    );
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 5..7)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_global_error() {
+    let src = "def x = {}=";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 8..9)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn ignore_use_error() {
+    let src = "use x::{y::=}";
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 7..8)],
+        errors
+    );
+    insta::assert_debug_snapshot!(program);
+}
+
+#[test]
+fn comma_after_field() {
+    let src = "
+def x = {
+    test: String,
+}
+";
+    let (tokens, errors) = lex(src);
+    assert_eq!(
+        vec![token::Error::new(token::ErrorMessage::Unknown, 27..28)],
+        errors
+    );
+    let (program, errors) = parse(&tokens);
+    assert_eq!(
+        vec![
+            Error::new(ErrorMessage::MissingClosingCurly, 12..12),
+            Error::new(ErrorMessage::UnexpectedTokens, 13..14),
+            Error::new(ErrorMessage::UnexpectedTokens, 14..16),
+        ],
+        errors
+    );
     insta::assert_debug_snapshot!(program);
 }

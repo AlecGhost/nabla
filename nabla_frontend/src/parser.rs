@@ -549,12 +549,17 @@ mod lookahead {
         token::def,
         token::r#let,
         token::lcurly,
-        token::rcurly,
         token::lbracket,
-        token::rbracket,
         token::ident,
         token::eof,
     );
-    lookahead_parser!(r#use, token::star, global,);
-    lookahead_parser!(expr, global, token::eq,);
+    lookahead_parser!(r#use, token::star, token::r#as, token::rcurly, global,);
+    lookahead_parser!(
+        expr,
+        token::eq,
+        token::rcurly,
+        token::rbracket,
+        token::r#as,
+        global,
+    );
 }

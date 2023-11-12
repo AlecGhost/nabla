@@ -37,9 +37,18 @@ where
         })),
         Err(nom::Err::Error(err)) => {
             let mut input = err.input;
+            let start = input.location_offset();
             loop {
                 match pattern(input) {
-                    Ok((input, _)) => return Ok((input, ())),
+                    Ok((mut input, _)) => {
+                        let end = input.location_offset();
+                        let error = parser::Error::new(
+                            parser::ErrorMessage::UnexpectedTokens,
+                            start..end,
+                        );
+                        input.append_error(error);
+                        return Ok((input, ()));
+                    }
                     Err(nom::Err::Error(err)) => {
                         match take::<usize, TokenStream<'a>, ParserError<'a>>(1)(err.input) {
                             Ok((i, _)) => input = i,

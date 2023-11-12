@@ -27,6 +27,7 @@ pub enum ErrorMessage {
     MissingClosingCurly,
     MissingClosingBracket,
     TokensAfterEof,
+    UnexpectedTokens,
 }
 
 impl std::fmt::Display for ErrorMessage {
@@ -40,6 +41,7 @@ impl std::fmt::Display for ErrorMessage {
             Self::MissingClosingCurly => "missing closing `}`",
             Self::MissingClosingBracket => "missing closing `]`",
             Self::TokensAfterEof => "EOF was not the last provided token",
+            Self::UnexpectedTokens => "unexpected tokens",
         };
         write!(f, "{}", message)
     }

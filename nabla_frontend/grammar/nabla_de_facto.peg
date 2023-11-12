@@ -53,10 +53,15 @@ GlobalLA <-
     / DEF
     / LET
     / LCURLY
-    / RCURLY
     / LBRACKET
-    / RBRACKET
     / IDENT
     / EOF
-UseLA <-  STAR / GlobalLA
-ExprLA <- GlobalLA
+UseLA <- STAR
+    / AS
+    / RCURLY
+    / GlobalLA
+ExprLA <- EQ
+    / RCURLY
+    / RBRACKET
+    / AS
+    / GlobalLA
