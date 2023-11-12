@@ -25,10 +25,7 @@ fn convert_to_json_value(value: Value) -> Option<serde_json::Value> {
             let len = s.len();
             let object: serde_json::Map<_, _> = s
                 .into_iter()
-                .filter_map(|(k, v)| match convert_to_json_value(v) {
-                    Some(value) => Some((k, value)),
-                    None => None,
-                })
+                .filter_map(|(k, v)| convert_to_json_value(v).map(|v| (k, v)))
                 .collect();
             if object.len() != len {
                 None

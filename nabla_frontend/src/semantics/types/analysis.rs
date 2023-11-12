@@ -204,11 +204,11 @@ const fn rule_index(rules: &[Rule]) -> RuleIndex {
 }
 
 pub(super) trait TypeAnalyzer {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex;
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex;
 }
 
 impl TypeAnalyzer for Expr {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let rules = &mut type_info.rules;
         match self {
             Self::Union(union) => union.analyze(type_info),
@@ -225,7 +225,7 @@ impl TypeAnalyzer for Expr {
 }
 
 impl TypeAnalyzer for Union {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let mut inner_rule_indices = Vec::with_capacity(self.alternatives.len() + 1);
         inner_rule_indices.push(self.single.analyze(type_info));
         self.alternatives
@@ -247,7 +247,7 @@ impl TypeAnalyzer for Union {
 }
 
 impl TypeAnalyzer for Single {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         match self {
             Self::Struct(s) => s.analyze(type_info),
             Self::List(list) => list.analyze(type_info),
@@ -258,7 +258,7 @@ impl TypeAnalyzer for Single {
 }
 
 impl TypeAnalyzer for StructOrList {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         match self {
             Self::Struct(s) => s.analyze(type_info),
             Self::List(l) => l.analyze(type_info),
@@ -267,7 +267,7 @@ impl TypeAnalyzer for StructOrList {
 }
 
 impl TypeAnalyzer for Struct {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let field_rule_indices = self
             .fields
             .iter()
@@ -284,7 +284,7 @@ impl TypeAnalyzer for Struct {
 }
 
 impl TypeAnalyzer for StructField {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let info = self.info.clone();
         let rule = match (
             self.type_expr
@@ -324,7 +324,7 @@ impl TypeAnalyzer for StructField {
 }
 
 impl TypeAnalyzer for List {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let inner_rule_indices = self
             .exprs
             .iter()
@@ -340,7 +340,7 @@ impl TypeAnalyzer for List {
 }
 
 impl TypeAnalyzer for Named {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let named_rule = Rule {
             type_description: TypeDescription::Ident(self.name.clone()),
             info: self.name.info.clone(),
@@ -358,7 +358,7 @@ impl TypeAnalyzer for Named {
 }
 
 impl TypeAnalyzer for Primitive {
-    fn analyze<'a>(&self, type_info: &mut TypeInfo<'a>) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let rules = &mut type_info.rules;
         rules.push(Rule {
             type_description: TypeDescription::Primitive(self.clone()),
@@ -368,7 +368,7 @@ impl TypeAnalyzer for Primitive {
     }
 }
 
-fn analyze_union_in_init<'a>(type_info: &mut TypeInfo<'a>, rule_index: RuleIndex) -> bool {
+fn analyze_union_in_init(type_info: &mut TypeInfo, rule_index: RuleIndex) -> bool {
     let rule = type_info.rules.get(rule_index).expect("Rule must exist");
     let is_union = matches!(rule.type_description, TypeDescription::Union(_));
     if is_union {
