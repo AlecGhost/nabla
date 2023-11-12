@@ -4,7 +4,7 @@ use thiserror::Error;
 /// Semantic error
 /// Contains an error message and the token range, where the error occurred.
 #[derive(Clone, Debug, Error, PartialEq, Eq)]
-#[error("Token {}-{}: {message}", .range.start, .range.end)]
+#[error("{message}")]
 pub struct Error {
     pub message: ErrorMessage,
     pub range: TokenRange,

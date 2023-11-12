@@ -72,7 +72,7 @@ pub enum ErrorMessage {
 /// Lexical error
 /// Contains an error message and the text range, where the error occurred.
 #[derive(Clone, Debug, PartialEq, Eq, Error)]
-#[error("{}..{}: {message}", .range.start, .range.end)]
+#[error("{message}")]
 pub struct Error {
     pub message: ErrorMessage,
     pub range: TextRange,
