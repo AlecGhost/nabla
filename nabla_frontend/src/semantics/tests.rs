@@ -5,7 +5,7 @@ use crate::{
     parser::parse,
     semantics::{
         error::{Error, ErrorMessage},
-        types::analyze,
+        types::{self, TypeInfo},
     },
 };
 use pretty_assertions::assert_eq;
@@ -17,7 +17,7 @@ fn empty() {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -32,7 +32,7 @@ use f::g as h
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -46,7 +46,7 @@ use c::b
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::Redeclaration("b".to_string()),
@@ -66,7 +66,7 @@ use c::b as d
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -80,7 +80,7 @@ EmptyList []
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -100,7 +100,7 @@ Person {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -115,7 +115,7 @@ let opt_some: Optional = 1
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -132,7 +132,7 @@ fn evaluate_struct() {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
     let init = program
         .globals
@@ -160,7 +160,7 @@ fn evaluate_list() {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
     let init = program
         .globals
@@ -200,7 +200,7 @@ fn evaluate_complex_struct() {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
     let init = program
         .globals
@@ -242,7 +242,7 @@ Config {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -255,7 +255,7 @@ def Type = Type {}
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -274,7 +274,7 @@ def Type: Type = {}
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -294,7 +294,7 @@ Type [ "a" [ "b" ] ]
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -312,7 +312,7 @@ A {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -330,7 +330,7 @@ A {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_empty!(errors);
 }
 
@@ -348,7 +348,7 @@ A {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
 
@@ -362,7 +362,7 @@ let b = "B" | "b"
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 9..15),
@@ -384,7 +384,7 @@ def Test = {
     assert_empty!(errors);
     let (program, errors) = parse(&tokens);
     assert_empty!(errors);
-    let errors = super::analyze(&program);
+    let TypeInfo { errors, .. } = super::analyze(&program);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 15..21),

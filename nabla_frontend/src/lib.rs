@@ -19,8 +19,30 @@ pub mod parser;
 pub mod semantics;
 pub mod token;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GlobalIdent {
     pub root: String,
     pub path: Vec<String>,
+}
+
+impl GlobalIdent {
+    pub fn extend(mut self, ident: String) -> Self {
+        self.path.push(ident);
+        self
+    }
+}
+
+impl Default for GlobalIdent {
+    fn default() -> Self {
+        Self {
+            root: "root".to_string(),
+            path: Vec::new(),
+        }
+    }
+}
+
+impl std::fmt::Display for GlobalIdent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}::{}", self.root, self.path.join("::"))
+    }
 }

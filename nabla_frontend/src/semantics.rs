@@ -1,13 +1,16 @@
 use crate::ast::{Global, Program};
 use error::{Error, ErrorMessage};
+pub use types::{BuiltInType, Rule, TypeDescription, TypeInfo};
 
 mod error;
 #[cfg(test)]
 mod tests;
 mod types;
 
-pub fn analyze(program: &Program) -> Vec<Error> {
-    [types::analyze(program), check_multiple_inits(program)].concat()
+pub fn analyze(program: &Program) -> TypeInfo {
+    let mut type_info = types::analyze(program);
+    type_info.errors.extend(check_multiple_inits(program));
+    type_info
 }
 
 fn check_multiple_inits(program: &Program) -> Vec<Error> {

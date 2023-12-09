@@ -1,7 +1,12 @@
 use clap::Parser;
 use nabla_backend::to_json_string;
 use nabla_frontend::{
-    ast::Global, eval::eval, lexer::lex, parser::parse, semantics::analyze, token::TextRange,
+    ast::Global,
+    eval::eval,
+    lexer::lex,
+    parser::parse,
+    semantics::{analyze, TypeInfo},
+    token::TextRange,
 };
 use std::path::PathBuf;
 
@@ -37,7 +42,7 @@ fn main() {
             range.start.line, range.start.char, error
         );
     }
-    let errors = analyze(&program);
+    let TypeInfo { errors, .. } = analyze(&program);
     if !errors.is_empty() {
         valid = false
     }

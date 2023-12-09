@@ -19,13 +19,13 @@ pub const BOOL: &str = "Bool";
 type RuleIndex = usize;
 
 #[derive(Clone, Debug)]
-struct Rule {
-    type_description: TypeDescription,
-    info: AstInfo,
+pub struct Rule {
+    pub type_description: TypeDescription,
+    pub info: AstInfo,
 }
 
 #[derive(Clone, Debug)]
-enum TypeDescription {
+pub enum TypeDescription {
     Union(Vec<RuleIndex>),
     Struct(HashMap<String, (RuleIndex, bool)>),
     List(Vec<RuleIndex>),
@@ -39,7 +39,7 @@ enum TypeDescription {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-enum BuiltInType {
+pub enum BuiltInType {
     String,
     Number,
     Bool,
@@ -71,14 +71,14 @@ impl BuiltInType {
 }
 
 #[derive(Clone, Debug, Default)]
-struct TypeInfo<'a> {
-    rules: Vec<Rule>,
-    assertions: Vec<(RuleIndex, RuleIndex)>,
-    idents: HashMap<&'a Ident, RuleIndex>,
-    errors: Vec<Error>,
+pub struct TypeInfo<'a> {
+    pub rules: Vec<Rule>,
+    pub assertions: Vec<(RuleIndex, RuleIndex)>,
+    pub idents: HashMap<&'a Ident, RuleIndex>,
+    pub errors: Vec<Error>,
 }
 
-pub fn analyze(program: &Program) -> Vec<Error> {
+pub fn analyze(program: &Program) -> TypeInfo {
     let mut type_info = TypeInfo::default();
     for global in &program.globals {
         match global {
@@ -91,49 +91,51 @@ pub fn analyze(program: &Program) -> Vec<Error> {
             Global::Error(_) => { /* no types to check */ }
         }
     }
-    replace_rules(&mut type_info);
+    validate_idents(&mut type_info);
+    lookup_imports(&mut type_info);
     assertions::check(&mut type_info);
-    type_info.errors
+    type_info
 }
 
-/// Replace all `Ident` and `Import` rules.
+/// Lookup all `Import` rules.
+///
+/// Imports are looked up and replaced by their rule type, if present,
+/// and an `Unknown`-rule otherwise.
+/// Currently the lookup is not implemented, so every import is `Unknown`.
+fn lookup_imports(type_info: &mut TypeInfo) {
+    for rule in type_info.rules.iter_mut() {
+        if let TypeDescription::Import(_) = &rule.type_description {
+            // currently not implementing use
+            rule.type_description = TypeDescription::Unknown;
+        };
+    }
+}
+
+/// Validate all `Ident` rules.
 ///
 /// If the ident is defined, its rule is replaced by a `ValidIdent`-rule,
 /// containing the original rule index.
 /// If not, and it's a built in, it gets converted to a `BuiltIn`-rule.
 /// Otherwise an error is reported and the rule type is `Unknown`.
-///
-/// Imports are looked up and replaced by their rule type, if present,
-/// and an `Unknown`-rule otherwise.
-/// Currently the lookup is not implemented, so every import is `Unknown`.
-fn replace_rules(type_info: &mut TypeInfo) {
+fn validate_idents(type_info: &mut TypeInfo) {
     for rule in type_info.rules.iter_mut() {
-        let replacement = match &rule.type_description {
-            TypeDescription::Ident(ident) => {
-                let rule_index = type_info.idents.get(ident).copied();
-                if let Some(rule_index) = rule_index {
-                    Some(TypeDescription::ValidIdent(rule_index))
-                } else if let Some(built_in) =
-                    BuiltInType::into_iter().find(|built_in| built_in.as_str() == ident.name)
-                {
-                    Some(TypeDescription::BuiltIn(built_in))
-                } else {
-                    // TODO: check imports
-                    type_info.errors.push(Error::new(
-                        ErrorMessage::UndefinedIdent(ident.name.clone()),
-                        ident.info.range.clone(),
-                    ));
-                    Some(TypeDescription::Unknown)
-                }
-            }
-            TypeDescription::Import(_) => {
-                // currently not implementing use
-                Some(TypeDescription::Unknown)
-            }
-            _ => None,
+        if let TypeDescription::Ident(ident) = &rule.type_description {
+            let rule_index = type_info.idents.get(ident).copied();
+            let new_description = if let Some(rule_index) = rule_index {
+                TypeDescription::ValidIdent(rule_index)
+            } else if let Some(built_in) =
+                BuiltInType::into_iter().find(|built_in| built_in.as_str() == ident.name)
+            {
+                TypeDescription::BuiltIn(built_in)
+            } else {
+                // TODO: check imports
+                type_info.errors.push(Error::new(
+                    ErrorMessage::UndefinedIdent(ident.name.clone()),
+                    ident.info.range.clone(),
+                ));
+                TypeDescription::Unknown
+            };
+            rule.type_description = new_description;
         };
-        if let Some(replacement) = replacement {
-            rule.type_description = replacement;
-        }
     }
 }
