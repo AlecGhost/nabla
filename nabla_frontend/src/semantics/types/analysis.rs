@@ -360,6 +360,7 @@ impl TypeAnalyzer for List {
 impl TypeAnalyzer for Named {
     fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
         let flat_name = self.flatten_name();
+        let is_incomplete = flat_name.name.ends_with("::");
         let named_rule = Rule {
             info: flat_name.info.clone(),
             type_description: TypeDescription::Ident(flat_name),
@@ -368,9 +369,11 @@ impl TypeAnalyzer for Named {
         rules.push(named_rule);
         let named_rule_index = rule_index(rules);
         if let Some(expr_rule_index) = self.expr.as_ref().map(|expr| expr.analyze(type_info)) {
-            type_info
-                .assertions
-                .push((named_rule_index, expr_rule_index));
+            if !is_incomplete {
+                type_info
+                    .assertions
+                    .push((named_rule_index, expr_rule_index));
+            }
         };
         named_rule_index
     }

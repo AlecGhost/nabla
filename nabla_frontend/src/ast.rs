@@ -227,14 +227,18 @@ pub struct Named {
 impl Named {
     pub fn flatten_name(&self) -> Ident {
         let mut ident = self.name.clone();
-        for inner_name in &self.inner_names {
-            ident.name += "::";
-            if let Some(inner_ident) = &inner_name.name {
-                ident.name += &inner_ident.name;
-            } else {
-                ident.name += "_";
-            }
-        }
+        let suffix = self
+            .inner_names
+            .iter()
+            .map(|inner_name| {
+                inner_name
+                    .name
+                    .as_ref()
+                    .map(|ident| ident.name.as_str())
+                    .unwrap_or("")
+            })
+            .fold(String::new(), |acc, name| acc + "::" + name);
+        ident.name = ident.name + &suffix;
         if let Some(inner_name) = self.inner_names.last() {
             ident.info.range.end = inner_name.info.range.end;
         }
