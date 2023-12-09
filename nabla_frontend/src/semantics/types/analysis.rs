@@ -267,12 +267,31 @@ impl TypeAnalyzer for StructOrList {
 
 impl TypeAnalyzer for Struct {
     fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+        let mut field_names = Vec::new();
+        let mut errors = Vec::new();
         let field_rule_indices = self
             .fields
             .iter()
             .flatten()
-            .map(|field| (field.name.name.clone(), field.analyze(type_info)))
+            .inspect(|field| {
+                let field_name = &field.name.name;
+                if field_names.contains(&field_name) {
+                    errors.push(Error::new(
+                        ErrorMessage::DuplicateField(field_name.clone()),
+                        field.info.range.clone(),
+                    ));
+                } else {
+                    field_names.push(field_name);
+                }
+            })
+            .map(|field| {
+                (
+                    field.name.name.clone(),
+                    field.analyze(type_info),
+                )
+            })
             .collect();
+        type_info.errors.extend(errors);
         let rules = &mut type_info.rules;
         rules.push(Rule {
             type_description: TypeDescription::Struct(field_rule_indices),
