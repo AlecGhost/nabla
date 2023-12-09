@@ -14,6 +14,18 @@ pub enum Value {
     Struct(HashMap<String, Value>),
 }
 
+impl Value {
+    /// Returns whether this value is entirely known/does not contain `Value::Unknown`.
+    pub fn is_known(&self) -> bool {
+        match self {
+            Self::Unknown => false,
+            Self::Null | Self::Bool(_) | Self::Number(_) | Self::String(_) => true,
+            Self::List(l) => l.iter().all(Self::is_known),
+            Self::Struct(s) => s.values().all(Self::is_known),
+        }
+    }
+}
+
 impl From<String> for Value {
     fn from(value: String) -> Self {
         Self::String(value)
@@ -49,7 +61,7 @@ where
     V: Into<Self>,
 {
     fn from(value: [V; N]) -> Self {
-        let list = value.map(|v| v.into());
+        let list = value.map(V::into);
         Self::List(Vec::from(list))
     }
 }
@@ -113,7 +125,7 @@ impl Eval for Struct {
                     let value = field
                         .expr
                         .as_ref()
-                        .map(|expr| expr.eval())
+                        .map(Expr::eval)
                         .unwrap_or(Value::Unknown);
                     (field.emit_name().to_string(), value)
                 })
@@ -124,7 +136,7 @@ impl Eval for Struct {
 
 impl Eval for List {
     fn eval(&self) -> Value {
-        Value::List(self.exprs.iter().map(|expr| expr.eval()).collect())
+        Value::List(self.exprs.iter().map(Expr::eval).collect())
     }
 }
 
