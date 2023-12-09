@@ -27,7 +27,7 @@ struct Rule {
 #[derive(Clone, Debug)]
 enum TypeDescription {
     Union(Vec<RuleIndex>),
-    Struct(HashMap<String, RuleIndex>),
+    Struct(HashMap<String, (RuleIndex, bool)>),
     List(Vec<RuleIndex>),
     Ident(Ident),
     ValidIdent(RuleIndex),

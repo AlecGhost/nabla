@@ -56,16 +56,16 @@ fn check_in_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) ->
 
 fn check_struct(
     rules: &[Rule],
-    expected: &HashMap<String, RuleIndex>,
-    actual: &HashMap<String, RuleIndex>,
+    expected: &HashMap<String, (RuleIndex, bool)>,
+    actual: &HashMap<String, (RuleIndex, bool)>,
 ) -> Vec<Error> {
     let mut errors = Vec::new();
-    for (field_name, expected_index) in expected {
-        if let Some(actual_index) = actual.get(field_name) {
+    for (field_name, (expected_index, has_default)) in expected {
+        if let Some((actual_index, _)) = actual.get(field_name) {
             let expected_rule = rules.get(*expected_index).expect("Rule must exist");
             let actual_rule = rules.get(*actual_index).expect("Rule must exist");
             errors.extend(check_rules(rules, expected_rule, actual_rule));
-        } else {
+        } else if !has_default {
             // TODO: find out range
             errors.push(Error::new(
                 ErrorMessage::MissingField(field_name.clone()),
