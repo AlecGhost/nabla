@@ -69,6 +69,21 @@ pub struct UseItem {
     pub info: AstInfo,
 }
 
+impl UseItem {
+    /// Get the identifier by which this item will be referable to in this scope.
+    /// If a valid alias is set, it is returned. Otherwise the original name.
+    pub fn identifier(&self) -> &Ident {
+        self.alias
+            .as_ref()
+            .and_then(|alias| alias.name.as_ref())
+            .and_then(|alias_name| match alias_name {
+                AliasName::Ident(ident) => Some(ident),
+                AliasName::String(_) => None,
+            })
+            .unwrap_or(&self.name)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct UseItemError {
     pub info: AstInfo,
@@ -173,6 +188,21 @@ pub struct StructField {
     pub info: AstInfo,
 }
 
+impl StructField {
+    /// Get the name as which this field will be emitted.
+    /// If a valid alias is set, it is returned. Otherwise the original name.
+    pub fn emit_name(&self) -> &str {
+        self.alias
+            .as_ref()
+            .and_then(|alias| alias.name.as_ref())
+            .and_then(|alias_name| match alias_name {
+                AliasName::String(name) => Some(&name.value),
+                AliasName::Ident(_) => None,
+            })
+            .unwrap_or(&self.name.name)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StructFieldError {
     pub info: AstInfo,
@@ -192,6 +222,24 @@ pub struct Named {
     pub inner_names: Vec<InnerName>,
     pub expr: Option<StructOrList>,
     pub info: AstInfo,
+}
+
+impl Named {
+    pub fn flatten_name(&self) -> Ident {
+        let mut ident = self.name.clone();
+        for inner_name in &self.inner_names {
+            ident.name += "::";
+            if let Some(inner_ident) = &inner_name.name {
+                ident.name += &inner_ident.name;
+            } else {
+                ident.name += "_";
+            }
+        }
+        if let Some(inner_name) = self.inner_names.last() {
+            ident.info.range.end = inner_name.info.range.end;
+        }
+        ident
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

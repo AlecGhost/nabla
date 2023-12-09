@@ -118,6 +118,7 @@ fn replace_rules(type_info: &mut TypeInfo) {
                 {
                     Some(TypeDescription::BuiltIn(built_in))
                 } else {
+                    // TODO: check imports
                     type_info.errors.push(Error::new(
                         ErrorMessage::UndefinedIdent(ident.name.clone()),
                         ident.info.range.clone(),

@@ -121,6 +121,8 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
         }
     }
 
+    /// If the item is terminal, add an import rule.
+    /// Else push its name on the stack and continue with `analyze_body`.
     fn analyze_item<'a>(
         item: &'a UseItem,
         type_info: &mut TypeInfo<'a>,
@@ -139,6 +141,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
             }
             path_stack.pop();
         } else {
+            // is a terminal item
             let TypeInfo {
                 ref mut rules,
                 ref mut idents,
@@ -159,33 +162,28 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
             rules.push(import_rule);
             path_stack.pop();
             let import_rule_index = rule_index(rules);
-            let name = item
-                .alias
-                .as_ref()
-                .and_then(|alias| alias.name.as_ref())
-                .and_then(|alias_name| match alias_name {
-                    AliasName::Ident(ident) => Some(ident),
-                    AliasName::String(_) => None,
-                })
-                .unwrap_or(&item.name);
+            let ident = item.identifier();
             use std::collections::hash_map::Entry;
-            match idents.entry(name) {
+            match idents.entry(ident) {
                 Entry::Vacant(entry) => {
                     entry.insert(import_rule_index);
                 }
                 Entry::Occupied(_) => {
                     errors.push(Error::new(
-                        ErrorMessage::Redeclaration(name.name.clone()),
-                        name.info.range.clone(),
+                        ErrorMessage::Redeclaration(ident.name.clone()),
+                        ident.info.range.clone(),
                     ));
                 }
             }
         }
     }
 
-    if let (Some(root), Some(body)) = (&u.name, &u.body) {
-        let mut path_stack = vec![root.name.clone()];
-        if !analyze_body(body, type_info, &mut path_stack) {
+    match (&u.name, &u.body) {
+        (Some(root), Some(body)) => {
+            let mut path_stack = vec![root.name.clone()];
+            analyze_body(body, type_info, &mut path_stack);
+        }
+        (Some(root), None) => {
             let import_rule = Rule {
                 type_description: TypeDescription::Import(GlobalIdent {
                     root: root.name.clone(),
@@ -195,6 +193,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
             };
             type_info.rules.push(import_rule);
         }
+        _ => {}
     }
 }
 
@@ -341,9 +340,10 @@ impl TypeAnalyzer for List {
 
 impl TypeAnalyzer for Named {
     fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+        let flat_name = self.flatten_name();
         let named_rule = Rule {
-            type_description: TypeDescription::Ident(self.name.clone()),
-            info: self.name.info.clone(),
+            info: flat_name.info.clone(),
+            type_description: TypeDescription::Ident(flat_name),
         };
         let rules = &mut type_info.rules;
         rules.push(named_rule);

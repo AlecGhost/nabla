@@ -115,7 +115,7 @@ impl Eval for Struct {
                         .as_ref()
                         .map(|expr| expr.eval())
                         .unwrap_or(Value::Unknown);
-                    (field.name.name.clone(), value)
+                    (field.emit_name().to_string(), value)
                 })
                 .collect(),
         )
