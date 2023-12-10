@@ -9,3 +9,4 @@ edition = "2021"
 clap = { version = "4.4.6", features = ["derive"] }
 nabla_frontend = { path = "../nabla_frontend" }
 nabla_backend = { path = "../nabla_backend" }
+serde_json = "1.0.108"

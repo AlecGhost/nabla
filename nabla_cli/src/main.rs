@@ -1,5 +1,5 @@
 use clap::Parser;
-use nabla_backend::to_json_string;
+use nabla_backend::to_json_value;
 use nabla_frontend::{
     ast::Global,
     eval::eval,
@@ -60,8 +60,9 @@ fn main() {
             _ => None,
         }) {
             let value = eval(init);
-            if let Some(json) = to_json_string(value) {
-                println!("{json}");
+            if let Some(json) = to_json_value(value) {
+                let pretty_json = serde_json::to_string_pretty(&json).expect("Converting value to string failed");
+                println!("{}", pretty_json);
             }
         }
     }
