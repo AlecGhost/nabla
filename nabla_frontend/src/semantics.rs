@@ -1,4 +1,4 @@
-use crate::ast::{Global, Program};
+use crate::{ast::{Global, Program}, token::ToTokenRange};
 use error::{Error, ErrorMessage};
 pub use types::{BuiltInType, Rule, TypeDescription, TypeInfo};
 
@@ -22,6 +22,6 @@ fn check_multiple_inits(program: &Program) -> Vec<Error> {
             _ => None,
         })
         .skip(1)
-        .map(|init| Error::new(ErrorMessage::MultipleInits, init.info().range.clone()))
+        .map(|init| Error::new(ErrorMessage::MultipleInits, init.info().to_token_range()))
         .collect()
 }

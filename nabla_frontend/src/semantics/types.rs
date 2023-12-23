@@ -4,7 +4,7 @@ use crate::{
         error::{Error, ErrorMessage},
         types::analysis::TypeAnalyzer,
     },
-    GlobalIdent,
+    GlobalIdent, token::ToTokenRange,
 };
 use std::{array::IntoIter, collections::HashMap};
 
@@ -131,7 +131,7 @@ fn validate_idents(type_info: &mut TypeInfo) {
                 // TODO: check imports
                 type_info.errors.push(Error::new(
                     ErrorMessage::UndefinedIdent(ident.name.clone()),
-                    ident.info.range.clone(),
+                    ident.info.to_token_range(),
                 ));
                 TypeDescription::Unknown
             };

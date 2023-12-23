@@ -4,7 +4,7 @@ use crate::{
         types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
         Error,
     },
-    token::TokenRange,
+    token::{TokenRange, ToTokenRange},
 };
 use std::collections::HashMap;
 
@@ -35,7 +35,7 @@ fn check_union(rules: &[Rule], expected: &[RuleIndex], actual: &[RuleIndex]) -> 
                 .iter()
                 .any(|expected_rule| check_rules(rules, expected_rule, actual_rule).is_empty())
         })
-        .map(|actual_rule| Error::new(ErrorMessage::TypeMismatch, actual_rule.info.range.clone()))
+        .map(|actual_rule| Error::new(ErrorMessage::TypeMismatch, actual_rule.info.to_token_range()))
         .collect()
 }
 
@@ -50,7 +50,7 @@ fn check_in_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) ->
     }
     vec![Error::new(
         ErrorMessage::TypeMismatch,
-        actual_rule.info.range.clone(),
+        actual_rule.info.to_token_range(),
     )]
 }
 
@@ -186,14 +186,14 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         // unknown
         (TypeDescription::Unknown, _) => vec![Error::new(
             ErrorMessage::UnknownType,
-            expected_rule.info.range.clone(),
+            expected_rule.info.to_token_range(),
         )],
         // built in
         (TypeDescription::BuiltIn(expected), TypeDescription::Primitive(actual)) => {
             check_value(expected, actual)
         }
         (TypeDescription::BuiltIn(expected), TypeDescription::BuiltIn(actual)) => {
-            check_built_in(expected, actual, actual_rule.info.range.clone())
+            check_built_in(expected, actual, actual_rule.info.to_token_range())
         }
         // struct
         (TypeDescription::Struct(expected), TypeDescription::Struct(actual)) => {
@@ -209,7 +209,7 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         }
         (_expected, _actual) => vec![Error::new(
             ErrorMessage::TypeMismatch,
-            actual_rule.info.range.clone(),
+            actual_rule.info.to_token_range(),
         )],
     }
 }

@@ -4,7 +4,7 @@ use crate::{
         error::{Error, ErrorMessage},
         types::{Rule, TypeDescription, TypeInfo},
     },
-    GlobalIdent,
+    GlobalIdent, token::ToTokenRange,
 };
 
 use super::RuleIndex;
@@ -44,7 +44,7 @@ fn analyze_binding<'a>(
         if check_self_reference(name, type_expr) || check_self_reference(name, expr) {
             type_info.errors.push(Error::new(
                 ErrorMessage::SelfReference(name.name.clone()),
-                name.info.range.clone(),
+                name.info.to_token_range(),
             ));
             return;
         }
@@ -77,7 +77,7 @@ fn analyze_binding<'a>(
             Entry::Occupied(_) => {
                 type_info.errors.push(Error::new(
                     ErrorMessage::Redeclaration(name.name.clone()),
-                    name.info.range.clone(),
+                    name.info.to_token_range(),
                 ));
                 None
             }
@@ -100,7 +100,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
                 UseKind::All(info) => {
                     type_info.errors.push(Error {
                         message: ErrorMessage::Unsupported("glob import".to_string()),
-                        range: info.range.clone(),
+                        range: info.to_token_range(),
                     });
                     false
                 }
@@ -135,7 +135,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
                 if let Some(alias) = &item.alias {
                     type_info.errors.push(Error::new(
                         ErrorMessage::AliasingNonSingle,
-                        alias.info.range.clone(),
+                        alias.info.to_token_range(),
                     ));
                 }
             }
@@ -171,7 +171,7 @@ pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
                 Entry::Occupied(_) => {
                     errors.push(Error::new(
                         ErrorMessage::Redeclaration(ident.name.clone()),
-                        ident.info.range.clone(),
+                        ident.info.to_token_range(),
                     ));
                 }
             }
@@ -278,7 +278,7 @@ impl TypeAnalyzer for Struct {
                 if field_names.contains(&field_name) {
                     errors.push(Error::new(
                         ErrorMessage::DuplicateField(field_name.clone()),
-                        field.info.range.clone(),
+                        field.info.to_token_range(),
                     ));
                 } else {
                     field_names.push(field_name);
@@ -396,7 +396,7 @@ fn analyze_union_in_init(type_info: &mut TypeInfo, rule_index: RuleIndex) -> boo
     if is_union {
         type_info.errors.push(Error::new(
             ErrorMessage::UnionInInit,
-            rule.info.range.clone(),
+            rule.info.to_token_range(),
         ));
     }
     is_union
