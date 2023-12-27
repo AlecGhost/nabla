@@ -5,7 +5,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-mod value_analysis;
+mod analysis;
 
 /// Index into rule list
 type RuleIndex = usize;
@@ -42,7 +42,7 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
         match global {
             Global::Def(d) => {
                 if let Some(expr) = &d.expr {
-                    value_analysis::analyze(expr, &mut rules);
+                    analysis::analyze(expr, &mut rules);
                     if let Some(ident) = &d.name {
                         let rule_index = rules.len() - 1;
                         rule_table.insert(ident.clone(), rule_index);
@@ -51,7 +51,7 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
             }
             Global::Let(l) => {
                 if let Some(expr) = &l.expr {
-                    value_analysis::analyze(expr, &mut rules);
+                    analysis::analyze(expr, &mut rules);
                     let rule_index = rules.len() - 1;
                     if let Some(ident) = &l.name {
                         rule_table.insert(ident.clone(), rule_index);
@@ -60,7 +60,7 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
                 }
             }
             Global::Init(expr) => {
-                value_analysis::analyze(expr, &mut rules);
+                analysis::analyze(expr, &mut rules);
                 let rule_index = rules.len() - 1;
                 inits.push(rule_index);
             }

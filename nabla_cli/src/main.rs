@@ -3,7 +3,7 @@ use nabla_backend::to_json_value;
 use nabla_frontend::{
     lexer::lex,
     parser::parse,
-    semantics::{analyze, TypeInfo, values},
+    semantics::{analyze, values},
     token::TextRange,
 };
 use std::path::PathBuf;
@@ -40,7 +40,7 @@ fn main() {
             range.start.line, range.start.char, error
         );
     }
-    let TypeInfo { errors, .. } = analyze(&program);
+    let errors = analyze(&program);
     if !errors.is_empty() {
         valid = false
     }
@@ -67,7 +67,8 @@ fn main() {
     if valid {
         if let Some(init) = inits.first() {
             if let Some(json) = to_json_value(init.clone()) {
-                let pretty_json = serde_json::to_string_pretty(&json).expect("Converting value to string failed");
+                let pretty_json =
+                    serde_json::to_string_pretty(&json).expect("Converting value to string failed");
                 println!("{}", pretty_json);
             }
         }

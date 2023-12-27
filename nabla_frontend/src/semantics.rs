@@ -3,18 +3,20 @@ use crate::{
     token::ToTokenRange,
 };
 use error::{Error, ErrorMessage};
-pub use types::{BuiltInType, Rule, TypeDescription, TypeInfo};
 
 mod error;
 #[cfg(test)]
 mod tests;
-mod types;
+pub mod types;
 pub mod values;
 
-pub fn analyze(program: &Program) -> TypeInfo {
-    let mut type_info = types::analyze(program);
-    type_info.errors.extend(check_multiple_inits(program));
-    type_info
+pub fn analyze(program: &Program) -> Vec<Error> {
+    let type_info = types::analyze(program);
+    let mut errors = type_info.errors;
+    errors.extend(check_multiple_inits(program));
+    let (_, _, value_errors) = values::analyze(program);
+    errors.extend(value_errors);
+    errors
 }
 
 fn check_multiple_inits(program: &Program) -> Vec<Error> {
