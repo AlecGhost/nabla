@@ -4,7 +4,7 @@ use nabla_frontend::eval::Value;
 
 pub fn to_json_value(value: Value) -> Option<serde_json::Value> {
     match value {
-        Value::Unknown | Value::Ref(_) => None,
+        Value::Unknown => None,
         Value::Null => Some(serde_json::Value::Null),
         Value::Bool(b) => Some(serde_json::Value::Bool(b)),
         Value::Number(n) => {

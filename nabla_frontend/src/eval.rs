@@ -9,7 +9,7 @@ pub fn eval(expr: &Expr) -> Value {
     expr.eval()
 }
 
-trait Eval {
+pub trait Eval {
     fn eval(&self) -> Value;
 }
 

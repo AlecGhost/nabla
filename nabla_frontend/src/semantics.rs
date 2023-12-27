@@ -1,4 +1,7 @@
-use crate::{ast::{Global, Program}, token::ToTokenRange};
+use crate::{
+    ast::{Global, Program},
+    token::ToTokenRange,
+};
 use error::{Error, ErrorMessage};
 pub use types::{BuiltInType, Rule, TypeDescription, TypeInfo};
 
@@ -6,6 +9,7 @@ mod error;
 #[cfg(test)]
 mod tests;
 mod types;
+pub mod values;
 
 pub fn analyze(program: &Program) -> TypeInfo {
     let mut type_info = types::analyze(program);

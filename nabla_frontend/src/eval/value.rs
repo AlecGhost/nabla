@@ -21,6 +21,25 @@ impl Value {
             Self::Struct(s) => s.values().all(Self::is_known),
         }
     }
+
+    /// Merges the field of two struct values.
+    /// Existing fields of `self` are not overwritten by the other value.
+    /// If any of the values is not a `Value::Struct`, nothing happens.
+    pub fn merge_fields(&mut self, other: Self) {
+        if let (Self::Struct(this), Self::Struct(other)) = (self, other) {
+            for (field, value) in other {
+                use std::collections::hash_map::Entry;
+                match this.entry(field) {
+                    Entry::Vacant(entry) => {
+                        entry.insert(value);
+                    }
+                    Entry::Occupied(mut entry) => {
+                        entry.get_mut().merge_fields(value);
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl From<String> for Value {

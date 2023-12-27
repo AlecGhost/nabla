@@ -1,11 +1,9 @@
 use clap::Parser;
 use nabla_backend::to_json_value;
 use nabla_frontend::{
-    ast::Global,
-    eval::eval,
     lexer::lex,
     parser::parse,
-    semantics::{analyze, TypeInfo},
+    semantics::{analyze, TypeInfo, values},
     token::TextRange,
 };
 use std::path::PathBuf;
@@ -54,13 +52,21 @@ fn main() {
             range.start.line, range.start.char, error
         );
     }
+    let (inits, _, errors) = values::analyze(&program);
+    if !errors.is_empty() {
+        valid = false
+    }
+    for error in errors {
+        let text_range = tokens[error.range.start].range.start..tokens[error.range.end].range.end;
+        let range = convert_text_range(&src, &text_range);
+        println!(
+            "Line {}, Char {}: {}",
+            range.start.line, range.start.char, error
+        );
+    }
     if valid {
-        if let Some(init) = program.globals.iter().find_map(|global| match global {
-            Global::Init(init) => Some(init),
-            _ => None,
-        }) {
-            let value = eval(init);
-            if let Some(json) = to_json_value(value) {
+        if let Some(init) = inits.first() {
+            if let Some(json) = to_json_value(init.clone()) {
                 let pretty_json = serde_json::to_string_pretty(&json).expect("Converting value to string failed");
                 println!("{}", pretty_json);
             }

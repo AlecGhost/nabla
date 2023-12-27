@@ -2,12 +2,11 @@ use crate::{
     ast::*,
     semantics::{
         error::{Error, ErrorMessage},
-        types::{Rule, TypeDescription, TypeInfo},
+        types::{Rule, RuleIndex, TypeDescription, TypeInfo},
     },
-    GlobalIdent, token::ToTokenRange,
+    token::ToTokenRange,
+    GlobalIdent,
 };
-
-use super::RuleIndex;
 
 pub(super) fn analyze_def<'a>(def: &'a Def, type_info: &mut TypeInfo<'a>) {
     analyze_binding(
