@@ -169,7 +169,7 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         extract_type_description(rules, &expected_rule.type_description),
         extract_type_description(rules, &actual_rule.type_description),
     ) {
-        // sort out types that were already replaced by `replace_rules` or extracted
+        // sort out types that were already replaced by `lookup_imports`, `validate_idents` or extracted
         (TypeDescription::Ident(_), _)
         | (TypeDescription::ValidIdent(_), _)
         | (TypeDescription::Rule(_), _)
