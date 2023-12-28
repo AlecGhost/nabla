@@ -111,20 +111,96 @@ fn evaluate(
 ) -> HashMap<RuleIndex, Value> {
     let mut stack: Vec<RuleIndex> = Vec::new();
     let mut evaluated: HashMap<RuleIndex, Value> = HashMap::with_capacity(rules.len());
-    let mut index = 0;
-    while evaluated.len() != rules.len() {
-        if let Some(rule_index) = stack.pop() {
+    for rule_index in 0..rules.len() {
+        if evaluated.contains_key(&rule_index) {
+            continue;
+        }
+        stack.push(rule_index);
+        while let Some(rule_index) = stack.pop() {
             if evaluated.contains_key(&rule_index) {
                 continue;
             }
+
+            // prevent infinite loop
             if stack.contains(&rule_index) {
-                // recursive call
                 let rule = rules.get(rule_index).expect("Rule must exist");
                 let error = Error::new(ErrorMessage::RecursiveInit, rule.info.range.clone());
                 errors.push(error);
                 evaluated.insert(rule_index, Value::Unknown);
+                continue;
             }
+
+            // push dependencies to stack
             let rule = rules.get(rule_index).expect("Rule must exist");
+            match &rule.value_description {
+                ValueDescription::Union(indices) => {
+                    let unevaluated: Vec<_> = indices
+                        .iter()
+                        .filter(|index| !evaluated.contains_key(index))
+                        .collect();
+                    if !unevaluated.is_empty() {
+                        stack.push(rule_index);
+                        stack.extend(unevaluated);
+                        continue;
+                    }
+                }
+                ValueDescription::Struct(s) => {
+                    let unevaluated: Vec<_> = s
+                        .values()
+                        .filter(|index| !evaluated.contains_key(index))
+                        .collect();
+                    if !unevaluated.is_empty() {
+                        stack.push(rule_index);
+                        stack.extend(unevaluated);
+                        continue;
+                    }
+                }
+                ValueDescription::List(indices) => {
+                    let unevaluated: Vec<_> = indices
+                        .iter()
+                        .filter(|index| !evaluated.contains_key(index))
+                        .collect();
+                    if !unevaluated.is_empty() {
+                        stack.push(rule_index);
+                        stack.extend(unevaluated);
+                        continue;
+                    }
+                }
+                ValueDescription::Composed(i1, i2) => {
+                    match (evaluated.contains_key(i1), evaluated.contains_key(i2)) {
+                        (false, false) => {
+                            stack.push(rule_index);
+                            stack.push(*i1);
+                            stack.push(*i2);
+                            continue;
+                        }
+                        (false, true) => {
+                            stack.push(rule_index);
+                            stack.push(*i1);
+                            continue;
+                        }
+                        (true, false) => {
+                            stack.push(rule_index);
+                            stack.push(*i2);
+                            continue;
+                        }
+                        (true, true) => {}
+                    }
+                }
+                ValueDescription::Ref(ident) => match rule_table.get(ident) {
+                    Some(ref_index) => {
+                        if !evaluated.contains_key(ref_index) {
+                            stack.push(rule_index);
+                            stack.push(*ref_index);
+                            continue;
+                        }
+                    }
+                    None => {}
+                },
+                _ => {}
+            }
+
+            // evaluate
             match &rule.value_description {
                 ValueDescription::Union(_indices) => {
                     // TODO: How to deal with unions?
@@ -166,59 +242,20 @@ fn evaluate(
                     evaluated.insert(rule_index, value.clone());
                 }
                 ValueDescription::Ref(ident) => {
-                    let ref_index = rule_table
-                        .get(ident)
-                        .expect("Rule table must contain ident");
-                    let value = evaluated
-                        .get(ref_index)
-                        .expect("Value must be present")
-                        .clone();
-                    evaluated.insert(rule_index, value);
+                    if let Some(ref_index) = rule_table.get(ident) {
+                        let value = evaluated
+                            .get(ref_index)
+                            .expect("Value must be present")
+                            .clone();
+                        evaluated.insert(rule_index, value);
+                    } else {
+                        evaluated.insert(rule_index, Value::Unknown);
+                    }
                 }
                 ValueDescription::Empty | ValueDescription::Unknown => {
                     evaluated.insert(rule_index, Value::Unknown);
                 }
             }
-        } else if evaluated.contains_key(&index) {
-            index += 1;
-            continue;
-        } else {
-            let rule = rules.get(index).expect("Rule must exist");
-            match &rule.value_description {
-                ValueDescription::Union(indices) => {
-                    stack.push(index);
-                    stack.extend(indices);
-                }
-                ValueDescription::Struct(s) => {
-                    stack.push(index);
-                    stack.extend(s.values());
-                }
-                ValueDescription::List(indices) => {
-                    stack.push(index);
-                    stack.extend(indices);
-                }
-                ValueDescription::Primitive(value) => {
-                    evaluated.insert(index, value.clone());
-                }
-                ValueDescription::Composed(i1, i2) => {
-                    stack.push(index);
-                    stack.push(*i1);
-                    stack.push(*i2);
-                }
-                ValueDescription::Ref(ident) => match rule_table.get(ident) {
-                    Some(rule_index) => {
-                        stack.push(index);
-                        stack.push(*rule_index);
-                    }
-                    None => {
-                        evaluated.insert(index, Value::Unknown);
-                    }
-                },
-                ValueDescription::Empty | ValueDescription::Unknown => {
-                    evaluated.insert(index, Value::Unknown);
-                }
-            }
-            index += 1;
         }
     }
     evaluated

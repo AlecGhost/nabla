@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::{
     ast::{AstInfo, Global, Ident},
     eval::{eval, Value},
@@ -11,6 +10,7 @@ use crate::{
     },
 };
 use pretty_assertions::assert_eq;
+use std::collections::HashMap;
 
 #[test]
 fn empty() {
@@ -599,7 +599,10 @@ let rec = Rec {}
     assert_empty!(errors);
     let (_, _, errors) = values::analyze(&program);
     assert_eq!(
-        vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
+        vec![
+            Error::new(ErrorMessage::RecursiveInit, 13..14),
+            Error::new(ErrorMessage::UninitializedDefault, 13..14),
+        ],
         errors
     );
 }
@@ -619,7 +622,10 @@ let rec = {
     assert_empty!(errors);
     let (_, _, errors) = values::analyze(&program);
     assert_eq!(
-        vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
+        vec![
+            Error::new(ErrorMessage::RecursiveInit, 13..14),
+            Error::new(ErrorMessage::UninitializedDefault, 13..14),
+        ],
         errors
     );
 }
