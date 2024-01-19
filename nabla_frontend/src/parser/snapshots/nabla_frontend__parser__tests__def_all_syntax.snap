@@ -7,12 +7,20 @@ Program {
         Use(
             Use {
                 use_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 1..1,
+                    },
                     range: 1..2,
                 },
                 name: Some(
                     Ident {
                         name: "other_dir",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 2..3,
+                            },
                             range: 3..4,
                         },
                     },
@@ -20,34 +28,58 @@ Program {
                 body: Some(
                     UseBody {
                         double_colon: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 4..4,
+                            },
                             range: 4..5,
                         },
                         kind: Some(
                             All(
                                 AstInfo {
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 5..5,
+                                    },
                                     range: 5..6,
                                 },
                             ),
                         ),
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 4..4,
+                            },
                             range: 4..6,
                         },
                     },
                 ),
                 info: AstInfo {
-                    range: 0..6,
+                    prelude: Prelude {
+                        comments: [],
+                        range: 1..1,
+                    },
+                    range: 1..6,
                 },
             },
         ),
         Use(
             Use {
                 use_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 7..7,
+                    },
                     range: 7..8,
                 },
                 name: Some(
                     Ident {
                         name: "dir2",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 8..9,
+                            },
                             range: 9..10,
                         },
                     },
@@ -55,12 +87,20 @@ Program {
                 body: Some(
                     UseBody {
                         double_colon: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 10..10,
+                            },
                             range: 10..11,
                         },
                         kind: Some(
                             Multiple(
                                 UseItems {
                                     lcurly: AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 11..11,
+                                        },
                                         range: 11..12,
                                     },
                                     items: [
@@ -69,18 +109,30 @@ Program {
                                                 name: Ident {
                                                     name: "x",
                                                     info: AstInfo {
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 12..12,
+                                                        },
                                                         range: 12..13,
                                                     },
                                                 },
                                                 body: Some(
                                                     UseBody {
                                                         double_colon: AstInfo {
+                                                            prelude: Prelude {
+                                                                comments: [],
+                                                                range: 13..13,
+                                                            },
                                                             range: 13..14,
                                                         },
                                                         kind: Some(
                                                             Multiple(
                                                                 UseItems {
                                                                     lcurly: AstInfo {
+                                                                        prelude: Prelude {
+                                                                            comments: [],
+                                                                            range: 14..14,
+                                                                        },
                                                                         range: 14..15,
                                                                     },
                                                                     items: [
@@ -89,12 +141,20 @@ Program {
                                                                                 name: Ident {
                                                                                     name: "y",
                                                                                     info: AstInfo {
+                                                                                        prelude: Prelude {
+                                                                                            comments: [],
+                                                                                            range: 15..15,
+                                                                                        },
                                                                                         range: 15..16,
                                                                                     },
                                                                                 },
                                                                                 body: None,
                                                                                 alias: None,
                                                                                 info: AstInfo {
+                                                                                    prelude: Prelude {
+                                                                                        comments: [],
+                                                                                        range: 15..15,
+                                                                                    },
                                                                                     range: 15..16,
                                                                                 },
                                                                             },
@@ -102,22 +162,38 @@ Program {
                                                                     ],
                                                                     rcurly: Some(
                                                                         AstInfo {
+                                                                            prelude: Prelude {
+                                                                                comments: [],
+                                                                                range: 16..16,
+                                                                            },
                                                                             range: 16..17,
                                                                         },
                                                                     ),
                                                                     info: AstInfo {
+                                                                        prelude: Prelude {
+                                                                            comments: [],
+                                                                            range: 14..14,
+                                                                        },
                                                                         range: 14..17,
                                                                     },
                                                                 },
                                                             ),
                                                         ),
                                                         info: AstInfo {
+                                                            prelude: Prelude {
+                                                                comments: [],
+                                                                range: 13..13,
+                                                            },
                                                             range: 13..17,
                                                         },
                                                     },
                                                 ),
                                                 alias: None,
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 12..12,
+                                                    },
                                                     range: 12..17,
                                                 },
                                             },
@@ -127,47 +203,79 @@ Program {
                                                 name: Ident {
                                                     name: "z",
                                                     info: AstInfo {
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 18..18,
+                                                        },
                                                         range: 18..19,
                                                     },
                                                 },
                                                 body: None,
                                                 alias: None,
                                                 info: AstInfo {
-                                                    range: 17..19,
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 17..18,
+                                                    },
+                                                    range: 18..19,
                                                 },
                                             },
                                         ),
                                     ],
                                     rcurly: Some(
                                         AstInfo {
+                                            prelude: Prelude {
+                                                comments: [],
+                                                range: 19..19,
+                                            },
                                             range: 19..20,
                                         },
                                     ),
                                     info: AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 11..11,
+                                        },
                                         range: 11..20,
                                     },
                                 },
                             ),
                         ),
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 10..10,
+                            },
                             range: 10..20,
                         },
                     },
                 ),
                 info: AstInfo {
-                    range: 6..20,
+                    prelude: Prelude {
+                        comments: [],
+                        range: 6..7,
+                    },
+                    range: 7..20,
                 },
             },
         ),
         Use(
             Use {
                 use_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 21..21,
+                    },
                     range: 21..22,
                 },
                 name: Some(
                     Ident {
                         name: "dir3",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 22..23,
+                            },
                             range: 23..24,
                         },
                     },
@@ -175,6 +283,10 @@ Program {
                 body: Some(
                     UseBody {
                         double_colon: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 24..24,
+                            },
                             range: 24..25,
                         },
                         kind: Some(
@@ -183,36 +295,60 @@ Program {
                                     name: Ident {
                                         name: "test",
                                         info: AstInfo {
+                                            prelude: Prelude {
+                                                comments: [],
+                                                range: 25..25,
+                                            },
                                             range: 25..26,
                                         },
                                     },
                                     body: None,
                                     alias: None,
                                     info: AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 25..25,
+                                        },
                                         range: 25..26,
                                     },
                                 },
                             ),
                         ),
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 24..24,
+                            },
                             range: 24..26,
                         },
                     },
                 ),
                 info: AstInfo {
-                    range: 20..26,
+                    prelude: Prelude {
+                        comments: [],
+                        range: 20..21,
+                    },
+                    range: 21..26,
                 },
             },
         ),
         Def(
             Def {
                 def_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 27..27,
+                    },
                     range: 27..28,
                 },
                 name: Some(
                     Ident {
                         name: "x",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 28..29,
+                            },
                             range: 29..30,
                         },
                     },
@@ -221,6 +357,10 @@ Program {
                 type_expr: None,
                 eq: Some(
                     AstInfo {
+                        prelude: Prelude {
+                            comments: [],
+                            range: 30..31,
+                        },
                         range: 31..32,
                     },
                 ),
@@ -229,6 +369,10 @@ Program {
                         Struct(
                             Struct {
                                 lcurly: AstInfo {
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 33..33,
+                                    },
                                     range: 33..34,
                                 },
                                 fields: [
@@ -237,11 +381,19 @@ Program {
                                             name: Ident {
                                                 name: "only_type",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 35..35,
+                                                    },
                                                     range: 35..36,
                                                 },
                                             },
                                             colon: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 36..36,
+                                                    },
                                                     range: 36..37,
                                                 },
                                             ),
@@ -252,13 +404,21 @@ Program {
                                                             name: Ident {
                                                                 name: "string",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 38..38,
+                                                                    },
                                                                     range: 38..39,
                                                                 },
                                                             },
                                                             inner_names: [],
                                                             expr: None,
                                                             info: AstInfo {
-                                                                range: 37..39,
+                                                                prelude: Prelude {
+                                                                    comments: [],
+                                                                    range: 38..38,
+                                                                },
+                                                                range: 38..39,
                                                             },
                                                         },
                                                     ),
@@ -268,7 +428,11 @@ Program {
                                             expr: None,
                                             alias: None,
                                             info: AstInfo {
-                                                range: 34..39,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 34..35,
+                                                },
+                                                range: 35..40,
                                             },
                                         },
                                     ),
@@ -277,6 +441,10 @@ Program {
                                             name: Ident {
                                                 name: "only_expr",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 40..40,
+                                                    },
                                                     range: 40..41,
                                                 },
                                             },
@@ -284,6 +452,10 @@ Program {
                                             type_expr: None,
                                             eq: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 41..42,
+                                                    },
                                                     range: 42..43,
                                                 },
                                             ),
@@ -294,6 +466,10 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "expr",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 44..44,
+                                                                    },
                                                                     range: 44..45,
                                                                 },
                                                             },
@@ -303,7 +479,11 @@ Program {
                                             ),
                                             alias: None,
                                             info: AstInfo {
-                                                range: 39..45,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 40..40,
+                                                },
+                                                range: 40..46,
                                             },
                                         },
                                     ),
@@ -312,11 +492,19 @@ Program {
                                             name: Ident {
                                                 name: "type_and_expr",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 46..46,
+                                                    },
                                                     range: 46..47,
                                                 },
                                             },
                                             colon: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 47..47,
+                                                    },
                                                     range: 47..48,
                                                 },
                                             ),
@@ -327,13 +515,21 @@ Program {
                                                             name: Ident {
                                                                 name: "number",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 49..49,
+                                                                    },
                                                                     range: 49..50,
                                                                 },
                                                             },
                                                             inner_names: [],
                                                             expr: None,
                                                             info: AstInfo {
-                                                                range: 48..50,
+                                                                prelude: Prelude {
+                                                                    comments: [],
+                                                                    range: 49..49,
+                                                                },
+                                                                range: 49..50,
                                                             },
                                                         },
                                                     ),
@@ -341,6 +537,10 @@ Program {
                                             ),
                                             eq: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 51..51,
+                                                    },
                                                     range: 51..52,
                                                 },
                                             ),
@@ -351,6 +551,10 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "1",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 53..53,
+                                                                    },
                                                                     range: 53..54,
                                                                 },
                                                             },
@@ -360,7 +564,11 @@ Program {
                                             ),
                                             alias: None,
                                             info: AstInfo {
-                                                range: 45..54,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 46..46,
+                                                },
+                                                range: 46..55,
                                             },
                                         },
                                     ),
@@ -369,11 +577,19 @@ Program {
                                             name: Ident {
                                                 name: "only_type_as",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 55..55,
+                                                    },
                                                     range: 55..56,
                                                 },
                                             },
                                             colon: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 56..56,
+                                                    },
                                                     range: 56..57,
                                                 },
                                             ),
@@ -384,13 +600,21 @@ Program {
                                                             name: Ident {
                                                                 name: "string",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 58..58,
+                                                                    },
                                                                     range: 58..59,
                                                                 },
                                                             },
                                                             inner_names: [],
                                                             expr: None,
                                                             info: AstInfo {
-                                                                range: 57..59,
+                                                                prelude: Prelude {
+                                                                    comments: [],
+                                                                    range: 58..58,
+                                                                },
+                                                                range: 58..59,
                                                             },
                                                         },
                                                     ),
@@ -401,6 +625,10 @@ Program {
                                             alias: Some(
                                                 Alias {
                                                     as_kw: AstInfo {
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 60..60,
+                                                        },
                                                         range: 60..61,
                                                     },
                                                     name: Some(
@@ -408,18 +636,30 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "x",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 61..62,
+                                                                    },
                                                                     range: 62..63,
                                                                 },
                                                             },
                                                         ),
                                                     ),
                                                     info: AstInfo {
-                                                        range: 59..63,
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 60..60,
+                                                        },
+                                                        range: 60..63,
                                                     },
                                                 },
                                             ),
                                             info: AstInfo {
-                                                range: 54..63,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 55..55,
+                                                },
+                                                range: 55..63,
                                             },
                                         },
                                     ),
@@ -428,6 +668,10 @@ Program {
                                             name: Ident {
                                                 name: "only_expr_as",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 64..64,
+                                                    },
                                                     range: 64..65,
                                                 },
                                             },
@@ -435,6 +679,10 @@ Program {
                                             type_expr: None,
                                             eq: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 65..66,
+                                                    },
                                                     range: 66..67,
                                                 },
                                             ),
@@ -445,6 +693,10 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "expr",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 68..68,
+                                                                    },
                                                                     range: 68..69,
                                                                 },
                                                             },
@@ -455,6 +707,10 @@ Program {
                                             alias: Some(
                                                 Alias {
                                                     as_kw: AstInfo {
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 70..70,
+                                                        },
                                                         range: 70..71,
                                                     },
                                                     name: Some(
@@ -462,18 +718,30 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "y",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 71..72,
+                                                                    },
                                                                     range: 72..73,
                                                                 },
                                                             },
                                                         ),
                                                     ),
                                                     info: AstInfo {
-                                                        range: 69..73,
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 70..70,
+                                                        },
+                                                        range: 70..73,
                                                     },
                                                 },
                                             ),
                                             info: AstInfo {
-                                                range: 63..73,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 63..64,
+                                                },
+                                                range: 64..73,
                                             },
                                         },
                                     ),
@@ -482,11 +750,19 @@ Program {
                                             name: Ident {
                                                 name: "type_and_expr_as",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 74..74,
+                                                    },
                                                     range: 74..75,
                                                 },
                                             },
                                             colon: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 75..75,
+                                                    },
                                                     range: 75..76,
                                                 },
                                             ),
@@ -497,13 +773,21 @@ Program {
                                                             name: Ident {
                                                                 name: "number",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 77..77,
+                                                                    },
                                                                     range: 77..78,
                                                                 },
                                                             },
                                                             inner_names: [],
                                                             expr: None,
                                                             info: AstInfo {
-                                                                range: 76..78,
+                                                                prelude: Prelude {
+                                                                    comments: [],
+                                                                    range: 77..77,
+                                                                },
+                                                                range: 77..78,
                                                             },
                                                         },
                                                     ),
@@ -511,6 +795,10 @@ Program {
                                             ),
                                             eq: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 79..79,
+                                                    },
                                                     range: 79..80,
                                                 },
                                             ),
@@ -521,6 +809,10 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "1",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 81..81,
+                                                                    },
                                                                     range: 81..82,
                                                                 },
                                                             },
@@ -531,6 +823,10 @@ Program {
                                             alias: Some(
                                                 Alias {
                                                     as_kw: AstInfo {
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 83..83,
+                                                        },
                                                         range: 83..84,
                                                     },
                                                     name: Some(
@@ -538,41 +834,69 @@ Program {
                                                             PrimitiveValue {
                                                                 value: "z",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 84..85,
+                                                                    },
                                                                     range: 85..86,
                                                                 },
                                                             },
                                                         ),
                                                     ),
                                                     info: AstInfo {
-                                                        range: 82..86,
+                                                        prelude: Prelude {
+                                                            comments: [],
+                                                            range: 83..83,
+                                                        },
+                                                        range: 83..86,
                                                     },
                                                 },
                                             ),
                                             info: AstInfo {
-                                                range: 73..86,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 73..74,
+                                                },
+                                                range: 74..86,
                                             },
                                         },
                                     ),
                                 ],
                                 rcurly: Some(
                                     AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 86..87,
+                                        },
                                         range: 87..88,
                                     },
                                 ),
                                 info: AstInfo {
-                                    range: 32..88,
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 33..33,
+                                    },
+                                    range: 33..88,
                                 },
                             },
                         ),
                     ),
                 ),
                 info: AstInfo {
-                    range: 26..88,
+                    prelude: Prelude {
+                        comments: [],
+                        range: 26..27,
+                    },
+                    range: 27..89,
                 },
             },
         ),
     ],
     info: AstInfo {
-        range: 0..90,
+        prelude: Prelude {
+            comments: [],
+            range: 0..1,
+        },
+        range: 1..90,
     },
 }

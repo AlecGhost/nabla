@@ -6,15 +6,15 @@ use crate::{
 };
 use pretty_assertions::assert_eq;
 
-fn ident(name: &str, range: TokenRange) -> Ident {
+fn ident(name: &str, prelude_range: TokenRange, range: TokenRange) -> Ident {
     Ident {
         name: name.to_string(),
-        info: AstInfo::new(range),
+        info: AstInfo::new(Prelude::ranged(prelude_range), range),
     }
 }
 
-fn info(range: TokenRange) -> AstInfo {
-    AstInfo::new(range)
+fn info(prelude_range: TokenRange, range: TokenRange) -> AstInfo {
+    AstInfo::new(Prelude::ranged(prelude_range), range)
 }
 
 #[test]
@@ -27,7 +27,7 @@ fn empty() {
     assert_eq!(
         Program {
             globals: Vec::new(),
-            info: AstInfo::new(0..1),
+            info: info(0..0, 0..1),
         },
         program
     );
@@ -49,7 +49,7 @@ fn missing_type_expr() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (_, errors) = parse(&tokens);
-    assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 3..3)], errors);
+    assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 4..4)], errors);
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn missing_multiple_exprs() {
     let (_, errors) = parse(&tokens);
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::ExpectedExpr, 3..3),
+            Error::new(ErrorMessage::ExpectedExpr, 4..4),
             Error::new(ErrorMessage::ExpectedExpr, 5..5),
         ],
         errors
@@ -86,12 +86,12 @@ fn use_simple() {
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
-                use_kw: info(0..1),
-                name: Some(ident("a", 1..3)),
+                use_kw: info(0..0, 0..1),
+                name: Some(ident("a", 1..2, 2..3)),
                 body: None,
-                info: info(0..3),
+                info: info(0..0, 0..3),
             })],
-            info: info(0..4),
+            info: info(0..0, 0..4),
         },
         program
     );
@@ -107,16 +107,16 @@ fn use_all() {
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
-                use_kw: info(0..1),
-                name: Some(ident("a", 1..3)),
+                use_kw: info(0..0, 0..1),
+                name: Some(ident("a", 1..2, 2..3)),
                 body: Some(UseBody {
-                    double_colon: info(3..4),
-                    kind: Some(UseKind::All(info(4..5))),
-                    info: info(3..5),
+                    double_colon: info(3..3, 3..4),
+                    kind: Some(UseKind::All(info(4..4, 4..5))),
+                    info: info(3..3, 3..5),
                 }),
-                info: info(0..5),
+                info: info(0..0, 0..5),
             })],
-            info: info(0..6),
+            info: info(0..0, 0..6),
         },
         program
     );
@@ -132,21 +132,21 @@ fn use_single() {
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
-                use_kw: info(0..1),
-                name: Some(ident("a", 1..3)),
+                use_kw: info(0..0, 0..1),
+                name: Some(ident("a", 1..1, 1..3)),
                 body: Some(UseBody {
-                    double_colon: info(3..4),
+                    double_colon: info(3..3, 3..4),
                     kind: Some(UseKind::Single(UseItem {
-                        name: ident("b", 4..5),
+                        name: ident("b", 4..4, 4..5),
                         body: None,
                         alias: None,
-                        info: info(4..5),
+                        info: info(4..4, 4..5),
                     })),
-                    info: info(3..5),
+                    info: info(3..3, 3..5),
                 }),
-                info: info(0..5),
+                info: info(0..0, 0..5),
             })],
-            info: info(0..6),
+            info: info(0..0, 0..6),
         },
         program
     );
@@ -162,34 +162,34 @@ fn use_multiple() {
     assert_eq!(
         Program {
             globals: vec![Global::Use(Use {
-                use_kw: info(0..1),
-                name: Some(ident("a", 2..3)),
+                use_kw: info(0..0, 0..1),
+                name: Some(ident("a", 1..2, 2..3)),
                 body: Some(UseBody {
-                    double_colon: info(3..4),
+                    double_colon: info(3..3, 3..4),
                     kind: Some(UseKind::Multiple(UseItems {
-                        lcurly: info(4..5),
+                        lcurly: info(4..4, 4..5),
                         items: vec![
                             Ok(UseItem {
-                                name: ident("b", 5..6),
+                                name: ident("b", 5..5, 5..6),
                                 body: None,
                                 alias: None,
-                                info: info(5..6),
+                                info: info(5..5, 5..6),
                             }),
                             Ok(UseItem {
-                                name: ident("c", 7..8),
+                                name: ident("c", 6..7, 7..8),
                                 body: None,
                                 alias: None,
-                                info: info(6..8),
+                                info: info(6..7, 7..8),
                             }),
                         ],
-                        rcurly: Some(info(8..9)),
-                        info: info(4..9),
+                        rcurly: Some(info(8..8, 8..9)),
+                        info: info(4..4, 4..9),
                     })),
-                    info: info(3..9),
+                    info: info(3..3, 3..9),
                 }),
-                info: info(0..9),
+                info: info(0..0, 0..9),
             })],
-            info: info(0..10),
+            info: info(0..0, 0..10),
         },
         program
     );
@@ -215,20 +215,20 @@ fn def_ident() {
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
-                def_kw: info(0..1),
-                name: Some(ident("x", 2..3)),
+                def_kw: info(0..0, 0..1),
+                name: Some(ident("x", 1..2, 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(4..5)),
+                eq: Some(info(3..4, 4..5)),
                 expr: Some(Expr::Single(Single::Named(Named {
-                    name: ident("y", 6..7),
+                    name: ident("y", 6..6, 6..7),
                     inner_names: Vec::new(),
                     expr: None,
-                    info: info(5..7),
+                    info: info(6..6, 6..7),
                 }))),
-                info: info(0..7),
+                info: info(0..0, 0..7),
             })],
-            info: info(0..8),
+            info: info(0..0, 0..8),
         },
         program
     );
@@ -244,28 +244,28 @@ fn def_union() {
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
-                def_kw: info(0..1),
-                name: Some(ident("ok", 2..3)),
+                def_kw: info(0..0, 0..1),
+                name: Some(ident("ok", 1..2, 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(4..5)),
+                eq: Some(info(3..4, 4..5)),
                 expr: Some(Expr::Union(Union {
                     single: Single::Primitive(Primitive::String(PrimitiveValue {
                         value: "yes".to_string(),
-                        info: info(6..7),
+                        info: info(6..6, 6..7),
                     })),
                     alternatives: vec![UnionAlternative {
-                        pipe: info(8..9),
-                        single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(
+                        pipe: info(8..8, 8..9),
+                        single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(9..10,
                             10..11
                         ))))),
-                        info: info(7..11),
+                        info: info(8..8, 8..11),
                     }],
-                    info: info(5..11),
+                    info: info(5..6, 6..11),
                 })),
-                info: info(0..11),
+                info: info(0..0, 0..11),
             })],
-            info: info(0..12),
+            info: info(0..0, 0..12),
         },
         program
     );
@@ -285,54 +285,54 @@ def Person = {
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
-                def_kw: info(1..2),
-                name: Some(ident("Person", 3..4)),
+                def_kw: info(1..1, 1..2),
+                name: Some(ident("Person", 2..3, 3..4)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(5..6)),
+                eq: Some(info(4..5, 5..6)),
                 expr: Some(Expr::Single(Single::Struct(Struct {
-                    lcurly: info(7..8),
+                    lcurly: info(7..7, 7..8),
                     fields: vec![
                         Ok(StructField {
-                            name: ident("name", 9..10),
-                            colon: Some(info(10..11)),
+                            name: ident("name", 9..9, 9..10),
+                            colon: Some(info(10..10, 10..11)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
-                                name: ident("string", 12..13),
+                                name: ident("string", 12..12, 12..13),
                                 inner_names: Vec::new(),
                                 expr: None,
-                                info: info(11..13),
+                                info: info(12..12, 12..13),
                             }))),
                             eq: None,
                             expr: None,
                             alias: None,
-                            info: info(8..13),
+                            info: info(8..9, 9..14),
                         }),
                         Ok(StructField {
-                            name: ident("age", 14..15),
-                            colon: Some(info(15..16)),
+                            name: ident("age", 14..14, 14..15),
+                            colon: Some(info(15..15, 15..16)),
                             type_expr: Some(Expr::Single(Single::Named(Named {
-                                name: ident("number", 17..18),
+                                name: ident("number", 17..17, 17..18),
                                 inner_names: Vec::new(),
                                 expr: None,
-                                info: info(16..18),
+                                info: info(17..17, 17..18),
                             }))),
-                            eq: Some(info(19..20)),
+                            eq: Some(info(19..19, 19..20)),
                             expr: Some(Expr::Single(Single::Primitive(Primitive::Number(
                                 PrimitiveValue {
                                     value: "0".to_string(),
-                                    info: info(21..22),
+                                    info: info(21..21, 21..22),
                                 }
                             )))),
                             alias: None,
-                            info: info(13..22),
+                            info: info(14..14, 14..23),
                         }),
                     ],
-                    rcurly: Some(info(23..24)),
-                    info: info(6..24),
+                    rcurly: Some(info(23..23, 23..24)),
+                    info: info(7..7, 7..24),
                 }))),
-                info: info(0..24),
+                info: info(1..1, 1..24),
             })],
-            info: info(0..25),
+            info: info(0..1, 1..25),
         },
         program
     );
@@ -348,25 +348,25 @@ fn def_list() {
     assert_eq!(
         Program {
             globals: vec![Global::Def(Def {
-                def_kw: info(0..1),
-                name: Some(ident("Strings", 2..3)),
+                def_kw: info(0..0, 0..1),
+                name: Some(ident("Strings", 1..2, 2..3)),
                 colon: None,
                 type_expr: None,
-                eq: Some(info(4..5)),
+                eq: Some(info(3..4, 4..5)),
                 expr: Some(Expr::Single(Single::List(List {
-                    lbracket: info(6..7),
+                    lbracket: info(6..6, 6..7),
                     exprs: vec![Expr::Single(Single::Named(Named {
-                        name: ident("string", 8..9),
+                        name: ident("string", 8..8, 8..9),
                         inner_names: Vec::new(),
                         expr: None,
-                        info: info(7..9),
+                        info: info(8..8, 8..9),
                     }))],
-                    rbracket: Some(info(10..11)),
-                    info: info(5..11),
+                    rbracket: Some(info(10..10, 10..11)),
+                    info: info(6..6, 6..11),
                 }))),
-                info: info(0..11),
+                info: info(0..0, 0..11),
             })],
-            info: info(0..12),
+            info: info(0..0, 0..12),
         },
         program
     );
@@ -405,7 +405,7 @@ fn ignore_expr_error() {
     );
     let (program, errors) = parse(&tokens);
     assert_eq!(
-        vec![Error::new(ErrorMessage::UnexpectedTokens, 5..7)],
+        vec![Error::new(ErrorMessage::UnexpectedTokens, 6..7)],
         errors
     );
     insta::assert_debug_snapshot!(program);

@@ -7,12 +7,20 @@ Program {
         Def(
             Def {
                 def_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 1..1,
+                    },
                     range: 1..2,
                 },
                 name: Some(
                     Ident {
                         name: "x",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 2..3,
+                            },
                             range: 3..4,
                         },
                     },
@@ -21,6 +29,10 @@ Program {
                 type_expr: None,
                 eq: Some(
                     AstInfo {
+                        prelude: Prelude {
+                            comments: [],
+                            range: 4..5,
+                        },
                         range: 5..6,
                     },
                 ),
@@ -29,6 +41,10 @@ Program {
                         Struct(
                             Struct {
                                 lcurly: AstInfo {
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 7..7,
+                                    },
                                     range: 7..8,
                                 },
                                 fields: [
@@ -37,11 +53,19 @@ Program {
                                             name: Ident {
                                                 name: "test",
                                                 info: AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 9..9,
+                                                    },
                                                     range: 9..10,
                                                 },
                                             },
                                             colon: Some(
                                                 AstInfo {
+                                                    prelude: Prelude {
+                                                        comments: [],
+                                                        range: 10..10,
+                                                    },
                                                     range: 10..11,
                                                 },
                                             ),
@@ -52,13 +76,21 @@ Program {
                                                             name: Ident {
                                                                 name: "String",
                                                                 info: AstInfo {
+                                                                    prelude: Prelude {
+                                                                        comments: [],
+                                                                        range: 12..12,
+                                                                    },
                                                                     range: 12..13,
                                                                 },
                                                             },
                                                             inner_names: [],
                                                             expr: None,
                                                             info: AstInfo {
-                                                                range: 11..13,
+                                                                prelude: Prelude {
+                                                                    comments: [],
+                                                                    range: 12..12,
+                                                                },
+                                                                range: 12..13,
                                                             },
                                                         },
                                                     ),
@@ -68,13 +100,21 @@ Program {
                                             expr: None,
                                             alias: None,
                                             info: AstInfo {
-                                                range: 8..13,
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 8..9,
+                                                },
+                                                range: 9..13,
                                             },
                                         },
                                     ),
                                     Err(
                                         StructFieldError {
                                             info: AstInfo {
+                                                prelude: Prelude {
+                                                    comments: [],
+                                                    range: 13..13,
+                                                },
                                                 range: 13..14,
                                             },
                                         },
@@ -82,23 +122,39 @@ Program {
                                 ],
                                 rcurly: Some(
                                     AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 14..15,
+                                        },
                                         range: 15..16,
                                     },
                                 ),
                                 info: AstInfo {
-                                    range: 6..16,
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 7..7,
+                                    },
+                                    range: 7..16,
                                 },
                             },
                         ),
                     ),
                 ),
                 info: AstInfo {
-                    range: 0..16,
+                    prelude: Prelude {
+                        comments: [],
+                        range: 1..1,
+                    },
+                    range: 1..17,
                 },
             },
         ),
     ],
     info: AstInfo {
-        range: 0..18,
+        prelude: Prelude {
+            comments: [],
+            range: 0..1,
+        },
+        range: 1..18,
     },
 }

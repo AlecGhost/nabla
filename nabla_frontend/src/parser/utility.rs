@@ -1,9 +1,11 @@
 use crate::{
-    ast::AstInfo,
+    ast::{AstInfo, Prelude},
     parser::{self, IResult, ParserError, ParserErrorKind},
     token::TokenStream,
 };
 use nom::bytes::complete::take;
+
+use super::Parser;
 
 pub(super) fn expect<'a, O, F>(
     mut expected: F,
@@ -42,10 +44,8 @@ where
                 match pattern(input) {
                     Ok((mut input, _)) => {
                         let end = input.location_offset();
-                        let error = parser::Error::new(
-                            parser::ErrorMessage::UnexpectedTokens,
-                            start..end,
-                        );
+                        let error =
+                            parser::Error::new(parser::ErrorMessage::UnexpectedTokens, start..end);
                         input.append_error(error);
                         return Ok((input, ()));
                     }
@@ -71,13 +71,14 @@ where
     F: FnMut(TokenStream<'a>) -> IResult<'a, O>,
 {
     move |input| {
+        let (input, prelude) = Prelude::parse(input).expect("Prelude must not fail.");
         let start = input.location_offset();
         let error_len = input.error_buffer.len();
         match parser(input) {
             Ok((input, o)) => {
                 let end = input.location_offset();
                 let range = start..end;
-                let info = AstInfo::new(range);
+                let info = AstInfo::new(prelude, range);
                 Ok((input, (o, info)))
             }
             Err(nom::Err::Error(mut err)) => {

@@ -7,12 +7,20 @@ Program {
         Def(
             Def {
                 def_kw: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 0..0,
+                    },
                     range: 0..1,
                 },
                 name: Some(
                     Ident {
                         name: "x",
                         info: AstInfo {
+                            prelude: Prelude {
+                                comments: [],
+                                range: 1..2,
+                            },
                             range: 2..3,
                         },
                     },
@@ -21,6 +29,10 @@ Program {
                 type_expr: None,
                 eq: Some(
                     AstInfo {
+                        prelude: Prelude {
+                            comments: [],
+                            range: 3..4,
+                        },
                         range: 4..5,
                     },
                 ),
@@ -29,33 +41,57 @@ Program {
                         Struct(
                             Struct {
                                 lcurly: AstInfo {
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 6..6,
+                                    },
                                     range: 6..7,
                                 },
                                 fields: [],
                                 rcurly: Some(
                                     AstInfo {
+                                        prelude: Prelude {
+                                            comments: [],
+                                            range: 7..7,
+                                        },
                                         range: 7..8,
                                     },
                                 ),
                                 info: AstInfo {
-                                    range: 5..8,
+                                    prelude: Prelude {
+                                        comments: [],
+                                        range: 6..6,
+                                    },
+                                    range: 6..8,
                                 },
                             },
                         ),
                     ),
                 ),
                 info: AstInfo {
+                    prelude: Prelude {
+                        comments: [],
+                        range: 0..0,
+                    },
                     range: 0..8,
                 },
             },
         ),
         Error(
             AstInfo {
+                prelude: Prelude {
+                    comments: [],
+                    range: 8..8,
+                },
                 range: 8..9,
             },
         ),
     ],
     info: AstInfo {
+        prelude: Prelude {
+            comments: [],
+            range: 0..0,
+        },
         range: 0..10,
     },
 }
