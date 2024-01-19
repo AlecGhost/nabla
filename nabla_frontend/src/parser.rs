@@ -1,6 +1,6 @@
 use crate::{
     ast::*,
-    token::{Token, TokenStream},
+    token::{Token, TokenStream, TokenType},
 };
 pub use error::*;
 use nom::{
@@ -213,12 +213,14 @@ impl Parser for Expr {
                 if alternatives.is_empty() {
                     Ok((input, Self::Single(single)))
                 } else {
+                    let start = single_info.range.start;
+                    let end = alt_info.range.end;
                     Ok((
                         input,
                         Self::Union(Union {
                             single,
                             alternatives,
-                            info: single_info.join(alt_info),
+                            info: AstInfo::new(single_info.prelude, start..end),
                         }),
                     ))
                 }
@@ -417,6 +419,31 @@ impl Parser for Bool {
     }
 }
 
+impl Parser for Prelude {
+    fn parse(input: TokenStream) -> IResult<Self> {
+        let start = input.location_offset();
+        let (input, tokens) = many0(alt((token::whitespace, token::comment)))(input)?;
+        let end = input.location_offset();
+        let comments = tokens
+            .iter()
+            .filter_map(|token| {
+                if let TokenType::Comment(comment) = &token.token_type {
+                    Some(comment.clone())
+                } else {
+                    None
+                }
+            })
+            .collect();
+        Ok((
+            input,
+            Prelude {
+                comments,
+                range: start..end,
+            },
+        ))
+    }
+}
+
 fn parse_type_annotation(input: TokenStream) -> IResult<(Option<AstInfo>, Option<Expr>)> {
     map(
         opt(tuple((
@@ -436,7 +463,7 @@ mod token {
         parser::{utility::info, IResult, ParserError, ParserErrorKind},
         token::{Token, TokenStream, TokenType},
     };
-    use nom::{branch::alt, bytes::complete::take, multi::many0, sequence::tuple};
+    use nom::bytes::complete::take;
 
     pub fn comment(input: TokenStream) -> IResult<Token> {
         let original_input = input.clone();
@@ -476,10 +503,7 @@ mod token {
         ($name:ident, $token_type:pat) => {
             pub fn $name(input: TokenStream) -> IResult<AstInfo> {
                 let original_input = input.clone();
-                let (input, ((_, (token_stream, info)), _)) = info(tuple((
-                    many0(alt((comment, whitespace))),
-                    info(take(1usize)),
-                )))(input)?;
+                let (input, (token_stream, info)) = info(take(1usize))(input)?;
                 let token = token_stream
                     .first_token()
                     .cloned()
@@ -500,10 +524,7 @@ mod token {
         ($name:ident, $token_type:path) => {
             pub fn $name(input: TokenStream) -> IResult<(String, AstInfo)> {
                 let original_input = input.clone();
-                let (input, ((_, (token_stream, info)), _)) = info(tuple((
-                    many0(alt((comment, whitespace))),
-                    info(take(1usize)),
-                )))(input)?;
+                let (input, (token_stream, info)) = info(take(1usize))(input)?;
                 let token = token_stream
                     .first_token()
                     .cloned()

@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstInfo, Global, Ident},
+    ast::{AstInfo, Global, Ident, Prelude},
     eval::{eval, Value},
     lexer::lex,
     parser::parse,
@@ -8,9 +8,14 @@ use crate::{
         types::{self, TypeInfo},
         values,
     },
+    token::TokenRange,
 };
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
+
+fn info(prelude_range: TokenRange, range: TokenRange) -> AstInfo {
+    AstInfo::new(Prelude::ranged(prelude_range), range)
+}
 
 #[test]
 fn empty() {
@@ -367,8 +372,8 @@ let b = "B" | "b"
     let TypeInfo { errors, .. } = types::analyze(&program);
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::UnionInInit, 9..15),
-            Error::new(ErrorMessage::UnionInInit, 21..27),
+            Error::new(ErrorMessage::UnionInInit, 10..15),
+            Error::new(ErrorMessage::UnionInInit, 22..27),
         ],
         errors
     );
@@ -389,8 +394,8 @@ def Test = {
     let TypeInfo { errors, .. } = types::analyze(&program);
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::UnionInInit, 15..21),
-            Error::new(ErrorMessage::UnionInInit, 25..31),
+            Error::new(ErrorMessage::UnionInInit, 16..21),
+            Error::new(ErrorMessage::UnionInInit, 26..31),
         ],
         errors
     );
@@ -416,7 +421,7 @@ let a = "x"
         HashMap::from([(
             Ident {
                 name: "a".to_string(),
-                info: AstInfo::new(0..0),
+                info: info(0..0, 0..0),
             },
             Value::from("x")
         )]),
@@ -445,7 +450,7 @@ Config {}
         HashMap::from([(
             Ident {
                 name: "Config".to_string(),
-                info: AstInfo::new(0..0),
+                info: info(0..0, 0..0),
             },
             Value::from([("x", 0)]),
         )]),
@@ -476,7 +481,7 @@ Config {
         HashMap::from([(
             Ident {
                 name: "Config".to_string(),
-                info: AstInfo::new(0..0),
+                info: info(0..0, 0..0),
             },
             Value::from([("x", 0)]),
         )]),
@@ -512,7 +517,7 @@ Config {
         HashMap::from([(
             Ident {
                 name: "Config".to_string(),
-                info: AstInfo::new(0..0),
+                info: info(0..0, 0..0),
             },
             Value::from([(
                 "x",
@@ -545,14 +550,14 @@ let pi = 3.14
             (
                 Ident {
                     name: "pi".to_string(),
-                    info: AstInfo::new(0..0),
+                    info: info(0..0, 0..0),
                 },
                 Value::from(3.14),
             ),
             (
                 Ident {
                     name: "Config".to_string(),
-                    info: AstInfo::new(0..0),
+                    info: info(0..0, 0..0),
                 },
                 Value::from([("x", 3.14)]),
             )
@@ -578,7 +583,7 @@ def Config = {
     assert_empty!(errors);
     let (_, _, errors) = values::analyze(&program);
     assert_eq!(
-        vec![Error::new(ErrorMessage::UninitializedDefault, 12..21)],
+        vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
     );
 }

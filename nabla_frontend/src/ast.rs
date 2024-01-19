@@ -2,24 +2,34 @@ use crate::token::{self, ToTokenRange, TokenRange};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AstInfo {
+    pub prelude: Prelude,
     pub range: TokenRange,
 }
 
 impl AstInfo {
-    pub const fn new(range: TokenRange) -> Self {
-        Self { range }
-    }
-
-    pub fn join(self, other: Self) -> Self {
-        let start = self.range.start.min(other.range.start);
-        let end = self.range.end.max(other.range.end);
-        Self { range: start..end }
+    pub const fn new(prelude: Prelude, range: TokenRange) -> Self {
+        Self { prelude, range }
     }
 }
 
 impl ToTokenRange for AstInfo {
     fn to_token_range(&self) -> TokenRange {
         self.range.clone()
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Prelude {
+    pub comments: Vec<String>,
+    pub range: TokenRange,
+}
+
+impl Prelude {
+    pub fn ranged(range: TokenRange) -> Self {
+        Self {
+            comments: Vec::new(),
+            range,
+        }
     }
 }
 
