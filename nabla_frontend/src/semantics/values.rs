@@ -187,16 +187,15 @@ fn evaluate(
                         (true, true) => {}
                     }
                 }
-                ValueDescription::Ref(ident) => match rule_table.get(ident) {
-                    Some(ref_index) => {
+                ValueDescription::Ref(ident) => {
+                    if let Some(ref_index) = rule_table.get(ident) {
                         if !evaluated.contains_key(ref_index) {
                             stack.push(rule_index);
                             stack.push(*ref_index);
                             continue;
                         }
                     }
-                    None => {}
-                },
+                }
                 _ => {}
             }
 

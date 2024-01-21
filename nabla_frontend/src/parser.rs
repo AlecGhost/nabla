@@ -436,7 +436,7 @@ impl Parser for Prelude {
             .collect();
         Ok((
             input,
-            Prelude {
+            Self {
                 comments,
                 range: start..end,
             },

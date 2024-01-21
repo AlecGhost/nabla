@@ -25,7 +25,7 @@ pub struct Prelude {
 }
 
 impl Prelude {
-    pub fn ranged(range: TokenRange) -> Self {
+    pub const fn ranged(range: TokenRange) -> Self {
         Self {
             comments: Vec::new(),
             range,

@@ -4,7 +4,7 @@ use crate::{
         types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
         Error,
     },
-    token::{TokenRange, ToTokenRange},
+    token::{ToTokenRange, TokenRange},
 };
 use std::collections::HashMap;
 
@@ -35,7 +35,12 @@ fn check_union(rules: &[Rule], expected: &[RuleIndex], actual: &[RuleIndex]) -> 
                 .iter()
                 .any(|expected_rule| check_rules(rules, expected_rule, actual_rule).is_empty())
         })
-        .map(|actual_rule| Error::new(ErrorMessage::TypeMismatch, actual_rule.info.to_token_range()))
+        .map(|actual_rule| {
+            Error::new(
+                ErrorMessage::TypeMismatch,
+                actual_rule.info.to_token_range(),
+            )
+        })
         .collect()
 }
 
@@ -188,6 +193,10 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
             ErrorMessage::UnknownType,
             expected_rule.info.to_token_range(),
         )],
+        (_, TypeDescription::Unknown) => {
+            // Error was reported at an earlier stage.
+            Vec::new()
+        }
         // built in
         (TypeDescription::BuiltIn(expected), TypeDescription::Primitive(actual)) => {
             check_value(expected, actual)
