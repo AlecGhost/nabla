@@ -285,7 +285,7 @@ impl TypeAnalyzer for Struct {
             })
             .map(|field| {
                 (
-                    field.name.name.clone(),
+                    field.name.clone(),
                     (field.analyze(type_info), field.expr.is_some()),
                 )
             })

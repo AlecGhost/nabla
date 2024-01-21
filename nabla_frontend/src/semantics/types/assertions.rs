@@ -1,4 +1,5 @@
 use crate::{
+    ast::Ident,
     semantics::{
         error::ErrorMessage,
         types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
@@ -61,29 +62,28 @@ fn check_in_union(rules: &[Rule], expected: &[RuleIndex], actual_rule: &Rule) ->
 
 fn check_struct(
     rules: &[Rule],
-    expected: &HashMap<String, (RuleIndex, bool)>,
-    actual: &HashMap<String, (RuleIndex, bool)>,
+    expected: &HashMap<Ident, (RuleIndex, bool)>,
+    actual_rule: &Rule,
+    actual: &HashMap<Ident, (RuleIndex, bool)>,
 ) -> Vec<Error> {
     let mut errors = Vec::new();
-    for (field_name, (expected_index, has_default)) in expected {
-        if let Some((actual_index, _)) = actual.get(field_name) {
+    for (field, (expected_index, has_default)) in expected {
+        if let Some((actual_index, _)) = actual.get(field) {
             let expected_rule = rules.get(*expected_index).expect("Rule must exist");
             let actual_rule = rules.get(*actual_index).expect("Rule must exist");
             errors.extend(check_rules(rules, expected_rule, actual_rule));
         } else if !has_default {
-            // TODO: find out range
             errors.push(Error::new(
-                ErrorMessage::MissingField(field_name.clone()),
-                0..0,
+                ErrorMessage::MissingField(field.name.clone()),
+                actual_rule.info.range.clone(),
             ));
         }
     }
-    for field_name in actual.keys() {
-        if !expected.contains_key(field_name) {
-            // TODO: find out range
+    for field in actual.keys() {
+        if !expected.contains_key(field) {
             errors.push(Error::new(
-                ErrorMessage::UnexpecedField(field_name.clone()),
-                0..0,
+                ErrorMessage::UnexpecedField(field.name.clone()),
+                field.info.range.clone(),
             ));
         }
     }
@@ -100,11 +100,13 @@ fn check_list(
             if actual_indices.is_empty() {
                 Vec::new()
             } else {
-                vec![Error::new(
-                    ErrorMessage::UnexpecedListElement,
-                    // TODO: find out range
-                    0..0,
-                )]
+                actual_indices
+                    .iter()
+                    .map(|index| rules.get(*index).expect("Rule must exist"))
+                    .map(|rule| &rule.info.range)
+                    .cloned()
+                    .map(|range| Error::new(ErrorMessage::UnexpecedListElement, range))
+                    .collect()
             }
         }
         1 => {
@@ -115,8 +117,16 @@ fn check_list(
                 .flat_map(|actual_rule| check_rules(rules, expected_rule, actual_rule))
                 .collect()
         }
-        // TODO: find out range
-        _ => vec![Error::new(ErrorMessage::MultipleListTypes, 0..0)],
+        // TODO: Check outside of assertions
+        // TODO: Should this be legal (value-type-duality)?
+        _ => expected_indices
+            .iter()
+            .skip(1)
+            .map(|index| rules.get(*index).expect("Rule must exist"))
+            .map(|rule| &rule.info.range)
+            .cloned()
+            .map(|range| Error::new(ErrorMessage::MultipleListTypes, range))
+            .collect(),
     }
 }
 
@@ -174,7 +184,7 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         extract_type_description(rules, &expected_rule.type_description),
         extract_type_description(rules, &actual_rule.type_description),
     ) {
-        // sort out types that were already replaced by `replace_rules` or extracted
+        // sort out types that were already replaced by `lookup_imports`, `validate_idents` or extracted
         (TypeDescription::Ident(_), _)
         | (TypeDescription::ValidIdent(_), _)
         | (TypeDescription::Rule(_), _)
@@ -206,7 +216,7 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         }
         // struct
         (TypeDescription::Struct(expected), TypeDescription::Struct(actual)) => {
-            check_struct(rules, expected, actual)
+            check_struct(rules, expected, actual_rule, actual)
         }
         // list
         (TypeDescription::List(expected), TypeDescription::List(actual)) => {

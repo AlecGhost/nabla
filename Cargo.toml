@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "nabla_frontend",
     "nabla_backend",
-    "nabla_cli"
+    "nabla_cli",
+    "nabla_ls"
 ]
 
 [profile.dev.package.insta]
