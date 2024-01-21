@@ -99,8 +99,8 @@ def Person = {
     age: Number
 }
 Person {
-    name: "Test"
-    age: 0
+    name = "Test"
+    age = 0
 }
 "#;
     let (tokens, errors) = lex(src);
@@ -607,6 +607,7 @@ let rec = Rec {}
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
+            Error::new(ErrorMessage::UninitializedLet, 17..28),
         ],
         errors
     );
@@ -630,6 +631,7 @@ let rec = {
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
+            Error::new(ErrorMessage::UninitializedLet, 1..17),
         ],
         errors
     );

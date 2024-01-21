@@ -80,6 +80,15 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
             }
         }
     }
+    for (l, rule_index) in lets {
+        let value = evaluated
+            .get(&rule_index)
+            .expect("Rule must have been evaluated");
+        if !value.is_known() {
+            let error = Error::new(ErrorMessage::UninitializedLet, l.info.range.clone());
+            errors.push(error);
+        }
+    }
     let symbol_table = rule_table
         .into_iter()
         .map(|(ident, rule_index)| {
