@@ -1,5 +1,5 @@
 use clap::Parser;
-use nabla_backend::{to_json_value, to_yaml_value};
+use nabla_backend::{to_json_value, to_toml_value, to_yaml_value};
 use nabla_frontend::{
     lexer::lex,
     parser::parse,
@@ -13,6 +13,7 @@ enum Target {
     #[default]
     Json,
     Yaml,
+    Toml,
 }
 
 #[derive(Debug, Parser)]
@@ -90,6 +91,13 @@ fn main() {
                         println!("{}", pretty_yaml);
                     }
                 }
+                Target::Toml => {
+                    if let Some(toml) = to_toml_value(init.clone()) {
+                        let pretty_toml = toml::to_string_pretty(&toml)
+                            .expect("Converting value to yaml string failed");
+                        println!("{}", pretty_toml);
+                    }
+                }
             }
         }
     }
@@ -104,7 +112,7 @@ struct Pos {
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct PosRange {
     start: Pos,
-    _end: Pos,
+    end: Pos,
 }
 
 fn convert_text_range(text: &str, range: &TextRange) -> PosRange {
@@ -133,5 +141,5 @@ fn convert_text_range(text: &str, range: &TextRange) -> PosRange {
             },
         })
         .expect("Split must yield at least one element");
-    PosRange { start, _end: end }
+    PosRange { start, end }
 }

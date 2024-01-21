@@ -1,6 +1,5 @@
-use std::str::FromStr;
-
 use nabla_frontend::eval::Value;
+use std::str::FromStr;
 
 pub fn to_json_value(value: Value) -> Option<serde_json::Value> {
     match value {
@@ -65,6 +64,45 @@ pub fn to_yaml_value(value: Value) -> Option<serde_yaml::Value> {
                 None
             } else {
                 Some(serde_yaml::Value::Mapping(object))
+            }
+        }
+    }
+}
+
+pub fn to_toml_value(value: Value) -> Option<toml::Value> {
+    match value {
+        Value::Unknown => None,
+        Value::Null => None,
+        Value::Bool(b) => Some(toml::Value::Boolean(b)),
+        Value::Number(n) => {
+            if n.contains('.') {
+                let float = f64::from_str(&n).ok()?;
+                Some(toml::Value::Float(float))
+            } else {
+                let int = i64::from_str(&n).ok()?;
+                Some(toml::Value::Integer(int))
+            }
+        }
+        Value::String(s) => Some(toml::Value::String(s)),
+        Value::List(list) => {
+            let len = list.iter().filter(|v| !matches!(v, Value::Null)).count();
+            let array: Vec<_> = list.into_iter().flat_map(to_toml_value).collect();
+            if array.len() != len {
+                None
+            } else {
+                Some(toml::Value::Array(array))
+            }
+        }
+        Value::Struct(s) => {
+            let len = s.iter().filter(|(_, v)| !matches!(v, Value::Null)).count();
+            let object: toml::map::Map<_, _> = s
+                .into_iter()
+                .filter_map(|(k, v)| to_toml_value(v).map(|v| (k, v)))
+                .collect();
+            if object.len() != len {
+                None
+            } else {
+                Some(toml::Value::Table(object))
             }
         }
     }
