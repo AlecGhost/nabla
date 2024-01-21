@@ -4,7 +4,8 @@ use crate::{
         error::{Error, ErrorMessage},
         types::analysis::TypeAnalyzer,
     },
-    GlobalIdent, token::ToTokenRange,
+    token::ToTokenRange,
+    GlobalIdent,
 };
 use std::{array::IntoIter, collections::HashMap};
 
@@ -70,6 +71,12 @@ impl BuiltInType {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+enum Context {
+    Expr,
+    TypeExpr,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TypeInfo<'a> {
     pub rules: Vec<Rule>,
@@ -86,7 +93,7 @@ pub fn analyze(program: &Program) -> TypeInfo {
             Global::Def(def) => analysis::analyze_def(def, &mut type_info),
             Global::Let(l) => analysis::analyze_let(l, &mut type_info),
             Global::Init(init) => {
-                init.analyze(&mut type_info);
+                init.analyze(&mut type_info, Context::Expr);
             }
             Global::Error(_) => { /* no types to check */ }
         }

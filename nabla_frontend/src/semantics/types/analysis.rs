@@ -2,7 +2,7 @@ use crate::{
     ast::*,
     semantics::{
         error::{Error, ErrorMessage},
-        types::{Rule, RuleIndex, TypeDescription, TypeInfo},
+        types::{Context, Rule, RuleIndex, TypeDescription, TypeInfo},
     },
     token::ToTokenRange,
     GlobalIdent,
@@ -14,7 +14,7 @@ pub(super) fn analyze_def<'a>(def: &'a Def, type_info: &mut TypeInfo<'a>) {
         def.type_expr.as_ref(),
         def.expr.as_ref(),
         type_info,
-        false,
+        Context::TypeExpr,
     );
 }
 
@@ -24,7 +24,7 @@ pub(super) fn analyze_let<'a>(l: &'a Let, type_info: &mut TypeInfo<'a>) {
         l.type_expr.as_ref(),
         l.expr.as_ref(),
         type_info,
-        true,
+        Context::Expr,
     );
 }
 
@@ -33,7 +33,7 @@ fn analyze_binding<'a>(
     type_expr: Option<&'a Expr>,
     expr: Option<&'a Expr>,
     type_info: &mut TypeInfo<'a>,
-    is_let: bool,
+    context: Context,
 ) {
     fn check_self_reference(ident: &Ident, expr: Option<&Expr>) -> bool {
         matches!(expr, Some(Expr::Single(Single::Named(Named { name, .. }))) if ident == name)
@@ -51,18 +51,18 @@ fn analyze_binding<'a>(
     let rule_index = match (
         type_expr
             .as_ref()
-            .map(|type_expr| type_expr.analyze(type_info)),
-        expr.as_ref().map(|expr| expr.analyze(type_info)),
+            .map(|type_expr| type_expr.analyze(type_info, Context::TypeExpr)),
+        expr.as_ref().map(|expr| expr.analyze(type_info, context)),
     ) {
         (Some(type_expr_index), Some(expr_index)) => {
-            if !(is_let && analyze_union_in_init(type_info, expr_index)) {
+            if !(matches!(context, Context::Expr) && analyze_union_in_init(type_info, expr_index)) {
                 type_info.assertions.push((type_expr_index, expr_index));
             }
             Some(type_expr_index)
         }
         (Some(type_expr_index), None) => Some(type_expr_index),
         (None, Some(expr_index)) => {
-            if is_let {
+            if matches!(context, Context::Expr) {
                 analyze_union_in_init(type_info, expr_index);
             }
             Some(expr_index)
@@ -202,15 +202,15 @@ const fn rule_index(rules: &[Rule]) -> RuleIndex {
 }
 
 pub(super) trait TypeAnalyzer {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex;
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex;
 }
 
 impl TypeAnalyzer for Expr {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let rules = &mut type_info.rules;
         match self {
-            Self::Union(union) => union.analyze(type_info),
-            Self::Single(single) => single.analyze(type_info),
+            Self::Union(union) => union.analyze(type_info, context),
+            Self::Single(single) => single.analyze(type_info, context),
             Self::Error(info) => {
                 rules.push(Rule {
                     type_description: TypeDescription::Unknown,
@@ -223,16 +223,16 @@ impl TypeAnalyzer for Expr {
 }
 
 impl TypeAnalyzer for Union {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let mut inner_rule_indices = Vec::with_capacity(self.alternatives.len() + 1);
-        inner_rule_indices.push(self.single.analyze(type_info));
+        inner_rule_indices.push(self.single.analyze(type_info, context));
         self.alternatives
             .iter()
             .flat_map(|alternative| {
                 alternative
                     .single
                     .as_ref()
-                    .map(|single| single.analyze(type_info))
+                    .map(|single| single.analyze(type_info, context))
             })
             .for_each(|rule| inner_rule_indices.push(rule));
         let rules = &mut type_info.rules;
@@ -245,27 +245,27 @@ impl TypeAnalyzer for Union {
 }
 
 impl TypeAnalyzer for Single {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         match self {
-            Self::Struct(s) => s.analyze(type_info),
-            Self::List(list) => list.analyze(type_info),
-            Self::Named(named) => named.analyze(type_info),
-            Self::Primitive(primitive) => primitive.analyze(type_info),
+            Self::Struct(s) => s.analyze(type_info, context),
+            Self::List(list) => list.analyze(type_info, context),
+            Self::Named(named) => named.analyze(type_info, context),
+            Self::Primitive(primitive) => primitive.analyze(type_info, context),
         }
     }
 }
 
 impl TypeAnalyzer for StructOrList {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         match self {
-            Self::Struct(s) => s.analyze(type_info),
-            Self::List(l) => l.analyze(type_info),
+            Self::Struct(s) => s.analyze(type_info, context),
+            Self::List(l) => l.analyze(type_info, context),
         }
     }
 }
 
 impl TypeAnalyzer for Struct {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let mut field_names = Vec::new();
         let mut errors = Vec::new();
         let field_rule_indices = self
@@ -286,7 +286,7 @@ impl TypeAnalyzer for Struct {
             .map(|field| {
                 (
                     field.name.clone(),
-                    (field.analyze(type_info), field.expr.is_some()),
+                    (field.analyze(type_info, context), field.expr.is_some()),
                 )
             })
             .collect();
@@ -301,13 +301,15 @@ impl TypeAnalyzer for Struct {
 }
 
 impl TypeAnalyzer for StructField {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let info = self.info.clone();
         let rule = match (
             self.type_expr
                 .as_ref()
-                .map(|type_expr| type_expr.analyze(type_info)),
-            self.expr.as_ref().map(|expr| expr.analyze(type_info)),
+                .map(|type_expr| type_expr.analyze(type_info, Context::TypeExpr)),
+            self.expr
+                .as_ref()
+                .map(|expr| expr.analyze(type_info, context)),
         ) {
             (Some(type_expr_index), Some(expr_index)) => {
                 if !analyze_union_in_init(type_info, expr_index) {
@@ -318,10 +320,16 @@ impl TypeAnalyzer for StructField {
                     info,
                 }
             }
-            (Some(type_expr_index), None) => Rule {
-                type_description: TypeDescription::Rule(type_expr_index),
-                info,
-            },
+            (Some(type_expr_index), None) => {
+                if matches!(context, Context::Expr) {
+                    let error = Error::new(ErrorMessage::UnassignedField, info.range.clone());
+                    type_info.errors.push(error);
+                }
+                Rule {
+                    type_description: TypeDescription::Rule(type_expr_index),
+                    info,
+                }
+            }
             (None, Some(expr_index)) => {
                 analyze_union_in_init(type_info, expr_index);
                 Rule {
@@ -329,10 +337,17 @@ impl TypeAnalyzer for StructField {
                     info,
                 }
             }
-            (None, None) => Rule {
-                type_description: TypeDescription::Unknown,
-                info,
-            },
+            (None, None) => {
+                let error = match context {
+                    Context::Expr => Error::new(ErrorMessage::UnassignedField, info.range.clone()),
+                    Context::TypeExpr => Error::new(ErrorMessage::UntypedField, info.range.clone()),
+                };
+                type_info.errors.push(error);
+                Rule {
+                    type_description: TypeDescription::Unknown,
+                    info,
+                }
+            }
         };
         let rules = &mut type_info.rules;
         rules.push(rule);
@@ -341,11 +356,11 @@ impl TypeAnalyzer for StructField {
 }
 
 impl TypeAnalyzer for List {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let inner_rule_indices = self
             .exprs
             .iter()
-            .map(|expr| expr.analyze(type_info))
+            .map(|expr| expr.analyze(type_info, context))
             .collect();
         let rules = &mut type_info.rules;
         rules.push(Rule {
@@ -357,7 +372,7 @@ impl TypeAnalyzer for List {
 }
 
 impl TypeAnalyzer for Named {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
         let flat_name = self.flatten_name();
         let is_incomplete = flat_name.name.ends_with("::");
         let named_rule = Rule {
@@ -367,7 +382,11 @@ impl TypeAnalyzer for Named {
         let rules = &mut type_info.rules;
         rules.push(named_rule);
         let named_rule_index = rule_index(rules);
-        if let Some(expr_rule_index) = self.expr.as_ref().map(|expr| expr.analyze(type_info)) {
+        if let Some(expr_rule_index) = self
+            .expr
+            .as_ref()
+            .map(|expr| expr.analyze(type_info, context))
+        {
             if !is_incomplete {
                 type_info
                     .assertions
@@ -379,7 +398,7 @@ impl TypeAnalyzer for Named {
 }
 
 impl TypeAnalyzer for Primitive {
-    fn analyze(&self, type_info: &mut TypeInfo) -> RuleIndex {
+    fn analyze(&self, type_info: &mut TypeInfo, _: Context) -> RuleIndex {
         let rules = &mut type_info.rules;
         rules.push(Rule {
             type_description: TypeDescription::Primitive(self.clone()),
