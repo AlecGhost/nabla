@@ -35,3 +35,37 @@ pub fn to_json_value(value: Value) -> Option<serde_json::Value> {
         }
     }
 }
+
+pub fn to_yaml_value(value: Value) -> Option<serde_yaml::Value> {
+    match value {
+        Value::Unknown => None,
+        Value::Null => Some(serde_yaml::Value::Null),
+        Value::Bool(b) => Some(serde_yaml::Value::Bool(b)),
+        Value::Number(n) => {
+            let number = serde_yaml::Number::from_str(&n).ok()?;
+            Some(serde_yaml::Value::Number(number))
+        }
+        Value::String(s) => Some(serde_yaml::Value::String(s)),
+        Value::List(list) => {
+            let len = list.len();
+            let array: Vec<_> = list.into_iter().flat_map(to_yaml_value).collect();
+            if array.len() != len {
+                None
+            } else {
+                Some(serde_yaml::Value::Sequence(array))
+            }
+        }
+        Value::Struct(s) => {
+            let len = s.len();
+            let object: serde_yaml::Mapping = s
+                .into_iter()
+                .filter_map(|(k, v)| to_yaml_value(v).map(|v| (serde_yaml::Value::String(k), v)))
+                .collect();
+            if object.len() != len {
+                None
+            } else {
+                Some(serde_yaml::Value::Mapping(object))
+            }
+        }
+    }
+}

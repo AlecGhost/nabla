@@ -1,5 +1,5 @@
 use clap::Parser;
-use nabla_backend::to_json_value;
+use nabla_backend::{to_json_value, to_yaml_value};
 use nabla_frontend::{
     lexer::lex,
     parser::parse,
@@ -8,9 +8,18 @@ use nabla_frontend::{
 };
 use std::path::PathBuf;
 
+#[derive(Clone, Debug, Default, clap::ValueEnum)]
+enum Target {
+    #[default]
+    Json,
+    Yaml,
+}
+
 #[derive(Debug, Parser)]
 struct Args {
     file: PathBuf,
+    #[clap(short, long, default_value = "json")]
+    target: Target,
 }
 
 fn main() {
@@ -66,10 +75,21 @@ fn main() {
     }
     if valid {
         if let Some(init) = inits.first() {
-            if let Some(json) = to_json_value(init.clone()) {
-                let pretty_json =
-                    serde_json::to_string_pretty(&json).expect("Converting value to string failed");
-                println!("{}", pretty_json);
+            match args.target {
+                Target::Json => {
+                    if let Some(json) = to_json_value(init.clone()) {
+                        let pretty_json = serde_json::to_string_pretty(&json)
+                            .expect("Converting value to json string failed");
+                        println!("{}", pretty_json);
+                    }
+                }
+                Target::Yaml => {
+                    if let Some(yaml) = to_yaml_value(init.clone()) {
+                        let pretty_yaml = serde_yaml::to_string(&yaml)
+                            .expect("Converting value to yaml string failed");
+                        println!("{}", pretty_yaml);
+                    }
+                }
             }
         }
     }
