@@ -1,7 +1,4 @@
-use crate::{
-    ast::{Global, Program},
-    token::ToTokenRange,
-};
+use crate::{ast::Program, eval::Value};
 use error::{Error, ErrorMessage};
 
 mod error;
@@ -10,24 +7,20 @@ mod tests;
 pub mod types;
 pub mod values;
 
-pub fn analyze(program: &Program) -> Vec<Error> {
+/// Analyze the semantics of the program.
+///
+/// The analysis is split into two parts:
+///
+/// 1. Type analysis
+/// 2. Value analysis
+///
+/// The analyses are executed in order and their errors accumulated.
+///
+/// This function returns (_init values_, _symbol table_, _errors_).
+pub fn analyze(program: &Program) -> (Vec<Value>, values::SymbolTable, Vec<Error>) {
     let type_info = types::analyze(program);
     let mut errors = type_info.errors;
-    errors.extend(check_multiple_inits(program));
-    let (_, _, value_errors) = values::analyze(program);
+    let (inits, symbol_table, value_errors) = values::analyze(program);
     errors.extend(value_errors);
-    errors
-}
-
-fn check_multiple_inits(program: &Program) -> Vec<Error> {
-    program
-        .globals
-        .iter()
-        .filter_map(|global| match global {
-            Global::Init(init) => Some(init),
-            _ => None,
-        })
-        .skip(1)
-        .map(|init| Error::new(ErrorMessage::MultipleInits, init.info().to_token_range()))
-        .collect()
+    (inits, symbol_table, errors)
 }

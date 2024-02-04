@@ -75,7 +75,7 @@ impl NablaLS {
             let diagnostic = new_diagnostic(range, error.message.to_string());
             diagnostics.push(diagnostic);
         }
-        let errors = nabla_frontend::semantics::analyze(&program);
+        let (_, _, errors) = nabla_frontend::semantics::analyze(&program);
         for error in errors {
             let text_range =
                 tokens[error.range.start].range.start..tokens[error.range.end].range.end;

@@ -2,6 +2,7 @@ use crate::{
     ast::{AstInfo, Global, Ident, Let, Program},
     eval::Value,
     semantics::{Error, ErrorMessage},
+    token::ToTokenRange,
 };
 use std::collections::HashMap;
 
@@ -101,6 +102,11 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
             )
         })
         .collect();
+    inits.iter().skip(1).for_each(|rule_index| {
+        let rule = rules.get(*rule_index).expect("Rule must exists");
+        let error = Error::new(ErrorMessage::MultipleInits, rule.info.to_token_range());
+        errors.push(error);
+    });
     let inits = inits
         .iter()
         .map(|rule_index| {
@@ -110,6 +116,7 @@ pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
                 .expect("Rule must have been evaluated")
         })
         .collect();
+
     (inits, symbol_table, errors)
 }
 

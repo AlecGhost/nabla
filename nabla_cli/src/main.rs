@@ -1,11 +1,6 @@
 use clap::Parser;
 use nabla_backend::{to_json_value, to_toml_value, to_xml_value, to_yaml_value};
-use nabla_frontend::{
-    lexer::lex,
-    parser::parse,
-    semantics::{analyze, values},
-    token::TextRange,
-};
+use nabla_frontend::{lexer, parser, semantics, token::TextRange};
 use std::path::PathBuf;
 
 macro_rules! printerr {
@@ -42,7 +37,7 @@ fn main() -> color_eyre::Result<()> {
     let args = Args::parse();
     let src = std::fs::read_to_string(args.file).expect("Could not open file");
     let mut valid = true;
-    let (tokens, errors) = lex(&src);
+    let (tokens, errors) = lexer::lex(&src);
     if !errors.is_empty() {
         valid = false
     }
@@ -53,17 +48,12 @@ fn main() -> color_eyre::Result<()> {
             range.start.line, range.start.char, error
         );
     }
-    let (program, errors) = parse(&tokens);
+    let (program, errors) = parser::parse(&tokens);
     if !errors.is_empty() {
         valid = false
     }
     printerr!(errors, src, tokens);
-    let errors = analyze(&program);
-    if !errors.is_empty() {
-        valid = false
-    }
-    printerr!(errors, src, tokens);
-    let (inits, _, errors) = values::analyze(&program);
+    let (inits, _, errors) = semantics::analyze(&program);
     if !errors.is_empty() {
         valid = false
     }
