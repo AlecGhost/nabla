@@ -34,7 +34,7 @@ impl Prelude {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Program {
+pub struct Ast {
     pub globals: Vec<Global>,
     pub info: AstInfo,
 }

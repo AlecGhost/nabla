@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstInfo, Global, Ident, Let, Program},
+    ast::{AstInfo, Global, Ident, Let, Ast},
     eval::Value,
     semantics::{Error, ErrorMessage},
     token::ToTokenRange,
@@ -33,13 +33,13 @@ enum ValueDescription {
     Unknown,
 }
 
-pub fn analyze(program: &Program) -> (Vec<Value>, SymbolTable, Vec<Error>) {
+pub fn analyze(ast: &Ast) -> (Vec<Value>, SymbolTable, Vec<Error>) {
     let mut rules = Vec::new();
     let mut rule_table: HashMap<Ident, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
     let mut lets: Vec<(&Let, RuleIndex)> = Vec::new();
 
-    for global in program.globals.iter() {
+    for global in ast.globals.iter() {
         match global {
             Global::Def(d) => {
                 if let Some(expr) = &d.expr {

@@ -85,9 +85,9 @@ pub struct TypeInfo<'a> {
     pub errors: Vec<Error>,
 }
 
-pub fn analyze(program: &Program) -> TypeInfo {
+pub fn analyze(ast: &Ast) -> TypeInfo {
     let mut type_info = TypeInfo::default();
-    for global in &program.globals {
+    for global in &ast.globals {
         match global {
             Global::Use(u) => analysis::analyze_use(u, &mut type_info),
             Global::Def(def) => analysis::analyze_def(def, &mut type_info),

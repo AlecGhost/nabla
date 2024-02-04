@@ -1,6 +1,6 @@
 # Nabla Grammar (de jure)
 
-Program <- Global* EOF
+Ast <- Global* EOF
 
 Global <- Use / Def / Let / Init
 

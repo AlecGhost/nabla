@@ -1,8 +1,8 @@
 ---
 source: nabla_frontend/src/parser/tests.rs
-expression: program
+expression: ast
 ---
-Program {
+Ast {
     globals: [
         Def(
             Def {

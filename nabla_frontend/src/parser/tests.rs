@@ -22,14 +22,14 @@ fn empty() {
     let src = "";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: Vec::new(),
             info: info(0..0, 0..1),
         },
-        program
+        ast
     );
 }
 
@@ -81,10 +81,10 @@ fn use_simple() {
     let src = "use a";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Use(Use {
                 use_kw: info(0..0, 0..1),
                 name: Some(ident("a", 1..2, 2..3)),
@@ -93,7 +93,7 @@ fn use_simple() {
             })],
             info: info(0..0, 0..4),
         },
-        program
+        ast
     );
 }
 
@@ -102,10 +102,10 @@ fn use_all() {
     let src = "use a::*";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Use(Use {
                 use_kw: info(0..0, 0..1),
                 name: Some(ident("a", 1..2, 2..3)),
@@ -118,7 +118,7 @@ fn use_all() {
             })],
             info: info(0..0, 0..6),
         },
-        program
+        ast
     );
 }
 
@@ -127,10 +127,10 @@ fn use_single() {
     let src = "use a::b";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Use(Use {
                 use_kw: info(0..0, 0..1),
                 name: Some(ident("a", 1..1, 1..3)),
@@ -148,7 +148,7 @@ fn use_single() {
             })],
             info: info(0..0, 0..6),
         },
-        program
+        ast
     );
 }
 
@@ -157,10 +157,10 @@ fn use_multiple() {
     let src = "use a::{b c}";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Use(Use {
                 use_kw: info(0..0, 0..1),
                 name: Some(ident("a", 1..2, 2..3)),
@@ -191,7 +191,7 @@ fn use_multiple() {
             })],
             info: info(0..0, 0..10),
         },
-        program
+        ast
     );
 }
 
@@ -200,9 +200,9 @@ fn use_complex() {
     let src = "use a::{b::{ c::d as x e::* } f as y}";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -210,10 +210,10 @@ fn def_ident() {
     let src = "def x = y";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..0, 0..1),
                 name: Some(ident("x", 1..2, 2..3)),
@@ -230,7 +230,7 @@ fn def_ident() {
             })],
             info: info(0..0, 0..8),
         },
-        program
+        ast
     );
 }
 
@@ -239,10 +239,10 @@ fn def_union() {
     let src = r#"def ok = "yes" | true"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..0, 0..1),
                 name: Some(ident("ok", 1..2, 2..3)),
@@ -256,7 +256,8 @@ fn def_union() {
                     })),
                     alternatives: vec![UnionAlternative {
                         pipe: info(8..8, 8..9),
-                        single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(9..10,
+                        single: Some(Single::Primitive(Primitive::Bool(Bool::new_true(info(
+                            9..10,
                             10..11
                         ))))),
                         info: info(8..8, 8..11),
@@ -267,7 +268,7 @@ fn def_union() {
             })],
             info: info(0..0, 0..12),
         },
-        program
+        ast
     );
 }
 
@@ -280,10 +281,10 @@ def Person = {
 }";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Def(Def {
                 def_kw: info(1..1, 1..2),
                 name: Some(ident("Person", 2..3, 3..4)),
@@ -334,7 +335,7 @@ def Person = {
             })],
             info: info(0..1, 1..25),
         },
-        program
+        ast
     );
 }
 
@@ -343,10 +344,10 @@ fn def_list() {
     let src = "def Strings = [ string ]";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
-        Program {
+        Ast {
             globals: vec![Global::Def(Def {
                 def_kw: info(0..0, 0..1),
                 name: Some(ident("Strings", 1..2, 2..3)),
@@ -368,7 +369,7 @@ fn def_list() {
             })],
             info: info(0..0, 0..12),
         },
-        program
+        ast
     );
 }
 
@@ -390,9 +391,9 @@ def x = {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -403,12 +404,12 @@ fn ignore_expr_error() {
         vec![token::Error::new(token::ErrorMessage::Unknown, 8..9)],
         errors
     );
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 6..7)],
         errors
     );
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -416,12 +417,12 @@ fn ignore_global_error() {
     let src = "def x = {}=";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 8..9)],
         errors
     );
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -429,12 +430,12 @@ fn ignore_use_kind_error() {
     let src = "use x::{y::=}";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 7..8)],
         errors
     );
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -442,12 +443,12 @@ fn ignore_use_item_error() {
     let src = "use x::{=}";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 5..6)],
         errors
     );
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }
 
 #[test]
@@ -462,10 +463,10 @@ def x = {
         vec![token::Error::new(token::ErrorMessage::Unknown, 27..28)],
         errors
     );
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 13..14)],
         errors
     );
-    insta::assert_debug_snapshot!(program);
+    insta::assert_debug_snapshot!(ast);
 }

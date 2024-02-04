@@ -48,12 +48,12 @@ fn main() -> color_eyre::Result<()> {
             range.start.line, range.start.char, error
         );
     }
-    let (program, errors) = parser::parse(&tokens);
+    let (ast, errors) = parser::parse(&tokens);
     if !errors.is_empty() {
         valid = false
     }
     printerr!(errors, src, tokens);
-    let (inits, _, errors) = semantics::analyze(&program);
+    let (inits, _, errors) = semantics::analyze(&ast);
     if !errors.is_empty() {
         valid = false
     }

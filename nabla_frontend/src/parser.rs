@@ -24,21 +24,21 @@ type IResult<'a, T> = nom::IResult<TokenStream<'a>, T, ParserError<'a>>;
 /// # Panics
 ///
 /// Panics if parsing fails.
-pub fn parse(input: &[Token]) -> (Program, Vec<Error>) {
-    let (mut token_stream, program) = Program::parse(input.into()).expect("Parser cannot fail");
+pub fn parse(input: &[Token]) -> (Ast, Vec<Error>) {
+    let (mut token_stream, ast) = Ast::parse(input.into()).expect("Parser cannot fail");
     if !token_stream.tokens().is_empty() {
         let offset = token_stream.location_offset();
         token_stream.append_error(Error::new(ErrorMessage::TokensAfterEof, offset..offset))
     }
     let errors = token_stream.error_buffer;
-    (program, errors)
+    (ast, errors)
 }
 
 trait Parser: Sized {
     fn parse(input: TokenStream) -> IResult<Self>;
 }
 
-impl Parser for Program {
+impl Parser for Ast {
     fn parse(input: TokenStream) -> IResult<Self> {
         map(
             info(tuple((many0(Global::parse), token::eof))),

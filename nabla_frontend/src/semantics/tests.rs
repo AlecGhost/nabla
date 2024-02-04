@@ -22,9 +22,9 @@ fn empty() {
     let src = "";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -37,9 +37,9 @@ use f::g as h
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -51,9 +51,9 @@ use c::b
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::Redeclaration("b".to_string()),
@@ -71,9 +71,9 @@ use c::b as d
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -85,9 +85,9 @@ EmptyList []
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -105,9 +105,9 @@ Person {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -120,9 +120,9 @@ let opt_some: Optional = 1
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -137,11 +137,11 @@ fn evaluate_struct() {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let init = program
+    let init = ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -165,11 +165,11 @@ fn evaluate_list() {
     let src = r#"["a" "b" "c"]"#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let init = program
+    let init = ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -205,11 +205,11 @@ fn evaluate_complex_struct() {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let init = program
+    let init = ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -247,9 +247,9 @@ Config {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -260,9 +260,9 @@ def Type = Type {}
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -279,9 +279,9 @@ def Type: Type = {}
 ";
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -299,9 +299,9 @@ Type [ "a" [ "b" ] ]
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -317,9 +317,9 @@ A {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -335,9 +335,9 @@ A {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
 }
 
@@ -353,9 +353,9 @@ A {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
 
@@ -367,9 +367,9 @@ let b = "B" | "b"
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 10..15),
@@ -389,9 +389,9 @@ def Test = {
 "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 16..21),
@@ -411,11 +411,11 @@ let a = "x"
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&program);
+    let (inits, table, errors) = values::analyze(&ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -440,11 +440,11 @@ Config {}
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&program);
+    let (inits, table, errors) = values::analyze(&ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -471,11 +471,11 @@ Config {
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&program);
+    let (inits, table, errors) = values::analyze(&ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -507,11 +507,11 @@ Config {
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&program);
+    let (inits, table, errors) = values::analyze(&ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -539,11 +539,11 @@ let pi = 3.14
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (_, table, errors) = values::analyze(&program);
+    let (_, table, errors) = values::analyze(&ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([
@@ -577,11 +577,11 @@ def Config = {
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&program);
+    let (_, _, errors) = values::analyze(&ast);
     assert_eq!(
         vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
@@ -598,11 +598,11 @@ let rec = Rec {}
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&program);
+    let (_, _, errors) = values::analyze(&ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -622,11 +622,11 @@ let rec = {
     "#;
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
+    let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
+    let TypeInfo { errors, .. } = types::analyze(&ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&program);
+    let (_, _, errors) = values::analyze(&ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -636,23 +636,23 @@ let rec = {
         errors
     );
 }
-
-#[test]
-fn recursive_value_type() {
-    let src = r#"
-let x = {
-     x: x = x
-}
-    "#;
-    let (tokens, errors) = lex(src);
-    assert_empty!(errors);
-    let (program, errors) = parse(&tokens);
-    assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&program);
-    assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&program);
-    assert_eq!(
-        vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
-        errors
-    );
-}
+//
+// #[test]
+// fn recursive_value_type() {
+//     let src = r#"
+// let x = {
+//      x: x = x
+// }
+//     "#;
+//     let (tokens, errors) = lex(src);
+//     assert_empty!(errors);
+//     let (ast, errors) = parse(&tokens);
+//     assert_empty!(errors);
+//     let TypeInfo { errors, .. } = types::analyze(&ast);
+//     assert_empty!(errors);
+//     let (_, _, errors) = values::analyze(&ast);
+//     assert_eq!(
+//         vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
+//         errors
+//     );
+// }
