@@ -5,7 +5,7 @@ use crate::{
         types::analysis::TypeAnalyzer,
     },
     token::ToTokenRange,
-    GlobalIdent,
+    GlobalIdent, ModuleAst,
 };
 use std::{array::IntoIter, collections::HashMap};
 
@@ -85,9 +85,9 @@ pub struct TypeInfo<'a> {
     pub errors: Vec<Error>,
 }
 
-pub fn analyze(ast: &Ast) -> TypeInfo {
+pub fn analyze(module_ast: &ModuleAst) -> TypeInfo {
     let mut type_info = TypeInfo::default();
-    for global in &ast.globals {
+    for global in &module_ast.ast.globals {
         match global {
             Global::Use(u) => analysis::analyze_use(u, &mut type_info),
             Global::Def(def) => analysis::analyze_def(def, &mut type_info),

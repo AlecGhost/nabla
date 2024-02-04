@@ -1,8 +1,9 @@
 use crate::{
-    ast::{AstInfo, Global, Ident, Let, Ast},
+    ast::{AstInfo, Global, Ident, Let},
     eval::Value,
     semantics::{Error, ErrorMessage},
     token::ToTokenRange,
+    ModuleAst,
 };
 use std::collections::HashMap;
 
@@ -33,13 +34,13 @@ enum ValueDescription {
     Unknown,
 }
 
-pub fn analyze(ast: &Ast) -> (Vec<Value>, SymbolTable, Vec<Error>) {
+pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) {
     let mut rules = Vec::new();
     let mut rule_table: HashMap<Ident, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
     let mut lets: Vec<(&Let, RuleIndex)> = Vec::new();
 
-    for global in ast.globals.iter() {
+    for global in module_ast.ast.globals.iter() {
         match global {
             Global::Def(d) => {
                 if let Some(expr) = &d.expr {

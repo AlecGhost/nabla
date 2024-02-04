@@ -1,6 +1,6 @@
 use clap::Parser;
 use nabla_backend::{to_json_value, to_toml_value, to_xml_value, to_yaml_value};
-use nabla_frontend::{lexer, parser, semantics, token::TextRange};
+use nabla_frontend::{lexer, parser, semantics, token::TextRange, GlobalIdent, ModuleAst};
 use std::path::PathBuf;
 
 macro_rules! printerr {
@@ -49,11 +49,12 @@ fn main() -> color_eyre::Result<()> {
         );
     }
     let (ast, errors) = parser::parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     if !errors.is_empty() {
         valid = false
     }
     printerr!(errors, src, tokens);
-    let (inits, _, errors) = semantics::analyze(&ast);
+    let (inits, _, errors) = semantics::analyze(&module_ast);
     if !errors.is_empty() {
         valid = false
     }

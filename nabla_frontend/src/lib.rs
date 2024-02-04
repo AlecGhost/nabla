@@ -1,5 +1,7 @@
 #![warn(clippy::nursery)]
 
+use ast::Ast;
+
 #[cfg(test)]
 const fn new_vec<T>(_: &Vec<T>) -> Vec<T> {
     Vec::new()
@@ -43,6 +45,22 @@ impl Default for GlobalIdent {
 
 impl std::fmt::Display for GlobalIdent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}::{}", self.root, self.path.join("::"))
+        if self.path.is_empty() {
+            write!(f, "{}", self.root)
+        } else {
+            write!(f, "{}::{}", self.root, self.path.join("::"))
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModuleAst {
+    pub name: GlobalIdent,
+    pub ast: Ast,
+}
+
+impl ModuleAst {
+    pub const fn new(name: GlobalIdent, ast: Ast) -> Self {
+        Self { name, ast }
     }
 }

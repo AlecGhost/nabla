@@ -9,6 +9,7 @@ use crate::{
         values,
     },
     token::TokenRange,
+    GlobalIdent, ModuleAst,
 };
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
@@ -24,7 +25,7 @@ fn empty() {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -39,7 +40,7 @@ use f::g as h
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -53,7 +54,7 @@ use c::b
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(
         vec![Error::new(
             ErrorMessage::Redeclaration("b".to_string()),
@@ -73,7 +74,7 @@ use c::b as d
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -87,7 +88,7 @@ EmptyList []
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -107,7 +108,7 @@ Person {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -122,7 +123,7 @@ let opt_some: Optional = 1
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -138,10 +139,12 @@ fn evaluate_struct() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let init = ast
+    let init = module_ast
+        .ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -166,10 +169,12 @@ fn evaluate_list() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let init = ast
+    let init = module_ast
+        .ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -206,10 +211,12 @@ fn evaluate_complex_struct() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let init = ast
+    let init = module_ast
+        .ast
         .globals
         .iter()
         .find_map(|global| match global {
@@ -249,7 +256,7 @@ Config {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -262,7 +269,7 @@ def Type = Type {}
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -281,7 +288,7 @@ def Type: Type = {}
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -301,7 +308,7 @@ Type [ "a" [ "b" ] ]
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -319,7 +326,7 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -337,7 +344,7 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_empty!(errors);
 }
 
@@ -355,7 +362,7 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
 
@@ -369,7 +376,7 @@ let b = "B" | "b"
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 10..15),
@@ -391,7 +398,7 @@ def Test = {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UnionInInit, 16..21),
@@ -412,10 +419,11 @@ let a = "x"
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&ast);
+    let (inits, table, errors) = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -441,10 +449,11 @@ Config {}
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&ast);
+    let (inits, table, errors) = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -472,10 +481,11 @@ Config {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&ast);
+    let (inits, table, errors) = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -508,10 +518,11 @@ Config {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&ast);
+    let (inits, table, errors) = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -540,10 +551,11 @@ let pi = 3.14
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, table, errors) = values::analyze(&ast);
+    let (_, table, errors) = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([
@@ -578,10 +590,11 @@ def Config = {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&ast);
+    let (_, _, errors) = values::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
@@ -599,10 +612,11 @@ let rec = Rec {}
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&ast);
+    let (_, _, errors) = values::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -623,10 +637,11 @@ let rec = {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ast);
+    let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&ast);
+    let (_, _, errors) = values::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -648,9 +663,9 @@ let rec = {
 //     assert_empty!(errors);
 //     let (ast, errors) = parse(&tokens);
 //     assert_empty!(errors);
-//     let TypeInfo { errors, .. } = types::analyze(&ast);
+//     let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
 //     assert_empty!(errors);
-//     let (_, _, errors) = values::analyze(&ast);
+//     let (_, _, errors) = values::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
 //     assert_eq!(
 //         vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
 //         errors
