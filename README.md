@@ -48,5 +48,6 @@ Since no version was specified, it will fall back on the default value for this 
 ## Supported Targets
 
 - [x] JSON
-- [ ] XML
-- [ ] YAML
+- [x] YAML
+- [x] XML
+- [x] TOML
