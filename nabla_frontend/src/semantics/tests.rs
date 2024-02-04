@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstInfo, Global, Ident, Prelude},
+    ast::Global,
     eval::{eval, Value},
     lexer::lex,
     parser::parse,
@@ -8,15 +8,10 @@ use crate::{
         types::{self, TypeInfo},
         values,
     },
-    token::TokenRange,
     GlobalIdent, ModuleAst,
 };
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
-
-fn info(prelude_range: TokenRange, range: TokenRange) -> AstInfo {
-    AstInfo::new(Prelude::ranged(prelude_range), range)
-}
 
 #[test]
 fn empty() {
@@ -427,10 +422,7 @@ let a = "x"
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
-            Ident {
-                name: "a".to_string(),
-                info: info(0..0, 0..0),
-            },
+            GlobalIdent::default().extend("a".to_string()),
             Value::from("x")
         )]),
         table
@@ -457,10 +449,7 @@ Config {}
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
-            Ident {
-                name: "Config".to_string(),
-                info: info(0..0, 0..0),
-            },
+            GlobalIdent::default().extend("Config".to_string()),
             Value::from([("x", 0)]),
         )]),
         table
@@ -489,10 +478,7 @@ Config {
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
-            Ident {
-                name: "Config".to_string(),
-                info: info(0..0, 0..0),
-            },
+            GlobalIdent::default().extend("Config".to_string()),
             Value::from([("x", 0)]),
         )]),
         table
@@ -526,10 +512,7 @@ Config {
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
-            Ident {
-                name: "Config".to_string(),
-                info: info(0..0, 0..0),
-            },
+            GlobalIdent::default().extend("Config".to_string()),
             Value::from([(
                 "x",
                 Value::from([("y", Value::from(0)), ("z", Value::Unknown)])
@@ -560,17 +543,11 @@ let pi = 3.14
     assert_eq!(
         HashMap::from([
             (
-                Ident {
-                    name: "pi".to_string(),
-                    info: info(0..0, 0..0),
-                },
+                GlobalIdent::default().extend("pi".to_string()),
                 Value::from(3.14),
             ),
             (
-                Ident {
-                    name: "Config".to_string(),
-                    info: info(0..0, 0..0),
-                },
+                GlobalIdent::default().extend("Config".to_string()),
                 Value::from([("x", 3.14)]),
             )
         ]),

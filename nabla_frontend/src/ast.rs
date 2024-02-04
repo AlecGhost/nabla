@@ -333,6 +333,12 @@ pub struct Ident {
     pub info: AstInfo,
 }
 
+impl Ident {
+    pub fn is_flattened(&self) -> bool {
+        self.name.contains("::")
+    }
+}
+
 impl PartialEq for Ident {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name

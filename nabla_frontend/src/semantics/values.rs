@@ -1,9 +1,9 @@
 use crate::{
     ast::{AstInfo, Global, Ident, Let},
     eval::Value,
-    semantics::{Error, ErrorMessage},
+    semantics::{Error, ErrorMessage, SymbolTable},
     token::ToTokenRange,
-    ModuleAst,
+    GlobalIdent, ModuleAst,
 };
 use std::collections::HashMap;
 
@@ -11,8 +11,6 @@ mod analysis;
 
 /// Index into rule list
 type RuleIndex = usize;
-
-pub type SymbolTable = HashMap<Ident, Value>;
 
 #[derive(Clone, Debug)]
 struct Rule {
@@ -36,7 +34,7 @@ enum ValueDescription {
 
 pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) {
     let mut rules = Vec::new();
-    let mut rule_table: HashMap<Ident, RuleIndex> = HashMap::new();
+    let mut rule_table: HashMap<GlobalIdent, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
     let mut lets: Vec<(&Let, RuleIndex)> = Vec::new();
 
@@ -47,7 +45,10 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) 
                     analysis::analyze(expr, &mut rules);
                     if let Some(ident) = &d.name {
                         let rule_index = rules.len() - 1;
-                        rule_table.insert(ident.clone(), rule_index);
+                        rule_table.insert(
+                            module_ast.name.clone().extend(ident.name.clone()),
+                            rule_index,
+                        );
                     }
                 }
             }
@@ -56,7 +57,10 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) 
                     analysis::analyze(expr, &mut rules);
                     let rule_index = rules.len() - 1;
                     if let Some(ident) = &l.name {
-                        rule_table.insert(ident.clone(), rule_index);
+                        rule_table.insert(
+                            module_ast.name.clone().extend(ident.name.clone()),
+                            rule_index,
+                        );
                     }
                     lets.push((l, rule_index));
                 }
@@ -70,7 +74,7 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) 
         }
     }
     let mut errors = Vec::new();
-    let evaluated = evaluate(&rules, &rule_table, &mut errors);
+    let evaluated = evaluate(module_ast.name.clone(), &rules, &rule_table, &mut errors);
     for (rule_index, rule) in rules.iter().enumerate() {
         if rule.is_default {
             let value = evaluated
@@ -122,8 +126,9 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) 
 }
 
 fn evaluate(
+    module: GlobalIdent,
     rules: &[Rule],
-    rule_table: &HashMap<Ident, RuleIndex>,
+    rule_table: &HashMap<GlobalIdent, RuleIndex>,
     errors: &mut Vec<Error>,
 ) -> HashMap<RuleIndex, Value> {
     let mut stack: Vec<RuleIndex> = Vec::new();
@@ -205,7 +210,16 @@ fn evaluate(
                     }
                 }
                 ValueDescription::Ref(ident) => {
-                    if let Some(ref_index) = rule_table.get(ident) {
+                    if ident.is_flattened() {
+                        // TODO: implement lookup
+                        errors.push(Error::new(
+                            ErrorMessage::Unsupported("module references".to_string()),
+                            ident.info.to_token_range(),
+                        ));
+                    }
+                    if let Some(ref_index) =
+                        rule_table.get(&module.clone().extend(ident.name.clone()))
+                    {
                         if !evaluated.contains_key(ref_index) {
                             stack.push(rule_index);
                             stack.push(*ref_index);
@@ -258,7 +272,9 @@ fn evaluate(
                     evaluated.insert(rule_index, value.clone());
                 }
                 ValueDescription::Ref(ident) => {
-                    if let Some(ref_index) = rule_table.get(ident) {
+                    if let Some(ref_index) =
+                        rule_table.get(&module.clone().extend(ident.name.clone()))
+                    {
                         let value = evaluated
                             .get(ref_index)
                             .expect("Value must be present")

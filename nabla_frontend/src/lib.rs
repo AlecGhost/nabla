@@ -21,7 +21,7 @@ pub mod parser;
 pub mod semantics;
 pub mod token;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct GlobalIdent {
     pub root: String,
     pub path: Vec<String>,
