@@ -1,5 +1,6 @@
 use nabla_frontend::eval::Value;
 use std::str::FromStr;
+use xml_builder::XMLElement;
 
 pub fn to_json_value(value: Value) -> Option<serde_json::Value> {
     match value {
@@ -106,4 +107,32 @@ pub fn to_toml_value(value: Value) -> Option<toml::Value> {
             }
         }
     }
+}
+
+pub fn to_xml_value(value: Value, name: &str) -> Option<XMLElement> {
+    let mut element = XMLElement::new(name);
+    match value {
+        Value::Unknown => return None,
+        Value::Null => {}
+        Value::Bool(b) => element.add_text(b.to_string()).expect("Element is empty"),
+        Value::Number(n) => element.add_text(n).expect("Element is empty"),
+        Value::String(s) => element.add_text(s).expect("Element is empty"),
+        Value::List(_) => return None,
+        Value::Struct(s) => {
+            for (key, value) in s {
+                if let Value::List(list) = value {
+                    for value in list {
+                        element
+                            .add_child(to_xml_value(value, &key)?)
+                            .expect("Element is no text element");
+                    }
+                } else {
+                    element
+                        .add_child(to_xml_value(value, &key)?)
+                        .expect("Element is no text element");
+                }
+            }
+        }
+    };
+    Some(element)
 }

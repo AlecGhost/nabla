@@ -519,6 +519,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "toml",
+ "xml-builder",
 ]
 
 [[package]]
@@ -531,6 +532,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "toml",
+ "xml-builder",
 ]
 
 [[package]]
@@ -1345,6 +1347,12 @@ checksum = "b7cf47b659b318dccbd69cc4797a39ae128f533dce7902a1096044d1967b9c16"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "xml-builder"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "efc4f1a86af7800dfc4056c7833648ea4515ae21502060b5c98114d828f5333b"
 
 [[package]]
 name = "yaml-rust"

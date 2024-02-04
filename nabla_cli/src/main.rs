@@ -1,5 +1,5 @@
 use clap::Parser;
-use nabla_backend::{to_json_value, to_toml_value, to_yaml_value};
+use nabla_backend::{to_json_value, to_toml_value, to_xml_value, to_yaml_value};
 use nabla_frontend::{
     lexer::lex,
     parser::parse,
@@ -14,6 +14,7 @@ enum Target {
     Json,
     Yaml,
     Toml,
+    Xml,
 }
 
 #[derive(Debug, Parser)]
@@ -96,6 +97,13 @@ fn main() {
                         let pretty_toml = toml::to_string_pretty(&toml)
                             .expect("Converting value to yaml string failed");
                         println!("{}", pretty_toml);
+                    }
+                }
+                Target::Xml => {
+                    if let Some(element) = to_xml_value(init.clone(), "root") {
+                        let mut xml = xml_builder::XMLBuilder::new().build();
+                        xml.set_root_element(element);
+                        xml.generate(std::io::stdout()).expect("Generation XML failed");
                     }
                 }
             }
