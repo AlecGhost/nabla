@@ -54,6 +54,7 @@ Ast {
                         },
                     },
                 ),
+                alias: None,
                 info: AstInfo {
                     prelude: Prelude {
                         comments: [],
@@ -250,6 +251,7 @@ Ast {
                         },
                     },
                 ),
+                alias: None,
                 info: AstInfo {
                     prelude: Prelude {
                         comments: [],
@@ -323,6 +325,7 @@ Ast {
                         },
                     },
                 ),
+                alias: None,
                 info: AstInfo {
                     prelude: Prelude {
                         comments: [],

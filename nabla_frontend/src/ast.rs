@@ -53,7 +53,23 @@ pub struct Use {
     pub use_kw: AstInfo,
     pub name: Option<Ident>,
     pub body: Option<UseBody>,
+    pub alias: Option<Alias>,
     pub info: AstInfo,
+}
+
+impl Use {
+    /// Get the identifier by which this use will be referable to in this scope.
+    /// If a valid alias is set, it is returned. Otherwise the original name.
+    pub fn identifier(&self) -> Option<&Ident> {
+        self.alias
+            .as_ref()
+            .and_then(|alias| alias.name.as_ref())
+            .and_then(|alias_name| match alias_name {
+                AliasName::Ident(ident) => Some(ident),
+                AliasName::String(_) => None,
+            })
+            .or(self.name.as_ref())
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

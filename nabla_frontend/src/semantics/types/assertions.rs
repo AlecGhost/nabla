@@ -188,11 +188,9 @@ fn check_rules(rules: &[Rule], expected_rule: &Rule, actual_rule: &Rule) -> Vec<
         (TypeDescription::Ident(_), _)
         | (TypeDescription::ValidIdent(_), _)
         | (TypeDescription::Rule(_), _)
-        | (TypeDescription::Import(_), _)
         | (_, TypeDescription::Ident(_))
         | (_, TypeDescription::ValidIdent(_))
-        | (_, TypeDescription::Rule(_))
-        | (_, TypeDescription::Import(_)) => panic!("Unexpected type description"),
+        | (_, TypeDescription::Rule(_)) => panic!("Unexpected type description"),
         // union
         (TypeDescription::Union(expected), TypeDescription::Union(actual)) => {
             check_union(rules, expected, actual)

@@ -4,7 +4,7 @@ Ast <- Global* EOF
 
 Global <- Use / Def / Let / Init
 
-Use <- USE IDENT UseBody?
+Use <- USE IDENT UseBody? (AS Ident)?
 UseBody <- DOUBLE_COLON UseKind
 UseKind <-
     STAR

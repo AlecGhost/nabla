@@ -5,7 +5,6 @@ use crate::{
         types::{Context, Rule, RuleIndex, TypeDescription, TypeInfo},
     },
     token::ToTokenRange,
-    GlobalIdent,
 };
 
 pub(super) fn analyze_def<'a>(def: &'a Def, type_info: &mut TypeInfo<'a>) {
@@ -84,115 +83,6 @@ fn analyze_binding<'a>(
     });
     if let (Some(entry), Some(index)) = (ident_entry, rule_index) {
         entry.insert(index);
-    }
-}
-
-pub(super) fn analyze_use<'a>(u: &'a Use, type_info: &mut TypeInfo<'a>) {
-    /// Analyzes the body and returns whether the `UseKind` was `Single`.
-    fn analyze_body<'a>(
-        body: &'a UseBody,
-        type_info: &mut TypeInfo<'a>,
-        path_stack: &mut Vec<String>,
-    ) -> bool {
-        if let Some(kind) = &body.kind {
-            match kind {
-                UseKind::All(info) => {
-                    type_info.errors.push(Error {
-                        message: ErrorMessage::Unsupported("glob import".to_string()),
-                        range: info.to_token_range(),
-                    });
-                    false
-                }
-                UseKind::Single(item) => {
-                    analyze_item(item, type_info, path_stack);
-                    true
-                }
-                UseKind::Multiple(items) => {
-                    items.items.iter().flatten().for_each(|item| {
-                        analyze_item(item, type_info, path_stack);
-                    });
-                    false
-                }
-                UseKind::Error(_) => false,
-            }
-        } else {
-            false
-        }
-    }
-
-    /// If the item is terminal, add an import rule.
-    /// Else push its name on the stack and continue with `analyze_body`.
-    fn analyze_item<'a>(
-        item: &'a UseItem,
-        type_info: &mut TypeInfo<'a>,
-        path_stack: &mut Vec<String>,
-    ) {
-        if let Some(body) = &item.body {
-            path_stack.push(item.name.name.clone());
-            let is_single = analyze_body(body, type_info, path_stack);
-            if !is_single {
-                if let Some(alias) = &item.alias {
-                    type_info.errors.push(Error::new(
-                        ErrorMessage::AliasingNonSingle,
-                        alias.info.to_token_range(),
-                    ));
-                }
-            }
-            path_stack.pop();
-        } else {
-            // is a terminal item
-            let TypeInfo {
-                ref mut rules,
-                ref mut idents,
-                ref mut errors,
-                ..
-            } = type_info;
-            path_stack.push(item.name.name.clone());
-            let import_rule = Rule {
-                type_description: TypeDescription::Import(GlobalIdent {
-                    root: path_stack
-                        .first()
-                        .expect("Path stack must have a root element")
-                        .clone(),
-                    path: path_stack[1..].to_vec(),
-                }),
-                info: item.info.clone(),
-            };
-            rules.push(import_rule);
-            path_stack.pop();
-            let import_rule_index = rule_index(rules);
-            let ident = item.identifier();
-            use std::collections::hash_map::Entry;
-            match idents.entry(ident) {
-                Entry::Vacant(entry) => {
-                    entry.insert(import_rule_index);
-                }
-                Entry::Occupied(_) => {
-                    errors.push(Error::new(
-                        ErrorMessage::Redeclaration(ident.name.clone()),
-                        ident.info.to_token_range(),
-                    ));
-                }
-            }
-        }
-    }
-
-    match (&u.name, &u.body) {
-        (Some(root), Some(body)) => {
-            let mut path_stack = vec![root.name.clone()];
-            analyze_body(body, type_info, &mut path_stack);
-        }
-        (Some(root), None) => {
-            let import_rule = Rule {
-                type_description: TypeDescription::Import(GlobalIdent {
-                    root: root.name.clone(),
-                    path: Vec::new(),
-                }),
-                info: root.info.clone(),
-            };
-            type_info.rules.push(import_rule);
-        }
-        _ => {}
     }
 }
 

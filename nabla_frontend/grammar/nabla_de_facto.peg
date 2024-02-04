@@ -5,7 +5,7 @@ Ast <- Global* EOF
 Global <- Use / Def / Let / Init / GlobalError
 GlobalError <- (!GlobalLA .)+
 
-Use <- USE Ident? UseBody?
+Use <- USE Ident? UseBody? Alias?
 UseBody <- DOUBLE_COLON UseKind?
 UseKind <-
     STAR

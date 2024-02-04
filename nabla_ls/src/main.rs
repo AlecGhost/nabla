@@ -1,4 +1,4 @@
-use nabla_frontend::{self, token::TextRange, GlobalIdent, ModuleAst};
+use nabla_frontend::{self, token::TextRange, GlobalIdent, ModuleAst, semantics::SymbolTable};
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
@@ -76,7 +76,8 @@ impl NablaLS {
             let diagnostic = new_diagnostic(range, error.message.to_string());
             diagnostics.push(diagnostic);
         }
-        let (_, _, errors) = nabla_frontend::semantics::analyze(&module_ast);
+        let extern_table = SymbolTable::new();
+        let (_, _, errors) = nabla_frontend::semantics::analyze(&module_ast, &extern_table);
         for error in errors {
             let text_range =
                 tokens[error.range.start].range.start..tokens[error.range.end].range.end;

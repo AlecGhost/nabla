@@ -5,7 +5,7 @@ use crate::{
         types::analysis::TypeAnalyzer,
     },
     token::ToTokenRange,
-    GlobalIdent, ModuleAst,
+    ModuleAst,
 };
 use std::{array::IntoIter, collections::HashMap};
 
@@ -34,7 +34,6 @@ pub enum TypeDescription {
     ValidIdent(RuleIndex),
     Primitive(Primitive),
     Rule(RuleIndex),
-    Import(GlobalIdent),
     BuiltIn(BuiltInType),
     Unknown,
 }
@@ -89,33 +88,17 @@ pub fn analyze(module_ast: &ModuleAst) -> TypeInfo {
     let mut type_info = TypeInfo::default();
     for global in &module_ast.ast.globals {
         match global {
-            Global::Use(u) => analysis::analyze_use(u, &mut type_info),
             Global::Def(def) => analysis::analyze_def(def, &mut type_info),
             Global::Let(l) => analysis::analyze_let(l, &mut type_info),
             Global::Init(init) => {
                 init.analyze(&mut type_info, Context::Expr);
             }
-            Global::Error(_) => { /* no types to check */ }
+            Global::Use(_) | Global::Error(_) => { /* no types to check */ }
         }
     }
     validate_idents(&mut type_info);
-    lookup_imports(&mut type_info);
     assertions::check(&mut type_info);
     type_info
-}
-
-/// Lookup all `Import` rules.
-///
-/// Imports are looked up and replaced by their rule type, if present,
-/// and an `Unknown`-rule otherwise.
-/// Currently the lookup is not implemented, so every import is `Unknown`.
-fn lookup_imports(type_info: &mut TypeInfo) {
-    for rule in type_info.rules.iter_mut() {
-        if let TypeDescription::Import(_) = &rule.type_description {
-            // currently not implementing use
-            rule.type_description = TypeDescription::Unknown;
-        };
-    }
 }
 
 /// Validate all `Ident` rules.

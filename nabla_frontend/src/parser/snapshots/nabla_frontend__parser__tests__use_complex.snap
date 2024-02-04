@@ -346,6 +346,7 @@ Ast {
                         },
                     },
                 ),
+                alias: None,
                 info: AstInfo {
                     prelude: Prelude {
                         comments: [],

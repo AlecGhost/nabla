@@ -32,6 +32,10 @@ impl GlobalIdent {
         self.path.push(ident);
         self
     }
+
+    pub fn end(&self) -> &str {
+        self.path.last().unwrap_or(&self.root)
+    }
 }
 
 impl Default for GlobalIdent {

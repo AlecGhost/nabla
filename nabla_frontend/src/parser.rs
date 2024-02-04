@@ -68,11 +68,13 @@ impl Parser for Use {
                 token::r#use,
                 expect(Ident::parse, ErrorMessage::ExpectedIdent),
                 opt(UseBody::parse),
+                opt(Alias::parse),
             ))),
-            |((use_kw, name, body), info)| Self {
+            |((use_kw, name, body, alias), info)| Self {
                 use_kw,
                 name,
                 body,
+                alias,
                 info,
             },
         )(input)

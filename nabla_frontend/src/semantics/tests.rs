@@ -418,7 +418,7 @@ let a = "x"
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&module_ast);
+    let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -445,7 +445,7 @@ Config {}
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&module_ast);
+    let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -474,7 +474,7 @@ Config {
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&module_ast);
+    let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -508,7 +508,7 @@ Config {
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (inits, table, errors) = values::analyze(&module_ast);
+    let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -538,7 +538,7 @@ let pi = 3.14
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, table, errors) = values::analyze(&module_ast);
+    let (_, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([
@@ -571,7 +571,7 @@ def Config = {
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast);
+    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_eq!(
         vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
@@ -593,7 +593,7 @@ let rec = Rec {}
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast);
+    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -618,7 +618,7 @@ let rec = {
     assert_empty!(errors);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast);
+    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
