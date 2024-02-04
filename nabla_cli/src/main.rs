@@ -8,6 +8,20 @@ use nabla_frontend::{
 };
 use std::path::PathBuf;
 
+macro_rules! printerr {
+    ($errors:expr, $src:expr, $tokens:expr) => {
+        for error in $errors {
+            let text_range =
+                $tokens[error.range.start].range.start..$tokens[error.range.end].range.end;
+            let range = convert_text_range(&$src, &text_range);
+            println!(
+                "Line {}, Char {}: {}",
+                range.start.line, range.start.char, error
+            );
+        }
+    };
+}
+
 #[derive(Clone, Debug, Default, clap::ValueEnum)]
 enum Target {
     #[default]
@@ -24,7 +38,7 @@ struct Args {
     target: Target,
 }
 
-fn main() {
+fn main() -> color_eyre::Result<()> {
     let args = Args::parse();
     let src = std::fs::read_to_string(args.file).expect("Could not open file");
     let mut valid = true;
@@ -43,72 +57,51 @@ fn main() {
     if !errors.is_empty() {
         valid = false
     }
-    for error in errors {
-        let text_range = tokens[error.range.start].range.start..tokens[error.range.end].range.end;
-        let range = convert_text_range(&src, &text_range);
-        println!(
-            "Line {}, Char {}: {}",
-            range.start.line, range.start.char, error
-        );
-    }
+    printerr!(errors, src, tokens);
     let errors = analyze(&program);
     if !errors.is_empty() {
         valid = false
     }
-    for error in errors {
-        let text_range = tokens[error.range.start].range.start..tokens[error.range.end].range.end;
-        let range = convert_text_range(&src, &text_range);
-        println!(
-            "Line {}, Char {}: {}",
-            range.start.line, range.start.char, error
-        );
-    }
+    printerr!(errors, src, tokens);
     let (inits, _, errors) = values::analyze(&program);
     if !errors.is_empty() {
         valid = false
     }
-    for error in errors {
-        let text_range = tokens[error.range.start].range.start..tokens[error.range.end].range.end;
-        let range = convert_text_range(&src, &text_range);
-        println!(
-            "Line {}, Char {}: {}",
-            range.start.line, range.start.char, error
-        );
-    }
+    printerr!(errors, src, tokens);
     if valid {
         if let Some(init) = inits.first() {
             match args.target {
                 Target::Json => {
-                    if let Some(json) = to_json_value(init.clone()) {
-                        let pretty_json = serde_json::to_string_pretty(&json)
-                            .expect("Converting value to json string failed");
-                        println!("{}", pretty_json);
-                    }
+                    let json = to_json_value(init.clone())?;
+                    let pretty_json = serde_json::to_string_pretty(&json)
+                        .expect("Converting value to json string failed");
+                    println!("{}", pretty_json);
                 }
                 Target::Yaml => {
-                    if let Some(yaml) = to_yaml_value(init.clone()) {
-                        let pretty_yaml = serde_yaml::to_string(&yaml)
-                            .expect("Converting value to yaml string failed");
-                        println!("{}", pretty_yaml);
-                    }
+                    let yaml = to_yaml_value(init.clone())?;
+                    let pretty_yaml = serde_yaml::to_string(&yaml)
+                        .expect("Converting value to yaml string failed");
+                    println!("{}", pretty_yaml);
                 }
                 Target::Toml => {
-                    if let Some(toml) = to_toml_value(init.clone()) {
-                        let pretty_toml = toml::to_string_pretty(&toml)
-                            .expect("Converting value to yaml string failed");
-                        println!("{}", pretty_toml);
-                    }
+                    let toml = to_toml_value(init.clone())?;
+                    let pretty_toml = toml::to_string_pretty(&toml)
+                        .expect("Converting value to yaml string failed");
+                    println!("{}", pretty_toml);
                 }
                 Target::Xml => {
-                    if let Some(element) = to_xml_value(init.clone(), "root") {
-                        let mut xml = xml_builder::XMLBuilder::new().build();
-                        xml.set_root_element(element);
-                        xml.generate(std::io::stdout()).expect("Generation XML failed");
-                    }
+                    let element = to_xml_value(init.clone(), "root")?;
+                    let mut xml = xml_builder::XMLBuilder::new().build();
+                    xml.set_root_element(element);
+                    xml.generate(std::io::stdout())
+                        .expect("Generation XML failed");
                 }
             }
+        } else {
+            println!("No errors detected.");
         }
     }
+    Ok(())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
