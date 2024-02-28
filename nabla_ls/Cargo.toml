@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 nabla_frontend = { path = "../nabla_frontend" }
-tokio = { version = "1.35.1", features = ["io-std", "rt", "macros", "rt-multi-thread"] }
+tokio = { version = "1.35.0", features = ["io-std", "rt", "macros", "rt-multi-thread"] }
 tower-lsp = "0.20.0"
