@@ -54,22 +54,20 @@ fn analyze_binding<'a>(
         expr.as_ref().map(|expr| expr.analyze(type_info, context)),
     ) {
         (Some(type_expr_index), Some(expr_index)) => {
-            if !(matches!(context, Context::Expr) && analyze_union_in_init(type_info, expr_index)) {
+            if !(matches!(context, Context::Expr) && is_union(type_info, expr_index)) {
                 type_info.assertions.push((type_expr_index, expr_index));
             }
             Some(type_expr_index)
         }
         (Some(type_expr_index), None) => Some(type_expr_index),
         (None, Some(expr_index)) => {
-            if matches!(context, Context::Expr) {
-                analyze_union_in_init(type_info, expr_index);
-            }
             Some(expr_index)
         }
         (None, None) => None,
     };
     let ident_entry = name.as_ref().and_then(|name| {
         use std::collections::hash_map::Entry;
+        // TODO: check redeclaration of use
         match type_info.idents.entry(name) {
             Entry::Vacant(entry) => Some(entry),
             Entry::Occupied(_) => {
@@ -202,7 +200,7 @@ impl TypeAnalyzer for StructField {
                 .map(|expr| expr.analyze(type_info, context)),
         ) {
             (Some(type_expr_index), Some(expr_index)) => {
-                if !analyze_union_in_init(type_info, expr_index) {
+                if !is_union(type_info, expr_index) {
                     type_info.assertions.push((type_expr_index, expr_index));
                 }
                 Rule {
@@ -221,7 +219,6 @@ impl TypeAnalyzer for StructField {
                 }
             }
             (None, Some(expr_index)) => {
-                analyze_union_in_init(type_info, expr_index);
                 Rule {
                     type_description: TypeDescription::Rule(expr_index),
                     info,
@@ -263,6 +260,7 @@ impl TypeAnalyzer for List {
 
 impl TypeAnalyzer for Named {
     fn analyze(&self, type_info: &mut TypeInfo, context: Context) -> RuleIndex {
+        // TODO: replace flattened name with global ident
         let flat_name = self.flatten_name();
         let is_incomplete = flat_name.name.ends_with("::");
         let named_rule = Rule {
@@ -298,14 +296,19 @@ impl TypeAnalyzer for Primitive {
     }
 }
 
-fn analyze_union_in_init(type_info: &mut TypeInfo, rule_index: RuleIndex) -> bool {
+// fn analyze_union_in_init(type_info: &mut TypeInfo, rule_index: RuleIndex) -> bool {
+//     let rule = type_info.rules.get(rule_index).expect("Rule must exist");
+//     let is_union = matches!(rule.type_description, TypeDescription::Union(_));
+//     if is_union {
+//         type_info.errors.push(Error::new(
+//             ErrorMessage::UnionInInit,
+//             rule.info.to_token_range(),
+//         ));
+//     }
+//     is_union
+// }
+//
+fn is_union(type_info: &TypeInfo, rule_index: RuleIndex) -> bool {
     let rule = type_info.rules.get(rule_index).expect("Rule must exist");
-    let is_union = matches!(rule.type_description, TypeDescription::Union(_));
-    if is_union {
-        type_info.errors.push(Error::new(
-            ErrorMessage::UnionInInit,
-            rule.info.to_token_range(),
-        ));
-    }
-    is_union
+    matches!(rule.type_description, TypeDescription::Union(_))
 }

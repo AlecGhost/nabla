@@ -4,6 +4,7 @@ use crate::{
     lexer::lex,
     parser::parse,
     semantics::{
+        self,
         error::{Error, ErrorMessage},
         types::{self, TypeInfo},
         uses, values,
@@ -20,7 +21,8 @@ fn empty() {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -86,7 +88,8 @@ EmptyList []
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -106,7 +109,8 @@ Person {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -121,7 +125,8 @@ let opt_some: Optional = 1
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -137,9 +142,9 @@ fn evaluate_struct() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -167,9 +172,9 @@ fn evaluate_list() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -209,9 +214,9 @@ fn evaluate_complex_struct() {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -254,7 +259,8 @@ Config {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -267,7 +273,8 @@ def Type = Type {}
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -286,7 +293,8 @@ def Type: Type = {}
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -306,7 +314,8 @@ Type [ "a" [ "b" ] ]
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -324,7 +333,8 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -342,7 +352,8 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_empty!(errors);
 }
 
@@ -360,7 +371,8 @@ A {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
 
@@ -374,11 +386,12 @@ let b = "B" | "b"
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::UnionInInit, 10..15),
-            Error::new(ErrorMessage::UnionInInit, 22..27),
+            Error::new(ErrorMessage::UninitializedLet, 1..15),
+            Error::new(ErrorMessage::UninitializedLet, 16..27),
         ],
         errors
     );
@@ -396,11 +409,12 @@ def Test = {
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::UnionInInit, 16..21),
-            Error::new(ErrorMessage::UnionInInit, 26..31),
+            Error::new(ErrorMessage::UninitializedDefault, 9..21),
+            Error::new(ErrorMessage::UninitializedDefault, 26..31),
         ],
         errors
     );
@@ -417,8 +431,8 @@ let a = "x"
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
     let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
@@ -444,8 +458,8 @@ Config {}
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
     let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
@@ -473,8 +487,8 @@ Config {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
     let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
@@ -507,8 +521,8 @@ Config {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
     let (inits, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
@@ -537,8 +551,8 @@ let pi = 3.14
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
-    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let TypeInfo { errors, .. } = types::analyze(&module_ast);
     assert_empty!(errors);
     let (_, table, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
@@ -570,11 +584,9 @@ def Config = {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
-    assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
@@ -594,9 +606,7 @@ let rec = Rec {}
     let (ast, errors) = parse(&tokens);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
-    assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),
@@ -617,11 +627,9 @@ let rec = {
     let (tokens, errors) = lex(src);
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
+    assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&module_ast);
-    assert_empty!(errors);
-    let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
+    let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
             Error::new(ErrorMessage::RecursiveInit, 13..14),

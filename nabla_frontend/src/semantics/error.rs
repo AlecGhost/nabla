@@ -38,7 +38,6 @@ pub enum ErrorMessage {
     UnassignedField,
     UntypedField,
     UninitializedLet,
-    UnionInInit,
     UnknownType,
     Unsupported(String),
     ValueMismatch(String, String),
@@ -66,7 +65,6 @@ impl std::fmt::Display for ErrorMessage {
             Self::UninitializedDefault => "default values must be fully initialized".to_string(),
             Self::UninitializedLet => "let statement must be fully initialized".to_string(),
             Self::UntypedField => "this field must be assigned a type".to_string(),
-            Self::UnionInInit => "unions cannot be used in initializations".to_string(),
             Self::UnknownType => "unknown type".to_string(),
             Self::Unsupported(name) => format!("{} is currently unsupported", name),
             Self::ValueMismatch(r#type, value) => {
