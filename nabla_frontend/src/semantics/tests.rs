@@ -6,7 +6,7 @@ use crate::{
     semantics::{
         error::{Error, ErrorMessage},
         types::{self, TypeInfo},
-        values,
+        uses, values,
     },
     GlobalIdent, ModuleAst,
 };
@@ -25,7 +25,7 @@ fn empty() {
 }
 
 #[test]
-fn no_reimport() {
+fn no_duplicate_use() {
     let src = "
 use a
 use b::{c d::e}
@@ -35,12 +35,13 @@ use f::g as h
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, errors) = uses::analyze(&module_ast);
     assert_empty!(errors);
 }
 
 #[test]
-fn reimport() {
+fn duplicate_use() {
     let src = "
 use a::b
 use c::b
@@ -49,18 +50,19 @@ use c::b
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, errors) = uses::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(
-            ErrorMessage::Redeclaration("b".to_string()),
-            11..12
+            ErrorMessage::DuplicateUse("b".to_string()),
+            7..12
         )],
         errors
     );
 }
 
 #[test]
-fn no_reimport_alias() {
+fn no_duplicate_use_alias() {
     let src = "
 use a::b
 use c::b as d
@@ -69,7 +71,8 @@ use c::b as d
     assert_empty!(errors);
     let (ast, errors) = parse(&tokens);
     assert_empty!(errors);
-    let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, errors) = uses::analyze(&module_ast);
     assert_empty!(errors);
 }
 
