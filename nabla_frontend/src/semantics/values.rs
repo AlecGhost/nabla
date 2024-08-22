@@ -91,7 +91,10 @@ pub fn analyze(
                 .get(&rule_index)
                 .expect("Rule must have been evaluated");
             if !value.is_known() {
-                let error = Error::new(ErrorMessage::UninitializedDefault, rule.info.range.clone());
+                let error = Error::new(
+                    ErrorMessage::UninitializedDefault,
+                    rule.info.to_token_range(),
+                );
                 errors.push(error);
             }
         }
@@ -101,7 +104,7 @@ pub fn analyze(
             .get(&rule_index)
             .expect("Rule must have been evaluated");
         if !value.is_known() {
-            let error = Error::new(ErrorMessage::UninitializedLet, l.info.range.clone());
+            let error = Error::new(ErrorMessage::UninitializedLet, l.info.to_token_range());
             errors.push(error);
         }
     }
@@ -125,10 +128,16 @@ pub fn analyze(
     let inits = inits
         .iter()
         .map(|rule_index| {
-            evaluated
+            let value = evaluated
                 .get(rule_index)
                 .cloned()
-                .expect("Rule must have been evaluated")
+                .expect("Rule must have been evaluated");
+            if !value.is_known() {
+                let rule = rules.get(*rule_index).expect("Rule must exists");
+                let error = Error::new(ErrorMessage::UninitializedInit, rule.info.to_token_range());
+                errors.push(error);
+            }
+            value
         })
         .collect();
 
