@@ -1,12 +1,19 @@
 use crate::{
-    ast::{Global, Use, UseBody, UseItem, UseKind},
+    ast::{AstInfo, Global, Use, UseBody, UseItem, UseKind},
     semantics::error::{Error, ErrorMessage},
     token::ToTokenRange,
     GlobalIdent, ModuleAst,
 };
-use std::collections::HashMap;
 
-pub fn analyze(module_ast: &ModuleAst) -> (HashMap<String, GlobalIdent>, Vec<Error>) {
+type UseTable = std::collections::HashMap<String, GlobalIdent>;
+type Errors = Vec<Error>;
+
+/// Analyze use statements for a module.
+///
+/// Returns (_use table_, _errors_).
+///
+/// The use table is a map from the module-local identifier as a String to the global identifier.
+pub fn analyze(module_ast: &ModuleAst) -> (UseTable, Errors) {
     module_ast
         .ast
         .globals
@@ -17,34 +24,39 @@ pub fn analyze(module_ast: &ModuleAst) -> (HashMap<String, GlobalIdent>, Vec<Err
         })
         .map(|u| {
             let (idents, errors) = analyze_use(u);
-            (u, idents, errors)
+            (&u.info, idents, errors)
         })
-        .fold(
-            (HashMap::new(), Vec::new()),
-            |(mut idents, mut errors), (u, new_idents, new_errors)| {
-                use std::collections::hash_map::Entry;
-                for (key, value) in new_idents {
-                    match idents.entry(key) {
-                        Entry::Occupied(entry) => {
-                            errors.push(Error::new(
-                                ErrorMessage::DuplicateUse(entry.key().clone()),
-                                u.info.to_token_range(),
-                            ));
-                        }
-                        Entry::Vacant(entry) => {
-                            entry.insert(value);
-                        }
-                    }
-                }
-                errors.extend(new_errors);
-                (idents, errors)
-            },
-        )
+        .fold((UseTable::new(), Errors::new()), fold_uses)
 }
 
-fn analyze_use(u: &Use) -> (HashMap<String, GlobalIdent>, Vec<Error>) {
+/// Fold uses into a single map.
+/// If a name is used twice, a duplicate error is reported.
+fn fold_uses(
+    (mut idents, mut errors): (UseTable, Errors),
+    (info, new_idents, new_errors): (&AstInfo, UseTable, Errors),
+) -> (UseTable, Errors) {
+    use std::collections::hash_map::Entry;
+    for (key, value) in new_idents {
+        match idents.entry(key) {
+            Entry::Occupied(entry) => {
+                errors.push(Error::new(
+                    ErrorMessage::DuplicateUse(entry.key().clone()),
+                    info.to_token_range(),
+                ));
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(value);
+            }
+        }
+    }
+    errors.extend(new_errors);
+    (idents, errors)
+}
+
+fn analyze_use(u: &Use) -> (UseTable, Errors) {
     match (&u.name, &u.body) {
         (Some(root), Some(body)) => {
+            // the path stack is used to keep track of the module hierarchy.
             let mut path_stack = vec![root.name.clone()];
             let (idents, errors, _) = analyze_body(body, &mut path_stack);
             (idents, errors)
@@ -55,23 +67,21 @@ fn analyze_use(u: &Use) -> (HashMap<String, GlobalIdent>, Vec<Error>) {
                 path: Vec::new(),
             };
             (
-                HashMap::from([(u.identifier().expect("name is present").name.clone(), ident)]),
-                Vec::new(),
+                UseTable::from([(u.identifier().expect("name is present").name.clone(), ident)]),
+                Errors::new(),
             )
         }
-        _ => (HashMap::new(), Vec::new()),
+        _ => (UseTable::new(), Errors::new()),
     }
 }
+
 /// Analyzes the body and returns whether the `UseKind` was `Single`.
-fn analyze_body(
-    body: &UseBody,
-    path_stack: &mut Vec<String>,
-) -> (HashMap<String, GlobalIdent>, Vec<Error>, bool) {
+fn analyze_body(body: &UseBody, path_stack: &mut Vec<String>) -> (UseTable, Errors, bool) {
     body.kind.as_ref().map_or_else(
-        || (HashMap::new(), Vec::new(), false),
+        || (UseTable::new(), Errors::new(), false),
         |kind| match kind {
             UseKind::All(info) => (
-                HashMap::new(),
+                UseTable::new(),
                 vec![
                     (Error {
                         message: ErrorMessage::Unsupported("glob import".to_string()),
@@ -91,40 +101,17 @@ fn analyze_body(
                     .flatten()
                     .map(|item| {
                         let (idents, errors) = analyze_item(item, path_stack);
-                        (item, idents, errors)
+                        (&item.info, idents, errors)
                     })
-                    .fold(
-                        (HashMap::new(), Vec::new()),
-                        |(mut idents, mut errors), (item, new_idents, new_errors)| {
-                            use std::collections::hash_map::Entry;
-                            for (key, value) in new_idents {
-                                match idents.entry(key) {
-                                    Entry::Occupied(entry) => {
-                                        errors.push(Error::new(
-                                            ErrorMessage::DuplicateUse(entry.key().clone()),
-                                            item.info.to_token_range(),
-                                        ));
-                                    }
-                                    Entry::Vacant(entry) => {
-                                        entry.insert(value);
-                                    }
-                                }
-                            }
-                            errors.extend(new_errors);
-                            (idents, errors)
-                        },
-                    );
+                    .fold((UseTable::new(), Errors::new()), fold_uses);
                 (idents, errors, false)
             }
-            UseKind::Error(_) => (HashMap::new(), Vec::new(), false),
+            UseKind::Error(_) => (UseTable::new(), Errors::new(), false),
         },
     )
 }
 
-fn analyze_item(
-    item: &UseItem,
-    path_stack: &mut Vec<String>,
-) -> (HashMap<String, GlobalIdent>, Vec<Error>) {
+fn analyze_item(item: &UseItem, path_stack: &mut Vec<String>) -> (UseTable, Errors) {
     path_stack.push(item.name.name.clone());
     if let Some(body) = &item.body {
         let (idents, mut errors, is_single) = analyze_body(body, path_stack);
@@ -149,8 +136,8 @@ fn analyze_item(
         };
         path_stack.pop();
         (
-            HashMap::from([(item.identifier().name.clone(), ident)]),
-            Vec::new(),
+            UseTable::from([(item.identifier().name.clone(), ident)]),
+            Errors::new(),
         )
     }
 }
