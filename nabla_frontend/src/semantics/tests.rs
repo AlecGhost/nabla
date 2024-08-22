@@ -609,7 +609,6 @@ let rec = Rec {}
     let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::RecursiveInit, 13..14),
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
             Error::new(ErrorMessage::UninitializedLet, 17..28),
         ],
@@ -632,7 +631,6 @@ let rec = {
     let (_, _, errors) = semantics::analyze(&module_ast, &HashMap::new());
     assert_eq!(
         vec![
-            Error::new(ErrorMessage::RecursiveInit, 13..14),
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
             Error::new(ErrorMessage::UninitializedLet, 1..17),
         ],
@@ -651,9 +649,10 @@ let rec = {
 //     assert_empty!(errors);
 //     let (ast, errors) = parse(&tokens);
 //     assert_empty!(errors);
-//     let TypeInfo { errors, .. } = types::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+//     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+//     let TypeInfo { errors, .. } = types::analyze(&module_ast);
 //     assert_empty!(errors);
-//     let (_, _, errors) = values::analyze(&ModuleAst::new(GlobalIdent::default(), ast));
+//     let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
 //     assert_eq!(
 //         vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
 //         errors

@@ -20,7 +20,7 @@ pub type SymbolTable = HashMap<GlobalIdent, Value>;
 ///
 /// 1. Use analysis
 /// 2. Type analysis
-/// 2. Value analysis
+/// 3. Value analysis
 ///
 /// The analyses are executed in order and their errors accumulated.
 ///

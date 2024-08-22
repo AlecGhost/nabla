@@ -32,7 +32,11 @@ enum ValueDescription {
     Unknown,
 }
 
-pub fn analyze(module_ast: &ModuleAst, extern_table: &SymbolTable, uses: &HashMap<String, GlobalIdent>) -> (Vec<Value>, SymbolTable, Vec<Error>) {
+pub fn analyze(
+    module_ast: &ModuleAst,
+    extern_table: &SymbolTable,
+    uses: &HashMap<String, GlobalIdent>,
+) -> (Vec<Value>, SymbolTable, Vec<Error>) {
     let mut rules = Vec::new();
     let mut rule_table: HashMap<GlobalIdent, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
@@ -74,7 +78,13 @@ pub fn analyze(module_ast: &ModuleAst, extern_table: &SymbolTable, uses: &HashMa
         }
     }
     let mut errors = Vec::new();
-    let evaluated = evaluate(module_ast.name.clone(), &rules, &rule_table, uses, &mut errors);
+    let evaluated = evaluate(
+        module_ast.name.clone(),
+        &rules,
+        &rule_table,
+        uses,
+        &mut errors,
+    );
     for (rule_index, rule) in rules.iter().enumerate() {
         if rule.is_default {
             let value = evaluated
@@ -146,9 +156,8 @@ fn evaluate(
 
             // prevent infinite loop
             if stack.contains(&rule_index) {
-                let rule = rules.get(rule_index).expect("Rule must exist");
-                let error = Error::new(ErrorMessage::RecursiveInit, rule.info.range.clone());
-                errors.push(error);
+                // a self reference is not necessarily illegal
+                // but it cannot be fully evaluated
                 evaluated.insert(rule_index, Value::Unknown);
                 continue;
             }
