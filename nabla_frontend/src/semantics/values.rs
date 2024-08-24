@@ -32,11 +32,7 @@ enum ValueDescription {
     Unknown,
 }
 
-pub fn analyze(
-    module_ast: &ModuleAst,
-    extern_table: &SymbolTable,
-    uses: &HashMap<String, GlobalIdent>,
-) -> (Vec<Value>, SymbolTable, Vec<Error>) {
+pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) {
     let mut rules = Vec::new();
     let mut rule_table: HashMap<GlobalIdent, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
@@ -78,13 +74,7 @@ pub fn analyze(
         }
     }
     let mut errors = Vec::new();
-    let evaluated = evaluate(
-        module_ast.name.clone(),
-        &rules,
-        &rule_table,
-        uses,
-        &mut errors,
-    );
+    let evaluated = evaluate(module_ast.name.clone(), &rules, &rule_table, &mut errors);
     for (rule_index, rule) in rules.iter().enumerate() {
         if rule.is_default {
             let value = evaluated
@@ -148,7 +138,6 @@ fn evaluate(
     module: GlobalIdent,
     rules: &[Rule],
     rule_table: &HashMap<GlobalIdent, RuleIndex>,
-    uses: &HashMap<String, GlobalIdent>,
     errors: &mut Vec<Error>,
 ) -> HashMap<RuleIndex, Value> {
     let mut stack: Vec<RuleIndex> = Vec::new();

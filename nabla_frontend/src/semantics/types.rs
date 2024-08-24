@@ -1,11 +1,7 @@
 use crate::{
     ast::*,
-    semantics::{
-        error::{Error, ErrorMessage},
-        types::analysis::TypeAnalyzer,
-    },
-    token::ToTokenRange,
-    ModuleAst,
+    semantics::{error::Error, types::analysis::TypeAnalyzer, Namespace},
+    GlobalIdent, ModuleAst,
 };
 use std::{array::IntoIter, collections::HashMap};
 
@@ -30,7 +26,7 @@ pub enum TypeDescription {
     Union(Vec<RuleIndex>),
     Struct(HashMap<Ident, (RuleIndex, bool)>),
     List(Vec<RuleIndex>),
-    Ident(Ident),
+    Ident(GlobalIdent),
     ValidIdent(RuleIndex),
     Primitive(Primitive),
     Rule(RuleIndex),
@@ -46,7 +42,7 @@ pub enum BuiltInType {
 }
 
 impl BuiltInType {
-    const fn as_str(&self) -> &'static str {
+    pub const fn as_str(&self) -> &'static str {
         match self {
             Self::String => STRING,
             Self::Number => NUMBER,
@@ -54,13 +50,13 @@ impl BuiltInType {
         }
     }
 
-    fn into_iter() -> IntoIter<Self, 3> {
+    pub fn into_iter() -> IntoIter<Self, 3> {
         static BUILT_INS: [BuiltInType; 3] =
             [BuiltInType::String, BuiltInType::Number, BuiltInType::Bool];
         BUILT_INS.into_iter()
     }
 
-    const fn matches(&self, value: &Primitive) -> bool {
+    pub const fn matches(&self, value: &Primitive) -> bool {
         matches!(
             (self, value),
             (Self::String, Primitive::String(_))
@@ -77,26 +73,51 @@ enum Context {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct TypeInfo<'a> {
+pub struct TypeInfo {
     pub rules: Vec<Rule>,
     pub assertions: Vec<(RuleIndex, RuleIndex)>,
-    pub idents: HashMap<&'a Ident, RuleIndex>,
     pub errors: Vec<Error>,
 }
 
-pub fn analyze(module_ast: &ModuleAst) -> TypeInfo {
+pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace) -> TypeInfo {
     let mut type_info = TypeInfo::default();
-    for global in &module_ast.ast.globals {
-        match global {
-            Global::Def(def) => analysis::analyze_def(def, &mut type_info),
-            Global::Let(l) => analysis::analyze_let(l, &mut type_info),
-            Global::Init(init) => {
-                init.analyze(&mut type_info, Context::Expr);
+    let ident_rules: HashMap<GlobalIdent, RuleIndex> = module_ast
+        .ast
+        .globals
+        .iter()
+        .flat_map(|global| {
+            match global {
+                Global::Def(def) => {
+                    analysis::analyze_def(def, &mut type_info, namespace).and_then(|rule_index| {
+                        def.name
+                            .as_ref()
+                            .map(|ident| ident.name.clone())
+                            .map(|name| module_ast.name.clone().extend(name))
+                            .map(|global_ident| (global_ident, rule_index))
+                    })
+                }
+                Global::Let(l) => {
+                    analysis::analyze_let(l, &mut type_info, namespace).and_then(|rule_index| {
+                        l.name
+                            .as_ref()
+                            .map(|ident| ident.name.clone())
+                            .map(|name| module_ast.name.clone().extend(name))
+                            .map(|global_ident| (global_ident, rule_index))
+                    })
+                }
+                Global::Init(init) => {
+                    init.analyze(&mut type_info, Context::Expr, namespace);
+                    None
+                }
+                Global::Use(_) | Global::Error(_) => {
+                    // no types to check
+                    None
+                }
             }
-            Global::Use(_) | Global::Error(_) => { /* no types to check */ }
-        }
-    }
-    validate_idents(&mut type_info);
+        })
+        .collect();
+    // TODO: add import rules to ident_rules
+    validate_idents(&mut type_info, &ident_rules);
     assertions::check(&mut type_info);
     type_info
 }
@@ -105,27 +126,14 @@ pub fn analyze(module_ast: &ModuleAst) -> TypeInfo {
 ///
 /// If the ident is defined, its rule is replaced by a `ValidIdent`-rule,
 /// containing the original rule index.
-/// If not, and it's a built in, it gets converted to a `BuiltIn`-rule.
-/// Otherwise an error is reported and the rule type is `Unknown`.
-fn validate_idents(type_info: &mut TypeInfo) {
+/// Otherwise the rule type is `Unknown`.
+fn validate_idents(type_info: &mut TypeInfo, ident_rules: &HashMap<GlobalIdent, RuleIndex>) {
     for rule in type_info.rules.iter_mut() {
         if let TypeDescription::Ident(ident) = &rule.type_description {
-            let rule_index = type_info.idents.get(ident).copied();
-            let new_description = if let Some(rule_index) = rule_index {
-                TypeDescription::ValidIdent(rule_index)
-            } else if let Some(built_in) =
-                BuiltInType::into_iter().find(|built_in| built_in.as_str() == ident.name)
-            {
-                TypeDescription::BuiltIn(built_in)
-            } else {
-                // TODO: check imports
-                type_info.errors.push(Error::new(
-                    ErrorMessage::UndefinedIdent(ident.name.clone()),
-                    ident.info.to_token_range(),
-                ));
-                TypeDescription::Unknown
-            };
-            rule.type_description = new_description;
+            let rule_index = ident_rules.get(ident).copied();
+            rule.type_description = rule_index
+                .map(TypeDescription::ValidIdent)
+                .unwrap_or(TypeDescription::Unknown);
         };
     }
 }

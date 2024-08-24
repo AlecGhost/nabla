@@ -18,6 +18,12 @@ impl ToTokenRange for AstInfo {
     }
 }
 
+pub trait TypedExpr {
+    fn type_expr(&self) -> Option<&Expr>;
+    fn expr(&self) -> Option<&Expr>;
+    fn info(&self) -> &AstInfo;
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Prelude {
     pub comments: Vec<String>,
@@ -134,6 +140,20 @@ pub struct Def {
     pub info: AstInfo,
 }
 
+impl TypedExpr for Def {
+    fn type_expr(&self) -> Option<&Expr> {
+        self.type_expr.as_ref()
+    }
+
+    fn expr(&self) -> Option<&Expr> {
+        self.expr.as_ref()
+    }
+
+    fn info(&self) -> &AstInfo {
+        &self.info
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Let {
     pub let_kw: AstInfo,
@@ -143,6 +163,20 @@ pub struct Let {
     pub eq: Option<AstInfo>,
     pub expr: Option<Expr>,
     pub info: AstInfo,
+}
+
+impl TypedExpr for Let {
+    fn type_expr(&self) -> Option<&Expr> {
+        self.type_expr.as_ref()
+    }
+
+    fn expr(&self) -> Option<&Expr> {
+        self.expr.as_ref()
+    }
+
+    fn info(&self) -> &AstInfo {
+        &self.info
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -229,6 +263,20 @@ impl StructField {
     }
 }
 
+impl TypedExpr for StructField {
+    fn type_expr(&self) -> Option<&Expr> {
+        self.type_expr.as_ref()
+    }
+
+    fn expr(&self) -> Option<&Expr> {
+        self.expr.as_ref()
+    }
+
+    fn info(&self) -> &AstInfo {
+        &self.info
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StructFieldError {
     pub info: AstInfo,
@@ -269,6 +317,25 @@ impl Named {
             ident.info.range.end = inner_name.info.range.end;
         }
         ident
+    }
+
+    /// Flatten the names into a vec.
+    /// In case of a parsing error (at least one of the names is not given),
+    /// an empty vec is returned.
+    pub fn names(&self) -> Vec<&String> {
+        let names: Vec<_> = std::iter::once(&self.name)
+            .chain(
+                self.inner_names
+                    .iter()
+                    .flat_map(|inner_name| inner_name.name.as_ref()),
+            )
+            .map(|ident| &ident.name)
+            .collect();
+        if names.len() < 1 + self.inner_names.len() {
+            Vec::new()
+        } else {
+            names
+        }
     }
 }
 

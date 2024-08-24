@@ -28,8 +28,19 @@ pub struct GlobalIdent {
 }
 
 impl GlobalIdent {
+    pub fn new(name: String) -> Self {
+        Self {
+            root: name,
+            path: Vec::new(),
+        }
+    }
     pub fn extend(mut self, ident: String) -> Self {
         self.path.push(ident);
+        self
+    }
+
+    pub fn extend_multiple(mut self, idents: Vec<String>) -> Self {
+        self.path.extend(idents);
         self
     }
 

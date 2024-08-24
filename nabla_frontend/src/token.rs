@@ -132,8 +132,8 @@ pub struct TokenStream<'a> {
 }
 
 impl<'a> TokenStream<'a> {
-    pub fn first_token(&self) -> Option<&Token> {
-        self.tokens.get(0)
+    pub const fn first_token(&self) -> Option<&Token> {
+        self.tokens.first()
     }
 }
 

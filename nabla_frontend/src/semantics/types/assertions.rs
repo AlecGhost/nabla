@@ -75,7 +75,7 @@ fn check_struct(
         } else if !has_default {
             errors.push(Error::new(
                 ErrorMessage::MissingField(field.name.clone()),
-                actual_rule.info.range.clone(),
+                actual_rule.info.to_token_range(),
             ));
         }
     }
@@ -83,7 +83,7 @@ fn check_struct(
         if !expected.contains_key(field) {
             errors.push(Error::new(
                 ErrorMessage::UnexpecedField(field.name.clone()),
-                field.info.range.clone(),
+                field.info.to_token_range(),
             ));
         }
     }
@@ -144,7 +144,7 @@ fn check_primitive(expected: &Primitive, actual: &Primitive) -> Vec<Error> {
     } else {
         vec![Error::new(
             ErrorMessage::ValueMismatch(expected.as_str().to_string(), actual.as_str().to_string()),
-            actual.info().range.clone(),
+            actual.info().to_token_range(),
         )]
     }
 }
@@ -155,7 +155,7 @@ fn check_value(expected: &BuiltInType, actual: &Primitive) -> Vec<Error> {
     } else {
         vec![Error::new(
             ErrorMessage::ValueMismatch(expected.as_str().to_string(), actual.as_str().to_string()),
-            actual.info().range.clone(),
+            actual.info().to_token_range(),
         )]
     }
 }

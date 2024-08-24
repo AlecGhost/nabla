@@ -1,11 +1,6 @@
 use clap::Parser;
 use nabla_backend::{to_json_value, to_toml_value, to_xml_value, to_yaml_value};
-use nabla_frontend::{
-    lexer, parser,
-    semantics::{self, SymbolTable},
-    token::TextRange,
-    GlobalIdent, ModuleAst,
-};
+use nabla_frontend::{lexer, parser, semantics, token::TextRange, GlobalIdent, ModuleAst};
 use std::path::PathBuf;
 
 macro_rules! printerr {
@@ -59,8 +54,7 @@ fn main() -> color_eyre::Result<()> {
         valid = false
     }
     printerr!(errors, src, tokens);
-    let extern_table = SymbolTable::new();
-    let (inits, _, errors) = semantics::analyze(&module_ast, &extern_table);
+    let (inits, _, errors) = semantics::analyze(&module_ast);
     if !errors.is_empty() {
         valid = false
     }
