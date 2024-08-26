@@ -2,35 +2,57 @@ use crate::{
     ast::{Expr, Global, Named, Single, StructOrList, TypedExpr},
     semantics::{
         error::{Error, ErrorMessage},
-        types, Errors, Namespace,
+        types, BindingMap, Errors, Namespace,
     },
     token::ToTokenRange,
     ModuleAst,
 };
 
-pub fn analyze(uses: &Namespace, module_ast: &ModuleAst) -> (Namespace, Errors) {
+#[derive(Clone, Debug)]
+pub enum Binding {
+    Def,
+    Let,
+}
+
+pub struct NamespaceResult {
+    pub namespace: Namespace,
+    pub bindings: BindingMap,
+    pub errors: Errors,
+}
+
+pub fn analyze(uses: &Namespace, module_ast: &ModuleAst) -> NamespaceResult {
+    let module_name = module_ast.name.clone();
     let mut namespace = uses.clone();
+    let mut bindings = BindingMap::new();
     let mut errors = Errors::new();
-    for (ident, global_ident) in module_ast
-        .ast
-        .globals
-        .iter()
-        .flat_map(|global| match global {
-            Global::Def(d) => d
-                .name
-                .as_ref()
-                .map(|ident| (ident, module_ast.name.clone().extend(ident.name.clone()))),
-            Global::Let(l) => l
-                .name
-                .as_ref()
-                .map(|ident| (ident, module_ast.name.clone().extend(ident.name.clone()))),
-            _ => None,
-        })
+    for (ident, global_ident, binding) in
+        module_ast
+            .ast
+            .globals
+            .iter()
+            .flat_map(|global| match global {
+                Global::Def(d) => d.name.as_ref().map(|ident| {
+                    (
+                        ident,
+                        module_name.clone().extend(ident.name.clone()),
+                        Binding::Def,
+                    )
+                }),
+                Global::Let(l) => l.name.as_ref().map(|ident| {
+                    (
+                        ident,
+                        module_name.clone().extend(ident.name.clone()),
+                        Binding::Let,
+                    )
+                }),
+                _ => None,
+            })
     {
         use std::collections::hash_map::Entry;
         match namespace.entry(ident.name.clone()) {
             Entry::Vacant(entry) => {
-                entry.insert(global_ident);
+                entry.insert(global_ident.clone());
+                bindings.insert(global_ident, binding);
             }
             Entry::Occupied(_) => {
                 errors.push(Error::new(
@@ -67,7 +89,12 @@ pub fn analyze(uses: &Namespace, module_ast: &ModuleAst) -> (Namespace, Errors) 
             Some(_global_ident) => { /* TODO: check if inner names actually exist */ }
         }
     }
-    (namespace, errors)
+
+    NamespaceResult {
+        namespace,
+        bindings,
+        errors,
+    }
 }
 
 fn get_named(expr: &Expr) -> Vec<&Named> {

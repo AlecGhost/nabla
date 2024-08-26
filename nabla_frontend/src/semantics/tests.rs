@@ -626,7 +626,7 @@ let rec = {
         errors
     );
 }
-//
+
 // #[test]
 // fn recursive_value_type() {
 //     let src = r#"
@@ -647,3 +647,29 @@ let rec = {
 //         errors
 //     );
 // }
+
+#[test]
+fn immutable_let() {
+    let src = r#"
+let x = {
+    a = "a"
+}
+
+x {
+    a = "b"
+}
+    "#;
+    let (tokens, errors) = lex(src);
+    assert_empty!(errors);
+    let (ast, errors) = parse(&tokens);
+    assert_empty!(errors);
+    let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
+    let (_, _, errors) = semantics::analyze(&module_ast);
+    assert_eq!(
+        vec![Error::new(
+            ErrorMessage::ImmutableLet("x".to_string()),
+            17..18
+        ),],
+        errors
+    );
+}

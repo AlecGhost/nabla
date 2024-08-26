@@ -2,15 +2,15 @@ use crate::{
     ast::Ident,
     semantics::{
         error::ErrorMessage,
-        types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypeInfo},
+        types::{BuiltInType, Primitive, Rule, RuleIndex, TypeDescription, TypesResult},
         Error,
     },
     token::{ToTokenRange, TokenRange},
 };
 use std::collections::HashMap;
 
-pub(super) fn check(type_info: &mut TypeInfo) {
-    let TypeInfo {
+pub(super) fn check(type_info: &mut TypesResult) {
+    let TypesResult {
         ref rules,
         ref assertions,
         ref mut errors,

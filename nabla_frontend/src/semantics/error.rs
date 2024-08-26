@@ -24,6 +24,7 @@ pub enum ErrorMessage {
     AliasingNonSingle,
     DuplicateField(String),
     DuplicateUse(String),
+    ImmutableLet(String),
     MissingField(String),
     MultipleListTypes,
     MultipleInits,
@@ -52,6 +53,10 @@ impl std::fmt::Display for ErrorMessage {
             Self::AliasingNonSingle => "only single use items can be aliased".to_string(),
             Self::DuplicateField(field_name) => format!("duplicate field: `{}`", field_name),
             Self::DuplicateUse(use_name) => format!("duplicate use: `{}`", use_name),
+            Self::ImmutableLet(let_name) => format!(
+                "`{}` is bound my a let-statement and therefore immutable",
+                let_name
+            ),
             Self::MissingField(field_name) => format!("missing field: `{}`", field_name),
             Self::MultipleListTypes => "more than one type in list".to_string(),
             Self::MultipleInits => "more than one initialization".to_string(),

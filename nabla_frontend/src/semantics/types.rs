@@ -1,6 +1,6 @@
 use crate::{
     ast::*,
-    semantics::{error::Error, types::analysis::TypeAnalyzer, Namespace},
+    semantics::{error::Error, types::analysis::TypeAnalyzer, BindingMap, Namespace},
     GlobalIdent, ModuleAst,
 };
 use std::{array::IntoIter, collections::HashMap};
@@ -73,14 +73,14 @@ enum Context {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct TypeInfo {
+pub struct TypesResult {
     pub rules: Vec<Rule>,
     pub assertions: Vec<(RuleIndex, RuleIndex)>,
     pub errors: Vec<Error>,
 }
 
-pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace) -> TypeInfo {
-    let mut type_info = TypeInfo::default();
+pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace, bindings: &BindingMap) -> TypesResult {
+    let mut types_result = TypesResult::default();
     let ident_rules: HashMap<GlobalIdent, RuleIndex> = module_ast
         .ast
         .globals
@@ -88,25 +88,26 @@ pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace) -> TypeInfo {
         .flat_map(|global| {
             match global {
                 Global::Def(def) => {
-                    analysis::analyze_def(def, &mut type_info, namespace).and_then(|rule_index| {
-                        def.name
-                            .as_ref()
-                            .map(|ident| ident.name.clone())
-                            .map(|name| module_ast.name.clone().extend(name))
-                            .map(|global_ident| (global_ident, rule_index))
-                    })
+                    analysis::analyze_def(def, &mut types_result, (namespace, bindings)).and_then(
+                        |rule_index| {
+                            def.name
+                                .as_ref()
+                                .map(|ident| ident.name.clone())
+                                .map(|name| module_ast.name.clone().extend(name))
+                                .map(|global_ident| (global_ident, rule_index))
+                        },
+                    )
                 }
-                Global::Let(l) => {
-                    analysis::analyze_let(l, &mut type_info, namespace).and_then(|rule_index| {
+                Global::Let(l) => analysis::analyze_let(l, &mut types_result, (namespace, bindings))
+                    .and_then(|rule_index| {
                         l.name
                             .as_ref()
                             .map(|ident| ident.name.clone())
                             .map(|name| module_ast.name.clone().extend(name))
                             .map(|global_ident| (global_ident, rule_index))
-                    })
-                }
+                    }),
                 Global::Init(init) => {
-                    init.analyze(&mut type_info, Context::Expr, namespace);
+                    init.analyze(&mut types_result, Context::Expr, (namespace, bindings));
                     None
                 }
                 Global::Use(_) | Global::Error(_) => {
@@ -117,9 +118,9 @@ pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace) -> TypeInfo {
         })
         .collect();
     // TODO: add import rules to ident_rules
-    validate_idents(&mut type_info, &ident_rules);
-    assertions::check(&mut type_info);
-    type_info
+    validate_idents(&mut types_result, &ident_rules);
+    assertions::check(&mut types_result);
+    types_result
 }
 
 /// Validate all `Ident` rules.
@@ -127,7 +128,7 @@ pub fn analyze(module_ast: &ModuleAst, namespace: &Namespace) -> TypeInfo {
 /// If the ident is defined, its rule is replaced by a `ValidIdent`-rule,
 /// containing the original rule index.
 /// Otherwise the rule type is `Unknown`.
-fn validate_idents(type_info: &mut TypeInfo, ident_rules: &HashMap<GlobalIdent, RuleIndex>) {
+fn validate_idents(type_info: &mut TypesResult, ident_rules: &HashMap<GlobalIdent, RuleIndex>) {
     for rule in type_info.rules.iter_mut() {
         if let TypeDescription::Ident(ident) = &rule.type_description {
             let rule_index = ident_rules.get(ident).copied();
