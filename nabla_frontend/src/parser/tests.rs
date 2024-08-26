@@ -1,7 +1,7 @@
 use crate::{
     ast::*,
-    lexer::lex,
-    parser::{parse, Error, ErrorMessage},
+    lexer::{lex, LexerResult},
+    parser::{parse, Error, ErrorMessage, ParserResult},
     token::{self, Token, TokenRange, TokenType},
 };
 use pretty_assertions::assert_eq;
@@ -20,9 +20,9 @@ fn info(prelude_range: TokenRange, range: TokenRange) -> AstInfo {
 #[test]
 fn empty() {
     let src = "";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -39,34 +39,34 @@ fn token_after_eof() {
         Token::new(TokenType::Eof, 0..0),
         Token::new(TokenType::Eof, 0..0),
     ];
-    let (_, errors) = parse(&tokens);
+    let ParserResult {errors, ..} = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::TokensAfterEof, 1..1)], errors);
 }
 
 #[test]
 fn missing_type_expr() {
     let src = "let a: = {}";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (_, errors) = parse(&tokens);
+    let ParserResult {errors, ..} = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 4..4)], errors);
 }
 
 #[test]
 fn missing_expr() {
     let src = "let a =";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (_, errors) = parse(&tokens);
+    let ParserResult {errors, ..} = parse(&tokens);
     assert_eq!(vec![Error::new(ErrorMessage::ExpectedExpr, 4..4)], errors);
 }
 
 #[test]
 fn missing_multiple_exprs() {
     let src = "let a: =";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (_, errors) = parse(&tokens);
+    let ParserResult {errors, ..} = parse(&tokens);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::ExpectedExpr, 4..4),
@@ -79,9 +79,9 @@ fn missing_multiple_exprs() {
 #[test]
 fn use_simple() {
     let src = "use a";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -101,9 +101,9 @@ fn use_simple() {
 #[test]
 fn use_all() {
     let src = "use a::*";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -127,9 +127,9 @@ fn use_all() {
 #[test]
 fn use_single() {
     let src = "use a::b";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -158,9 +158,9 @@ fn use_single() {
 #[test]
 fn use_multiple() {
     let src = "use a::{b c}";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -202,9 +202,9 @@ fn use_multiple() {
 #[test]
 fn use_complex() {
     let src = "use a::{b::{ c::d as x e::* } f as y}";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     insta::assert_debug_snapshot!(ast);
 }
@@ -212,9 +212,9 @@ fn use_complex() {
 #[test]
 fn def_ident() {
     let src = "def x = y";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -241,9 +241,9 @@ fn def_ident() {
 #[test]
 fn def_union() {
     let src = r#"def ok = "yes" | true"#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -283,9 +283,9 @@ def Person = {
     name: string
     age: number = 0
 }";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -346,9 +346,9 @@ def Person = {
 #[test]
 fn def_list() {
     let src = "def Strings = [ string ]";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     assert_eq!(
         Ast {
@@ -393,9 +393,9 @@ def x = {
     type_and_expr_as: number = 1 as "z"
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     insta::assert_debug_snapshot!(ast);
 }
@@ -403,12 +403,12 @@ def x = {
 #[test]
 fn ignore_expr_error() {
     let src = "def x = @";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_eq!(
         vec![token::Error::new(token::ErrorMessage::Unknown, 8..9)],
         errors
     );
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 6..7)],
         errors
@@ -419,9 +419,9 @@ fn ignore_expr_error() {
 #[test]
 fn ignore_global_error() {
     let src = "def x = {}=";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 8..9)],
         errors
@@ -432,9 +432,9 @@ fn ignore_global_error() {
 #[test]
 fn ignore_use_kind_error() {
     let src = "use x::{y::=}";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 7..8)],
         errors
@@ -445,9 +445,9 @@ fn ignore_use_kind_error() {
 #[test]
 fn ignore_use_item_error() {
     let src = "use x::{=}";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 5..6)],
         errors
@@ -462,12 +462,12 @@ def x = {
     test: String,
 }
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_eq!(
         vec![token::Error::new(token::ErrorMessage::Unknown, 27..28)],
         errors
     );
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_eq!(
         vec![Error::new(ErrorMessage::UnexpectedTokens, 13..14)],
         errors

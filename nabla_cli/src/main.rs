@@ -1,6 +1,12 @@
 use clap::Parser;
 use nabla_backend::{to_json_value, to_toml_value, to_xml_value, to_yaml_value};
-use nabla_frontend::{lexer, parser, semantics, token::TextRange, GlobalIdent, ModuleAst};
+use nabla_frontend::{
+    lexer::{self, LexerResult},
+    parser::{self, ParserResult},
+    semantics::{self, SemanticsResult},
+    token::TextRange,
+    GlobalIdent, ModuleAst,
+};
 use std::path::PathBuf;
 
 macro_rules! printerr {
@@ -37,7 +43,7 @@ fn main() -> color_eyre::Result<()> {
     let args = Args::parse();
     let src = std::fs::read_to_string(args.file).expect("Could not open file");
     let mut valid = true;
-    let (tokens, errors) = lexer::lex(&src);
+    let LexerResult { tokens, errors } = lexer::lex(&src);
     if !errors.is_empty() {
         valid = false
     }
@@ -48,13 +54,13 @@ fn main() -> color_eyre::Result<()> {
             range.start.line, range.start.char, error
         );
     }
-    let (ast, errors) = parser::parse(&tokens);
+    let ParserResult { ast, errors } = parser::parse(&tokens);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     if !errors.is_empty() {
         valid = false
     }
     printerr!(errors, src, tokens);
-    let (inits, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { inits, errors, .. } = semantics::analyze(&module_ast);
     if !errors.is_empty() {
         valid = false
     }

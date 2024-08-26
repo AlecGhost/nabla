@@ -1,4 +1,10 @@
-use nabla_frontend::{self, token::TextRange, GlobalIdent, ModuleAst};
+use nabla_frontend::{
+    lexer::{self, LexerResult},
+    parser::{self, ParserResult},
+    semantics::{self, SemanticsResult},
+    token::TextRange,
+    GlobalIdent, ModuleAst,
+};
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
@@ -61,13 +67,13 @@ impl LanguageServer for NablaLS {
 impl NablaLS {
     async fn on_change(&self, uri: Url, text: String) {
         let mut diagnostics = Vec::new();
-        let (tokens, errors) = nabla_frontend::lexer::lex(&text);
+        let LexerResult { tokens, errors } = lexer::lex(&text);
         for error in errors {
             let range = convert_text_range(&text, &error.range);
             let diagnostic = new_diagnostic(range, error.message.to_string());
             diagnostics.push(diagnostic);
         }
-        let (ast, errors) = nabla_frontend::parser::parse(&tokens);
+        let ParserResult { ast, errors } = parser::parse(&tokens);
         let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
         for error in errors {
             let text_range =
@@ -76,7 +82,7 @@ impl NablaLS {
             let diagnostic = new_diagnostic(range, error.message.to_string());
             diagnostics.push(diagnostic);
         }
-        let (_, _, errors) = nabla_frontend::semantics::analyze(&module_ast);
+        let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
         for error in errors {
             let text_range =
                 tokens[error.range.start].range.start..tokens[error.range.end].range.end;

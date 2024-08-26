@@ -19,19 +19,26 @@ mod utility;
 
 type IResult<'a, T> = nom::IResult<TokenStream<'a>, T, ParserError<'a>>;
 
+#[derive(Clone, Debug)]
+pub struct ParserResult {
+    pub ast: Ast,
+    pub errors: Vec<Error>,
+}
+
 /// Parses the given tokens and returns an AST.
 ///
 /// # Panics
 ///
 /// Panics if parsing fails.
-pub fn parse(input: &[Token]) -> (Ast, Vec<Error>) {
+pub fn parse(input: &[Token]) -> ParserResult {
     let (mut token_stream, ast) = Ast::parse(input.into()).expect("Parser cannot fail");
     if !token_stream.tokens().is_empty() {
         let offset = token_stream.location_offset();
         token_stream.append_error(Error::new(ErrorMessage::TokensAfterEof, offset..offset))
     }
     let errors = token_stream.error_buffer;
-    (ast, errors)
+
+    ParserResult { ast, errors }
 }
 
 trait Parser: Sized {

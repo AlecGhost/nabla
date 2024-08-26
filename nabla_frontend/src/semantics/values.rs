@@ -1,7 +1,7 @@
 use crate::{
     ast::{AstInfo, Global, Ident, Let},
     eval::Value,
-    semantics::{Error, ErrorMessage, SymbolTable},
+    semantics::{Error, ErrorMessage, Errors, SymbolTable},
     token::ToTokenRange,
     GlobalIdent, ModuleAst,
 };
@@ -32,7 +32,14 @@ enum ValueDescription {
     Unknown,
 }
 
-pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) {
+#[derive(Clone, Debug)]
+pub struct ValuesResult {
+    pub inits: Vec<Value>,
+    pub symbol_table: SymbolTable,
+    pub errors: Errors,
+}
+
+pub fn analyze(module_ast: &ModuleAst) -> ValuesResult {
     let mut rules = Vec::new();
     let mut rule_table: HashMap<GlobalIdent, RuleIndex> = HashMap::new();
     let mut inits: Vec<RuleIndex> = Vec::new();
@@ -131,7 +138,11 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Vec<Error>) 
         })
         .collect();
 
-    (inits, symbol_table, errors)
+    ValuesResult {
+        inits,
+        symbol_table,
+        errors,
+    }
 }
 
 fn evaluate(

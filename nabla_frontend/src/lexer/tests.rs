@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn empty() {
     let src = "";
-    let (tokens, errors) = lex(src);
+    let LexerResult {tokens, errors} = lex(src);
     assert_empty!(errors);
     assert_eq!(vec![Token::new(TokenType::Eof, 0..0)], tokens);
 }
@@ -12,7 +12,7 @@ fn empty() {
 #[test]
 fn all_in_one() {
     let src = "@//abc\n \t\r\ntest 0123.456789'\\n'\"xyz\"true false use def let as :=|*::[]{}";
-    let (tokens, errors) = lex(src);
+    let LexerResult {tokens, errors} = lex(src);
     assert_eq!(vec![Error::new(ErrorMessage::Unknown, 0..1)], errors);
     assert_eq!(
         vec![
@@ -54,7 +54,7 @@ fn all_in_one() {
 #[test]
 fn number_missing_decimals() {
     let src = "123.";
-    let (tokens, errors) = lex(src);
+    let LexerResult {tokens, errors} = lex(src);
     assert_eq!(
         vec![Error::new(ErrorMessage::MissingDecimals, 4..4)],
         errors
@@ -71,7 +71,7 @@ fn number_missing_decimals() {
 #[test]
 fn char_missing_single_quote() {
     let src = "'a";
-    let (tokens, errors) = lex(src);
+    let LexerResult {tokens, errors} = lex(src);
     assert_eq!(
         vec![Error::new(ErrorMessage::MissingClosingSingleQuote, 2..2)],
         errors
@@ -88,7 +88,7 @@ fn char_missing_single_quote() {
 #[test]
 fn char_escape() {
     let src = "'\\''";
-    let (tokens, errors) = lex(src);
+    let LexerResult {tokens, errors} = lex(src);
     assert_empty!(errors);
     assert_eq!(
         vec![

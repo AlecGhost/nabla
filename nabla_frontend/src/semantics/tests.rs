@@ -1,12 +1,14 @@
 use crate::{
     ast::Global,
     eval::{eval, Value},
-    lexer::lex,
-    parser::parse,
+    lexer::{lex, LexerResult},
+    parser::{parse, ParserResult},
     semantics::{
         self,
         error::{Error, ErrorMessage},
-        uses, values,
+        uses,
+        values::{self, ValuesResult},
+        SemanticsResult,
     },
     GlobalIdent, ModuleAst,
 };
@@ -16,12 +18,12 @@ use std::collections::HashMap;
 #[test]
 fn empty() {
     let src = "";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -32,9 +34,9 @@ use a
 use b::{c d::e}
 use f::g as h
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let (_, errors) = uses::analyze(&module_ast);
@@ -47,9 +49,9 @@ fn duplicate_use() {
 use a::b
 use c::b
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let (_, errors) = uses::analyze(&module_ast);
@@ -68,9 +70,9 @@ fn no_duplicate_use_alias() {
 use a::b
 use c::b as d
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     let (_, errors) = uses::analyze(&module_ast);
@@ -83,12 +85,12 @@ fn empty_list() {
 def EmptyList = []
 EmptyList []
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -104,12 +106,12 @@ Person {
     age = 0
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -120,12 +122,12 @@ def Optional = Number | null
 let opt_none: Optional = null
 let opt_some: Optional = 1
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -138,12 +140,12 @@ fn evaluate_struct() {
     const: "x"  = "x"
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -168,12 +170,12 @@ fn evaluate_struct() {
 #[test]
 fn evaluate_list() {
     let src = r#"["a" "b" "c"]"#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -210,12 +212,12 @@ fn evaluate_complex_struct() {
     ]
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     let init = module_ast
         .ast
@@ -254,12 +256,12 @@ Config {
     version: String = "1.0.0"
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -268,12 +270,12 @@ fn self_reference_expr() {
     let src = "
 def Type = Type {}
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -288,12 +290,12 @@ fn self_reference_type_expr() {
     let src = "
 def Type: Type = {}
 ";
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::SelfReference("Type".to_string()),
@@ -309,12 +311,12 @@ fn legal_self_reference() {
 def Type = [ Type | String ]
 Type [ "a" [ "b" ] ]
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -328,12 +330,12 @@ A {
     a: String | null = null
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -347,12 +349,12 @@ A {
     a: String | null = null
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_empty!(errors);
 }
 
@@ -366,12 +368,12 @@ A {
     a: String | Number | null = null
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(vec![Error::new(ErrorMessage::TypeMismatch, 31..32)], errors);
 }
 
@@ -381,12 +383,12 @@ fn union_in_let() {
 let a: String = "A" | "a"
 let b = "B" | "b"
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UninitializedLet, 1..15),
@@ -404,12 +406,12 @@ def Test = {
     b = "B" | "b"
 }
 "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UninitializedDefault, 9..21),
@@ -427,19 +429,23 @@ let a = "x"
     a = a
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (inits, table, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult {
+        inits,
+        symbol_table,
+        errors,
+    } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
             GlobalIdent::default().extend("a".to_string()),
             Value::from("x")
         )]),
-        table
+        symbol_table
     );
     assert_eq!(vec![Value::from([("a", "x")])], inits);
 }
@@ -452,19 +458,23 @@ def Config = {
 }
 Config {}
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (inits, table, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult {
+        inits,
+        symbol_table,
+        errors,
+    } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
             GlobalIdent::default().extend("Config".to_string()),
             Value::from([("x", 0)]),
         )]),
-        table
+        symbol_table
     );
     assert_eq!(vec![Value::from([("x", 0)])], inits);
 }
@@ -479,19 +489,23 @@ Config {
     x = 1
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (inits, table, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult {
+        inits,
+        symbol_table,
+        errors,
+    } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
             GlobalIdent::default().extend("Config".to_string()),
             Value::from([("x", 0)]),
         )]),
-        table
+        symbol_table
     );
     assert_eq!(vec![Value::from([("x", 1)])], inits);
 }
@@ -511,12 +525,16 @@ Config {
     }
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (inits, table, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult {
+        inits,
+        symbol_table,
+        errors,
+    } = semantics::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([(
@@ -526,7 +544,7 @@ Config {
                 Value::from([("y", Value::from(0)), ("z", Value::Unknown)])
             )]),
         )]),
-        table
+        symbol_table
     );
     assert_eq!(vec![Value::from([("x", [("y", 0), ("z", 1)])])], inits);
 }
@@ -539,12 +557,16 @@ def Config = {
 }
 let pi = 3.14
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, table, errors) = values::analyze(&module_ast);
+    let ValuesResult {
+        symbol_table,
+        errors,
+        ..
+    } = values::analyze(&module_ast);
     assert_empty!(errors);
     assert_eq!(
         HashMap::from([
@@ -557,7 +579,7 @@ let pi = 3.14
                 Value::from([("x", 3.14)]),
             )
         ]),
-        table
+        symbol_table
     );
 }
 
@@ -570,12 +592,12 @@ def Config = {
     }
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(ErrorMessage::UninitializedDefault, 13..21)],
         errors
@@ -590,12 +612,12 @@ def Rec = {
 }
 let rec = Rec {}
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
     assert_empty!(errors);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
@@ -612,12 +634,12 @@ let rec = {
      r = rec
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![
             Error::new(ErrorMessage::UninitializedDefault, 13..14),
@@ -634,14 +656,14 @@ let rec = {
 //      x: x = x
 // }
 //     "#;
-//     let (tokens, errors) = lex(src);
+//     let LexerResult {tokens, errors} = lex(src);
 //     assert_empty!(errors);
-//     let (ast, errors) = parse(&tokens);
+//     let ParserResult {ast, errors} = parse(&tokens);
 //     assert_empty!(errors);
 //     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
 //     let TypeInfo { errors, .. } = types::analyze(&module_ast);
 //     assert_empty!(errors);
-//     let (_, _, errors) = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
+//     let SemanticsResult { errors, ..} = values::analyze(&module_ast, &HashMap::new(), &HashMap::new());
 //     assert_eq!(
 //         vec![Error::new(ErrorMessage::RecursiveInit, 13..14)],
 //         errors
@@ -659,12 +681,12 @@ x {
     a = "b"
 }
     "#;
-    let (tokens, errors) = lex(src);
+    let LexerResult { tokens, errors } = lex(src);
     assert_empty!(errors);
-    let (ast, errors) = parse(&tokens);
+    let ParserResult { ast, errors } = parse(&tokens);
     assert_empty!(errors);
     let module_ast = ModuleAst::new(GlobalIdent::default(), ast);
-    let (_, _, errors) = semantics::analyze(&module_ast);
+    let SemanticsResult { errors, .. } = semantics::analyze(&module_ast);
     assert_eq!(
         vec![Error::new(
             ErrorMessage::ImmutableLet("x".to_string()),

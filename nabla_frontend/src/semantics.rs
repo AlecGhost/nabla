@@ -8,7 +8,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-use self::namespace::NamespaceResult;
+use self::{namespace::NamespaceResult, values::ValuesResult};
 
 mod error;
 pub mod namespace;
@@ -25,6 +25,13 @@ type Namespace = HashMap<String, GlobalIdent>;
 type BindingMap = HashMap<GlobalIdent, Binding>;
 type Errors = Vec<Error>;
 
+#[derive(Clone, Debug)]
+pub struct SemanticsResult {
+    pub inits: Vec<Value>,
+    pub symbol_table: SymbolTable,
+    pub errors: Errors,
+}
+
 /// Analyze the semantics of the module.
 ///
 /// The analysis is split into four parts:
@@ -35,9 +42,7 @@ type Errors = Vec<Error>;
 /// 4. Value analysis
 ///
 /// The analyses are executed in order and their errors accumulated.
-///
-/// This function returns (_init values_, _symbol table_, _errors_).
-pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Errors) {
+pub fn analyze(module_ast: &ModuleAst) -> SemanticsResult {
     let (uses, mut errors) = uses::analyze(module_ast);
     let NamespaceResult {
         namespace,
@@ -47,7 +52,16 @@ pub fn analyze(module_ast: &ModuleAst) -> (Vec<Value>, SymbolTable, Errors) {
     errors.extend(namespace_errors);
     let types_result = types::analyze(module_ast, &namespace, &bindings);
     errors.extend(types_result.errors);
-    let (inits, symbol_table, value_errors) = values::analyze(module_ast);
+    let ValuesResult {
+        inits,
+        symbol_table,
+        errors: value_errors,
+    } = values::analyze(module_ast);
     errors.extend(value_errors);
-    (inits, symbol_table, errors)
+
+    SemanticsResult {
+        inits,
+        symbol_table,
+        errors,
+    }
 }

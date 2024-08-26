@@ -30,12 +30,18 @@ impl ToTextRange for Span<'_> {
 
 type IResult<'a> = nom::IResult<Span<'a>, Token>;
 
+#[derive(Clone, Debug)]
+pub struct LexerResult {
+    pub tokens: Vec<Token>,
+    pub errors: Vec<Error>,
+}
+
 /// Tokenizes the given source code.
 ///
 /// # Panics
 ///
 /// Panics if lexing fails.
-pub fn lex(src: &str) -> (Vec<Token>, Vec<Error>) {
+pub fn lex(src: &str) -> LexerResult {
     let input = Span::new_extra(src, Rc::default());
     let (input, (mut tokens, eof_token)) =
         pair(many0(Token::lex), Eof::lex)(input).expect("Lexing must not fail.");
@@ -43,7 +49,8 @@ pub fn lex(src: &str) -> (Vec<Token>, Vec<Error>) {
     let errors = Rc::try_unwrap(input.extra)
         .expect("There must only be one owner")
         .into_inner();
-    (tokens, errors)
+
+    LexerResult { tokens, errors }
 }
 
 /// Try to parse `Span` into `Token`
